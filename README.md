@@ -1,0 +1,2 @@
+scala-ide-insynth-integration
+=============================
