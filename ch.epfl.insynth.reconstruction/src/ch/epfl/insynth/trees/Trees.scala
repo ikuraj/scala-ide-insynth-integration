@@ -8,8 +8,8 @@ case class Const(val name: String) extends Type
 case class Instance(val name: String, val t: List[Type]) extends Type
 case class Arrow(val paramType:TSet, val returnType:Type) extends Type
 
-
-case class TSet(val list:List[Type]) extends Type {
+// XXX TSet does not have to be a Type
+case class TSet(val list:List[Type]) {
   
   def this() = this(Nil)
   
