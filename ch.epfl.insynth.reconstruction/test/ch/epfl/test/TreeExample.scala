@@ -28,14 +28,14 @@ object TreeExample {
 	type NodeMap = Map[InSynthType, ContainerNode]
 
 	def main(args: Array[String]): Unit = {
-	  simpleTree
+	  buildComplexTree
 	}
   
 	/**
 	 * Constructs a simple tree (only one trivial method application).
 	 * Based on the example we had when discussing.
 	 */
-	private def simpleTree = {
+	def buildSimpleTree = {
 	  //************************************
 	  // Goals
 	  //	find expression of type: String
@@ -82,23 +82,17 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************
 	  
-	  // goal:String, type:Unit→String
-	  // expression: m4(this, Unit):String
+	  // XXX Unit→String is not the same as ()→String
+	  // goal:String, type:A→String
+	  // expression: m4(this):String
 	  val getStringNode = SimpleNode(
 	    m4Declaration,
 	    InSynthConst("String"),
 	    Map(
-		  // I will get Unit from nothing
-	  	  transform(typeUnit) ->
-	  	  ContainerNode(
-	  		  transform(typeUnit),
-	  		  Set()
-	  		  // can be an empty map actually?
-	        ),
           // I will get object of class A from
           transform(objectA) ->
 	  	  ContainerNode(
-	  		  transform(typeUnit),
+	  		  transform(objectA),
 	  		  Set(
 	  		      SimpleNode(
   		    		  objectADeclaration,
@@ -124,13 +118,15 @@ object TreeExample {
 	            )
 	        ) 
 	    )
+	    
+	  query
 	}
 
 	/**
 	 * Constructs a complex tree.
 	 * Based on the example we had when discussing.
 	 */
-	private def complexTree = {
+	def buildComplexTree = {
 	//***************************************************
 	// Goals
 	//	find expression of type: Boolean
@@ -157,21 +153,21 @@ object TreeExample {
 	  // def m1(f: Int=>String, c:Char): Boolean
 	  val m1 = Method(
 	      objectA, // receiver
-	      List( List ( Function(typeInt, typeString), typeString ), typeChar ), // parameters
+	      List( List ( Function(typeInt, typeString), typeChar ) ), // parameters
 	      typeBoolean // return type
 		)	
 	  // def m2(a: Int): String 
 	  val m2 = Method(objectA, List(typeInt), typeString)
 	  // def m3(a:Long): String
-	  val m3 = Method(objectA, List(), typeInt)
+	  val m3 = Method(objectA, List(typeLong), typeString)
 	  // def m4(): Char
 	  val m4 = Method(objectA, List(), typeChar)
 	  // def m5(a: Int): Long
 	  val m5 = Method(objectA, List(typeInt), typeLong)
 	  // def m6(): String
 	  val m6 = Method(objectA, List(), typeString)
-	  // query: String → ⊥
-	  val queryType = Function(typeString, typeBottom)
+	  // query: typeBoolean → ⊥
+	  val queryType = Function(typeBoolean, typeBottom)
 	  
 	  // NOTE InSynth query type: Arrow(TSet(List(Const(String))),Const($Bottom_Type_Just_For_Resolution$))
 	  
@@ -245,18 +241,39 @@ object TreeExample {
       // goal:(Int→String), type:(Int→String)
 	  // expression: m2(this)
 	  val m2Node = SimpleNode(
-	      m2Declaration, m2,
+	      m2Declaration, typeString,
+	      Map(
+	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode)),
+	          transform(typeInt) ->
+	          	ContainerNode(transform(typeInt), Set(Leaf(transform(typeInt))))
+          )
+      )      
+      
+  	  val m2NodeIntermediate = SimpleNode(
+	      Declaration("abs$inst", Arrow(TSet(typeInt), typeString), Function(typeInt, typeString)),
+	      Arrow(TSet(typeInt), typeString),
+	      Map(
+	          transform(typeString) -> ContainerNode(transform(typeString), Set(m2Node))
+	      )
+      )   
+      
+      // goal:String, type:(A→String)
+	  // expression: m6(this)
+	  val m6Node = SimpleNode(
+	      m6Declaration, typeString,
 	      Map(
 	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode))
           )
       )
       
-      // goal:(Int→String), type:(Unit→String)
-	  // expression: (Int=>m6(this))
-	  val m6Node = SimpleNode(
-	      m6Declaration, m6,
+      // NOTE in order to construct (Int=>String) we need one intermediate node
+      // goal:(Int→String), type:(Int→...)
+	  // expression: (Int=>m6(this))      
+      val m6NodeIntermediate = SimpleNode(
+	      Declaration("abs$inst", Arrow(TSet(typeInt), typeString), Function(typeInt, typeString)), 
+	      Function(typeInt, typeString),
 	      Map(
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode))
+	          transform(typeString) -> ContainerNode(transform(typeString), Set(m6Node))
           )
       )
             
@@ -277,10 +294,18 @@ object TreeExample {
 	  // expression: Int => m3(this, m5(this, _))
 	  val composeNode = SimpleNode(
 	      m3Declaration,
-	      transform(Function(typeInt, typeString)),
+	      typeString,
 	      Map(
 	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode)),
 	          transform(typeLong) -> ContainerNode(transform(typeLong), Set(m5Node))
+          )
+      )
+       
+	  val composeNodeIntermediate = SimpleNode(
+	      Declaration("abs$inst", Arrow(TSet(typeInt), typeString), Function(typeInt, typeString)),
+	      transform(Function(typeInt, typeString)),
+	      Map(
+	          transform(typeString) -> ContainerNode(transform(typeString), Set(composeNode))       
           )
       )
 	    
@@ -294,7 +319,10 @@ object TreeExample {
 	      Map(
 	          transform(typeChar) -> ContainerNode(InSynthConst("Char"), Set(m4Node)),
 	          transform(Function(typeInt, typeString)) ->
-	          	ContainerNode(transform(Function(typeInt, typeString)), Set(composeNode, m2Node, m6Node)),
+	          	ContainerNode(
+	          	    transform(Function(typeInt, typeString)), 
+	          	    Set(composeNodeIntermediate, m2NodeIntermediate, m6NodeIntermediate)
+          	    ),
 	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode))
           )
       )
@@ -315,6 +343,140 @@ object TreeExample {
 	            )
 	        ) 
 	    )
+	    
+	  queryNode
 	}
 	
+	/**
+	 * Constructs a tree with an arrow goal type.
+	 */
+//	def buildTreeArrowType = {
+//	//***************************************************
+//	// Goals
+//	//	find expression of type: (Int, Int)→Char
+//	//	expression:
+//	//	code:
+//	//  def outside(a: Int, b:Int): Char
+//	// 	class A {
+//	//  	def m1(): ((Int, Int)=>Char)
+//	//  	def m2(a: Int, b:Int): Char
+//	//  	def m3(): Char
+//	//  	def test() {
+//	//    		val b:(Int, Int)=>Char = ?synthesize?
+//	//  	}
+//	//	}
+//	//***************************************************
+//	  
+//	  //************************************
+//	  // Scala types
+//	  //************************************
+//	  // class A { ... }
+//	  val objectA = Const("A")	
+//	  // def m1(): ((Int, Int)=>Char)
+//	  val m1 = Method(
+//	      objectA, // receiver
+//	      List( objectA ), // parameters
+//	      Function(List(typeInt, typeInt), typeChar) // return type
+//		)	
+//	  // def m2(a: Int, b:Int): Char
+//	  val m2 = Method(objectA, List(objectA, typeInt, typeInt), typeChar)
+//	  // def m3(): Char
+//	  val m3 = Method(objectA, List(objectA), typeChar)
+//	  // query: String → ⊥
+//	  val queryType = Function(typeInt, typeChar)
+//	  // def outside(a: Int, b:Int): Char
+//	  val outside = Function(List(typeInt, typeInt), typeChar)
+//	  	  	  
+//	  //************************************
+//	  // Declarations
+//	  //************************************
+//	  val objectADeclaration = new Declaration(
+//	      fullNameClassA, // full name
+//	      transform(objectA), // inSynth type
+//	      objectA // scala type
+//	    )
+//	  // needs a constructor
+//	  objectADeclaration.setIsApply(true)	  
+//	  
+//	  val m1Declaration	= new Declaration(
+//	      fullNameClassA + ".m1",
+//	      transform(m1),
+//	      m1
+//	  )
+//	  val m2Declaration = new Declaration(
+//	      fullNameClassA + ".m2", // full name
+//	      m2, // inSynth type (implicit conversion)
+//	      m2 // scala type
+//	  )
+//	  val m3Declaration = new Declaration(
+//	      fullNameClassA + ".m3", // full name
+//	      m3, m3
+//      )	  
+//	  
+//	  // special query declaration
+//	  val queryDeclaration = new Declaration(
+//	      "special.name.for.query",
+//	      queryType, queryType
+//	    )	  	
+//	  
+//	  val outsideDeclaration = new Declaration(
+//	      "outisde",
+//	      outside, outside
+//      )	 
+//	  
+//	  //************************************
+//	  // InSynth proof trees
+//	  //************************************	  
+//	  
+//	  // goal:A, type: A
+//	  // expression: d.fullname
+//	  val thisNode = SimpleNode(
+//	      objectADeclaration,
+//	      objectA,
+//	      Map()
+//      )
+//	  
+//	  // goal:(Int→Char), type:A→Int→Char
+//	  // expression: m1(this)	  
+//	  val m1Node = SimpleNode(
+//	      m1Declaration,
+//	      transform(Function(typeInt, typeChar)),
+//	      Map(
+//	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode))
+//          )
+//      )
+//      
+//      // goal:(Int→Char), type:(Int→Char)
+//	  // expression: d.fullName ("outside")	  
+//	  val outsideNode = SimpleNode(
+//	      outsideDeclaration,
+//	      transform(Function(typeInt, typeChar)),
+//	      Map()
+//      )
+//      
+//      // goal:(Int→Char), type:(Int→...)
+//	  // expression: (Int => ...:Char) 
+//	  val intermediateNode = SimpleNode(
+//	      Declaration("abs$inst", Arrow(typeInt, typeChar), Function),
+//	      transform(Function(typeInt, typeChar)),
+//	      Map()
+//      )      
+//	  
+//      // goal:⊥, type:(Int→Char)→⊥	    
+//      // expression: query(		m1(this,
+//	  //			m2(this) |  m3(this) ∘ m5(this) | Int→m6(this), 
+//	  //			m4(this)	)):⊥
+//	  val queryNode = 
+//	    SimpleNode(
+//	  	  queryDeclaration,
+//	  	  transform(typeBottom),
+//	  	  Map( // for each parameter type - how can we resolve it
+//	  	      transform(Function(typeInt, typeChar)) ->
+//	  	      ContainerNode(
+//	  	          transform(Function(typeInt, typeChar)),
+//	  	          Set(m1Node, outsideNode, intermediateNode)
+//	            )
+//	        ) 
+//	    )	  
+//	}
 }
