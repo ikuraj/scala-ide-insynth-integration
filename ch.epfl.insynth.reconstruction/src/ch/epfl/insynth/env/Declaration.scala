@@ -7,7 +7,7 @@ import ch.epfl.scala.trees.ScalaType
  * @param fullName
  * @param inSynthType
  */
-class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType) {
+case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType) {
   assert(fullName != null && inSynthType != null)
   
   private var weight:Weight = null
