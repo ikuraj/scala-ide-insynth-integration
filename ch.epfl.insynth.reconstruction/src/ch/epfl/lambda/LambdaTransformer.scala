@@ -59,30 +59,50 @@ object LambdaTransformer extends (SimpleNode => Set[Term]) {
 	          case `goalType` =>
 	            set
 	          case Arrow(TSet(parameterList), `goalType`) => {
-	            val listOfSetsOfParameterTypes =
+	            val mapOfSetsOfParameterTypes =
             		// go through all needed parameters and generate appropriate terms
             		// NOTE the result will be list of sets of terms (a set for each parameter)
 	            			              
-            		(List[Set[Term]]() /: parameterList) {
-		              (list, parameterType) => {
+            		(Map[InSynth.Type, Set[Term]]() /: parameterList) {
+		              (map, parameterType) => {
 		                // get node with the needed type, deeper in down the tree
 		                val containerNode = node.params(parameterType)
-		                list :+ 
+		                map + 
+		                (parameterType -> 
 		                	// get all possible terms from each node
 			                (Set[Term]() /: containerNode.nodes) {
 			                  (set, node) => node match {
 			                    case Leaf(`parameterType`) => set ++ getAllTermsFromContext(parameterType)
 			                    case nprime@SimpleNode(_, `parameterType`, _) => set ++ transform(nprime, context)
-			                    case _ => throw new RuntimeException
+			                    case _ => throw new RuntimeException("Cannot go down for type: " + parameterType)
 			                  }
-			                }	                
+			                }	
+		                )
 		              }
 		            } 
 	            // add all possible combinations of application term to the set
-	            set ++ generateApplication(Variable(declaration.fullName), listOfSetsOfParameterTypes)
+	            val setOfApplications = declaration.scalaType match {
+          		  case Scala.Method(receiver, params, retType) =>
+              	  	generateApplication(
+              	  	    Variable(declaration.fullName), 
+              	  	    receiver +: params.flatten, 
+              	  	    mapOfSetsOfParameterTypes
+          	  	    )
+          		  case Scala.Function(list, _) =>			            
+              	  	generateApplication(
+      	  			  Variable(declaration.fullName),
+      	  			  list,
+      	  			  mapOfSetsOfParameterTypes
+      	  			)
+          		  case _ => throw new RuntimeException // cannot happen	              
+	            }
+	            set ++ setOfApplications
 	          }
 	          case _:Instance => throw new UnsupportedOperationException // not implemented yet
 	          case _:Const => throw new RuntimeException // should not happen	          
+	          case _ => throw new RuntimeException("Failed matching "
+                + declaration.inSynthType + " for goal type " + goalType) // should not happen
+                //+ "I have declarations: " + declaration) // should not happen
 	        }
 	      }
 	    } 
@@ -93,10 +113,7 @@ object LambdaTransformer extends (SimpleNode => Set[Term]) {
 	    // goal type is arrow type, we need to cover new abstraction also
 	    case arrowTpe@Arrow(TSet(parameterList), returnType) => {
 	      import variableGenerator._
-	      
-	      // get node with the needed type, deeper in down the tree
-          val containerNode = node.params(returnType)
-          
+	                
           // find a declaration that will tell me that I should make an abstraction
           val declaration = node.decls.find {
 	        _ match {
@@ -117,6 +134,9 @@ object LambdaTransformer extends (SimpleNode => Set[Term]) {
 		    newContext: Context, makeTerm:(Term => Term)): Set[Term] = {
                 
 		    import TypeTransformer.{ transform => typeTransform }
+		    
+		    // get node with the needed type, deeper in down the tree
+		    val containerNode = node.params(returnType)
 		      	
             parameterList match {
 	            case List() =>
@@ -176,6 +196,61 @@ object LambdaTransformer extends (SimpleNode => Set[Term]) {
    * @param list of set of terms
    * @return set of application terms
    */
+  private def generateApplication(term :Term, list:List[Scala.ScalaType], map: Map[InSynth.Type, Set[Term]]): Set[App] = {
+    import TypeTransformer.{ transform => typeTransform }
+        
+    list match {
+	  // we cannot have an empty list, because there are no parameters to apply to term
+	  case List() => throw new RuntimeException
+	  // if we have only one element, do the application without a recursive call
+	  case List(tpe) =>
+	    val set = map(typeTransform(tpe))
+	    (Set[App]() /: set) {
+    	  (set, element) =>		  	
+		  	set + App(term, element)
+	    }
+      // for a list, get recursive application terms for all elements except the last
+	  // and then plug them to the top level App
+	  case list:List[Scala.ScalaType] =>
+	    val innerApplications = generateApplication(term, list.init, map)
+	  	(Set[App]() /: map(typeTransform(list.last))) {
+  		  (currentListElementSet, element) =>
+		  	(currentListElementSet /: innerApplications) {
+		  	  (set, innerApplication) => set + App(innerApplication, element) 
+		  	}  		  	
+	  	}
+  	}
+  	
+  }
+  
+  /**
+   * return a Lambda type which corresponds to the given InSynth type
+   * @param tpe InSynth type to transform
+   * @return corresponding Lambda type
+   */
+  private def typeTransformInSynthToLambda(tpe: InSynth.Type):Type =
+	  tpe match {
+	  	case Const(name) => TypeConst(name)
+	  	case Arrow(TSet(first::rest), returnType) =>
+	  	  TypeComplex(
+		    typeTransformInSynthToLambda(first),
+		    typeTransformInSynthToLambda(Arrow(TSet(rest), returnType))
+		  )
+	  	case Arrow(TSet(List()), returnType) =>
+	  	  typeTransformInSynthToLambda(returnType)
+	  	case _:Instance => throw new UnsupportedOperationException
+	    case _:IArrow => throw new UnsupportedOperationException
+	    case _:InSynth.Variable => throw new UnsupportedOperationException
+	  }
+  
+  
+  /**
+   * given a list of sets of terms and a term returns a set of terms which represent
+   * all possible combinations for an application terms in the form term x1 x2 ... xn
+   * where ∀i. 0 ≤ i ≤ n-1 → xᵢ ∈ list(i)
+   * @param list of set of terms
+   * @return set of application terms
+   */
   private def generateApplication(term :Term, list: List[Set[Term]]): Set[App] =
     list match {
 	  // we cannot have an empty list, because there are no parameters to apply to term
@@ -197,24 +272,4 @@ object LambdaTransformer extends (SimpleNode => Set[Term]) {
 		  	}  		  	
 	  	}
   	}
-  
-  /**
-   * return a Lambda type which corresponds to the given InSynth type
-   * @param tpe InSynth type to transform
-   * @return corresponding Lambda type
-   */
-  private def typeTransformInSynthToLambda(tpe: InSynth.Type):Type =
-	  tpe match {
-	  	case Const(name) => TypeConst(name)
-	  	case Arrow(TSet(first::rest), returnType) =>
-	  	  TypeComplex(
-		    typeTransformInSynthToLambda(first),
-		    typeTransformInSynthToLambda(Arrow(TSet(rest), returnType))
-		  )
-	  	case Arrow(TSet(List()), returnType) =>
-	  	  typeTransformInSynthToLambda(returnType)
-	  	case _:Instance => throw new UnsupportedOperationException
-	    case _:IArrow => throw new UnsupportedOperationException
-	    case _:InSynth.Variable => throw new UnsupportedOperationException
-	  }
 }

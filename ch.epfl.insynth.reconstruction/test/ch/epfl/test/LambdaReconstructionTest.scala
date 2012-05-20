@@ -4,7 +4,12 @@ import ch.epfl.lambda.LambdaTransformer
 object LambdaReconstructionTest {
 
   def main(args: Array[String]): Unit = {
+    println("simpleTreeTransform")
+    simpleTreeTransform
+    println("complexTreeTransform")
     complexTreeTransform
+    println("arrowTreeTransform")
+    arrowTreeTransform
   }
   
   def simpleTreeTransform() = {
@@ -20,6 +25,15 @@ object LambdaReconstructionTest {
     val complexTree = TreeExample.buildComplexTree
     
     val terms = LambdaTransformer(complexTree)
+    
+    for (term <- terms)
+      println(term)
+  }
+  
+  def arrowTreeTransform() = {
+    val arrowTree = TreeExample.buildTreeArrowType
+    
+    val terms = LambdaTransformer(arrowTree)
     
     for (term <- terms)
       println(term)
