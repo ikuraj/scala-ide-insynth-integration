@@ -2,12 +2,21 @@ package ch.epfl.insynth.env
 
 import ch.epfl.insynth.trees._
 import ch.epfl.scala.trees.ScalaType
+import ch.epfl.scala.{ trees => Scala }
+
+abstract class Declaration(inSynthType: Type) extends Typable {
+  def getType = inSynthType
+}
+
+case class AbsDeclaration(inSynthType: Type) extends Declaration(inSynthType)
 
 /**
  * @param fullName
  * @param inSynthType
  */
-case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType) {
+case class NormalDeclaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType)
+extends Declaration(inSynthType)
+{
   assert(fullName != null && inSynthType != null)
   
   private var weight:Weight = null
@@ -23,6 +32,14 @@ case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:
   private var query = false
   
   private val simpleName = fullName.substring(fullName.lastIndexOf(".")+1)
+  
+  def getScalaParamTypes:List[ScalaType] = scalaType match {
+    case Scala.Method(receiver, params, retType) => 
+      receiver +: params.flatten
+    case Scala.Function(list, _) =>
+      list
+    case _ => Nil	
+  }
   
   private val returnType = inSynthType match {
     case Arrow(_,retType) => retType
@@ -48,7 +65,7 @@ case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:
   
   def setWeight(weight:Weight){this.weight = weight}
   
-  def getType = inSynthType
+  //def getType = inSynthType
     
   def getSimpleName = simpleName
 
