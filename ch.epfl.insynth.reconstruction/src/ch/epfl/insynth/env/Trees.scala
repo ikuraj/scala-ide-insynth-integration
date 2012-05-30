@@ -12,7 +12,7 @@ trait Typable {
 /**
  * abstract tree node
  */
-abstract class Node(tpe:Type) extends Typable {
+abstract class Node(tpe:Type) extends Typable with FormatableIntermediate {
   def getType = tpe
 }
 
@@ -26,11 +26,35 @@ case class SimpleNode(decls:List[Declaration], tpe:Type, params:Map[Type, Contai
 /**
  * container for tree nodes
  */
-case class ContainerNode(tpe:Type, var nodes:Set[Node]) extends Typable {
+case class ContainerNode(tpe:Type, var nodes:Set[Node]) extends Typable with FormatableIntermediate {
   def getType = tpe
   
-  def addNode(node:Node){
+  def addNode(node:Node) {
     nodes += node
   }  
   def getNodes = nodes
+}
+
+trait FormatableIntermediate extends ch.epfl.insynth.print.Formatable {
+  def toDocument = {
+    import ch.epfl.insynth.print.FormatHelpers._
+
+    this match {
+      case Leaf(tpe) => "Leaf" :: paren(tpe.toDocument)
+      case SimpleNode(decls, tpe, map) =>
+        "SimpleNode" :: paren(tpe.toDocument) :: nestedBrackets(
+            seqToDoc(decls, ",", { d:Declaration => strToDoc(d.getSimpleName) })
+            :/:
+            seqToDoc(map.toList, ",", 
+              { 
+            	p:(Type, ContainerNode) => paren(p._1.toDocument) :: "->" ::
+            	nestedBrackets(p._2.toDocument)
+              }
+            )
+        )
+      case ContainerNode(tpe, nodes) =>
+        nestedBrackets(seqToDoc(nodes.toList, ",", (_:Node).toDocument))
+        //"Container"
+    }
+  }
 }
