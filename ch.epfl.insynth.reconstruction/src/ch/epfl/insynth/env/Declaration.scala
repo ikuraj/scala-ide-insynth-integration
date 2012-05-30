@@ -5,10 +5,16 @@ import ch.epfl.scala.trees.ScalaType
 import ch.epfl.scala.{ trees => Scala }
 
 abstract class Declaration(inSynthType: Type) extends Typable {
+  private var weight: Double = 1.0d
+  
   def getType = inSynthType
+  def getWeight = weight
+  def getSimpleName: String
 }
 
-case class AbsDeclaration(inSynthType: Type) extends Declaration(inSynthType)
+case class AbsDeclaration(inSynthType: Type) extends Declaration(inSynthType) {
+  def getSimpleName = "AbsDeclaration"
+}
 
 /**
  * @param fullName
@@ -19,7 +25,9 @@ extends Declaration(inSynthType)
 {
   assert(fullName != null && inSynthType != null)
   
-  private var weight:Weight = null
+  //private var weight:Weight = null
+  
+  private var weight: Double = 1.0d
   
   private var method = false
   private var field = false
@@ -61,9 +69,9 @@ extends Declaration(inSynthType)
   
   def this(fullName:String, inSynthType:Type) = this(fullName, inSynthType, null)
 
-  def getWeight = weight
+  //def getWeight = weight
   
-  def setWeight(weight:Weight){this.weight = weight}
+  //def setWeight(weight:Weight){this.weight = weight}
   
   //def getType = inSynthType
     
