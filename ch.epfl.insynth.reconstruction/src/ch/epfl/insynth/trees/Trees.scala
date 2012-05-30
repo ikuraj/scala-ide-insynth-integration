@@ -1,6 +1,6 @@
 package ch.epfl.insynth.trees
 
-sealed abstract class Type
+sealed abstract class Type extends FormatableType
   
 //--------------------------------------------------- Ground Types ----------------------------------------------------------//
   
@@ -70,6 +70,18 @@ object TSet {
   
 }
 
+trait FormatableType extends ch.epfl.insynth.print.Formatable {
+  import ch.epfl.insynth.print.FormatHelpers._
+    
+  def toDocument = {    
+    this match {
+      case Const(name) => name
+      case Arrow(TSet(paramList), returnType) => 
+        paren(seqToDoc(paramList, ",", (_:Type).toDocument)) :: "→" :: returnType.toDocument
+      case _ => throw new UnsupportedOperationException
+    }
+  }
+}
 
 //------------------------------------------------ Polymorphic Types --------------------------------------------------------//
   
