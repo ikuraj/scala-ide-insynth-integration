@@ -128,6 +128,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 		// NOTE we eliminate duplicates in order to avoid redundant computation	            			              
 		(Map[Scala.ScalaType, Set[IntermediateNode]]() /: (parameterList distinct)) {
 	      (map, parameterType) => {
+	        println("need to find parameter for " + parameterType)	        
 	        // corresponding InSynth type
 	        val parameterTypeInSynth = typeTransform(parameterType)
 	        //println("Parameter list is: " + parameterList + "(node : " + node + ")" )
@@ -234,7 +235,8 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	 	   * @return tuple of function in which body should be plugged in and the generated
 	 	   * 	context
 		   */
-    	  def computeAbstraction(outerContext: Context):(Set[IntermediateNode] => Abstraction, Context) = {
+    	  def computeAbstraction(outerContext: Context, goalType: Scala.ScalaType):
+		  (Set[IntermediateNode] => Abstraction, Context) = {
     	    // for generating fresh variable names
 		    import variableGenerator._
 		    // "last return type" of the goal type
@@ -248,7 +250,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 			    // of the function
 			    val contextDelta:Context = params map { (getFreshVariableName, _) }
 			    // recursively compute the inner abstraction and the full context
-			    val innerAbstractionPair = computeAbstraction(contextDelta ++ outerContext)
+			    val innerAbstractionPair = computeAbstraction(contextDelta ++ outerContext, f)
 			    // return tuple (function, full context)
 	      		(
 	      		  {set:Set[IntermediateNode] => Abstraction(
@@ -258,7 +260,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
   				  innerAbstractionPair._2
 				)		        
 		      }
-		      case sf@Scala.Function(params, c:Scala.Const) => {
+		      case sf@Scala.Function(params, `neededReturnType`) => {
 		        // create an addition to the current context
 			    val contextDelta:Context = params map { (getFreshVariableName, _) }
 			    // the recursion ends in this case
@@ -277,7 +279,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	    	}
   		  }
     	  // compute an appropriate abstraction so that the body can be plugged in
-      	  val (abstractionTermFun, contextDelta) = computeAbstraction(emptyContext)
+      	  val (abstractionTermFun, contextDelta) = computeAbstraction(emptyContext, goalType)
 	      
       	  // update context
       	  context = contextDelta ++ context
