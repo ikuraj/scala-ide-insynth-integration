@@ -5,9 +5,10 @@ object CombinatorTest {
 
   def main(args: Array[String]): Unit = {
 //    simpleTreeCombine
-    complexTreeCombine
+//    complexTreeCombine
 //    arrowTreeCombine
 //    overlapTreeCombine
+    sKombinatorTreeReconstruct
   }
   
   def simpleTreeCombine() = {
@@ -36,6 +37,14 @@ object CombinatorTest {
     TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
     println("combined overlap tree")
     Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, 6).println
+  }
+  
+  
+  def sKombinatorTreeReconstruct() = {
+    println("s combinator tree")
+    TreeExample.buildTreeSKombinator.println
+    println("combined tree")
+    Combinator(TreeExample.buildTreeSKombinator, 6).println
   }
 
 }

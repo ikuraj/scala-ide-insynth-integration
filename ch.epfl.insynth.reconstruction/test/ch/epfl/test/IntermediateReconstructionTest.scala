@@ -4,7 +4,7 @@ import ch.epfl.insynth.reconstruction.IntermediateTransformer
 object IntermediateReconstructionTest {
 
   def main(args: Array[String]): Unit = {
-    absApplicationTreeTransform
+    sKombinatorTreeTransform
   }
   
   def simpleTreeTransform() = {
@@ -59,6 +59,15 @@ object IntermediateReconstructionTest {
     TreeExample.buildTreeAbsApplication.println
     println("after intermediate transform")
     for (tree <- IntermediateTransformer(TreeExample.buildTreeAbsApplication))
+      tree.println
+  }
+  
+  
+  def sKombinatorTreeTransform() = {
+    println("s kombinator tree")
+    TreeExample.buildTreeSKombinator.println
+    println("after intermediate transform")
+    for (tree <- IntermediateTransformer(TreeExample.buildTreeSKombinator))
       tree.println
   }
 
