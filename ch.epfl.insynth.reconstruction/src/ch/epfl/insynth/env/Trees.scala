@@ -1,24 +1,10 @@
 package ch.epfl.insynth.env
 
-import ch.epfl.insynth.trees.Type
+import ch.epfl.insynth.trees._
 
-/**
- * can return the type of the (sub)tree
- */
-trait Typable {
-  def getType: Type
-}
+trait Node extends FormatableIntermediate
 
-/**
- * abstract tree node
- */
-abstract class Node(tpe:Type) extends Typable with FormatableIntermediate {
-  def getType = tpe
-}
-
-case class Leaf(tpe:Type) extends Node(tpe)
-
-case class SimpleNode(decls:List[Declaration], tpe:Type, params:Map[Type, ContainerNode]) extends Node(tpe) {
+case class SimpleNode(decls:List[Declaration], params:Map[Type, ContainerNode]) extends Node {
   def getDecls = decls
   def getParams = params
 }
@@ -26,12 +12,14 @@ case class SimpleNode(decls:List[Declaration], tpe:Type, params:Map[Type, Contai
 /**
  * container for tree nodes
  */
-case class ContainerNode(tpe:Type, var nodes:Set[Node]) extends Typable with FormatableIntermediate {
-  def getType = tpe
+case class ContainerNode(var nodes:Set[SimpleNode]) extends Node {
   
-  def addNode(node:Node) {
+  def this() = this(Set.empty)
+  
+  def addNode(node:SimpleNode){
     nodes += node
-  }  
+  }
+  
   def getNodes = nodes
 }
 
@@ -40,10 +28,9 @@ trait FormatableIntermediate extends ch.epfl.insynth.print.Formatable {
     import ch.epfl.insynth.print.FormatHelpers._
 
     this match {
-      case Leaf(tpe) => "Leaf" :: paren(tpe.toDocument)
-      case SimpleNode(decls, tpe, map) =>
-        "SimpleNode" :: paren(tpe.toDocument) :: nestedBrackets(
-            seqToDoc(decls, ",", { d:Declaration => strToDoc(d.getSimpleName) })
+      case SimpleNode(decls, map) =>
+        "SimpleNode" :: nestedBrackets(
+            seqToDoc(decls, ",", { (_:Declaration).toDocument })
             :/:
             seqToDoc(map.toList, ",", 
               { 
@@ -52,9 +39,12 @@ trait FormatableIntermediate extends ch.epfl.insynth.print.Formatable {
               }
             )
         )
-      case ContainerNode(tpe, nodes) =>
-        nestedBrackets(seqToDoc(nodes.toList, ",", (_:Node).toDocument))
-        //"Container"
+      case ContainerNode(nodes) =>
+        nestedBrackets(seqToDoc(nodes.toList, ",", (_:Node).toDocument))        
+      case ad@Declaration(fullName, inSynthType, scalaType) if ad.isAbstract =>
+        strToDoc(fullName) :/: inSynthType.toDocument
+      case Declaration(fullName, inSynthType, scalaType) =>
+        strToDoc(fullName) :/: scalaType.toString
     }
   }
 }

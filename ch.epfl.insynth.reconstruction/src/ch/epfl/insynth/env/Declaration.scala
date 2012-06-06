@@ -2,32 +2,14 @@ package ch.epfl.insynth.env
 
 import ch.epfl.insynth.trees._
 import ch.epfl.scala.trees.ScalaType
-import ch.epfl.scala.{ trees => Scala }
 
-abstract class Declaration(inSynthType: Type) extends Typable {
-  private var weight: Double = 1.0d
-  
-  def getType = inSynthType
-  def getWeight = weight
-  def getSimpleName: String
-}
-
-case class AbsDeclaration(inSynthType: Type) extends Declaration(inSynthType) {
-  def getSimpleName = "AbsDeclaration"
-}
-
-/**
- * @param fullName
- * @param inSynthType
- */
-case class NormalDeclaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType)
-extends Declaration(inSynthType)
-{
+case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType)
+ extends FormatableIntermediate {
   assert(fullName != null && inSynthType != null)
   
+  // TODO some default value for testing purposes
   //private var weight:Weight = null
-  
-  private var weight: Double = 1.0d
+  private var weight:Weight = new Weight(1.0d)
   
   private var method = false
   private var field = false
@@ -38,17 +20,13 @@ extends Declaration(inSynthType)
   private var receiverObject = false
   private var apply = false
   private var query = false
+  private var local = false
+  private var _this = false
+  private var _abstract = false
+  private var constructor = false
   
   private val simpleName = fullName.substring(fullName.lastIndexOf(".")+1)
-  
-  def getScalaParamTypes:List[ScalaType] = scalaType match {
-    case Scala.Method(receiver, params, retType) => 
-      receiver +: params.flatten
-    case Scala.Function(list, _) =>
-      list
-    case _ => Nil	
-  }
-  
+
   private val returnType = inSynthType match {
     case Arrow(_,retType) => retType
     case IArrow(_,retType) => retType
@@ -68,20 +46,22 @@ extends Declaration(inSynthType)
   }
   
   def this(fullName:String, inSynthType:Type) = this(fullName, inSynthType, null)
+  
+  def this(inSynthType:Type) = {
+    this("#abs#", inSynthType)
+    this.setIsAbstract(true)
+  }
 
-  //def getWeight = weight
+  def getWeight = weight
   
-  //def setWeight(weight:Weight){this.weight = weight}
+  def setWeight(weight:Weight){this.weight = weight}
   
-  //def getType = inSynthType
+  def getType = inSynthType
     
   def getSimpleName = simpleName
 
   def getReturnType = returnType
   
-  /**
-   * @return list of parameter types
-   */
   def getParamTypes = paramTypes
   
   def getParamSetTypes = paramSetTypes
@@ -104,12 +84,24 @@ extends Declaration(inSynthType)
   def hasParentheses = this.needParentheses
   def setHasParentheses(needParentheses:Boolean){this.needParentheses = needParentheses}  
   
-  def isReceiverObject = this.receiverObject
-  def setIsReceiverObject(receiverObject:Boolean){this.receiverObject = receiverObject}
+  def belongsToObject = this.receiverObject
+  def setBelongsToObject(receiverObject:Boolean){this.receiverObject = receiverObject}
   
   def isApply = this.apply
   def setIsApply(apply:Boolean){this.apply = apply}
   
   def isQuery = this.query
   def setIsQuery(query:Boolean){this.query = query}
+
+  def isLocal = this.local
+  def setIsLocal(local:Boolean){this.local= local}  
+  
+  def isAbstract = this._abstract
+  def setIsAbstract(_abstract:Boolean){this._abstract= _abstract}
+  
+  def isThis = this._this
+  def setIsThis(_this:Boolean){this._this = _this}
+  
+  def isConstructor = this.constructor
+  def setIsConstructor(constructor:Boolean){this.constructor = constructor}
 }
