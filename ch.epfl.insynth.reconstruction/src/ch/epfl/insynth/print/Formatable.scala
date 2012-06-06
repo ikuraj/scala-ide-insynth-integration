@@ -2,8 +2,6 @@ package ch.epfl.insynth.print
 
 import scala.text.Document
 import Document._
-import ch.epfl.insynth.reconstruction.trees._
-import ch.epfl.insynth.env.NormalDeclaration
 
 trait Formatable {
   def toDocument: Document

@@ -57,7 +57,7 @@ object TreeExample {
 	  //************************************
 	  // Declarations
 	  //************************************
-	  val objectADeclaration = new NormalDeclaration(
+	  val objectADeclaration = new Declaration(
 	      "some.package.A", // full name
 	      transform(objectA), // inSynth type
 	      objectA // scala type
@@ -65,14 +65,14 @@ object TreeExample {
 	  // needs a constructor
 	  objectADeclaration.setIsApply(true)
 	  
-	  val m4Declaration = new NormalDeclaration(
+	  val m4Declaration = new Declaration(
 	      "some.package.A.m4", // full name
 	      transform(m4), // inSynth type
 	      m4 // scala type
 	    )		
 	  
 	  // special query declaration
-	  val queryDeclaration = new NormalDeclaration(
+	  val queryDeclaration = new Declaration(
 	      "special.name.for.query",
 	      transform(queryType),
 	      queryType
@@ -87,16 +87,13 @@ object TreeExample {
 	  // expression: m4(this):String
 	  val getStringNode = SimpleNode(
 	    m4Declaration,
-	    InSynthConst("String"),
 	    Map(
           // I will get object of class A from
           transform(objectA) ->
 	  	  ContainerNode(
-	  		  transform(objectA),
 	  		  Set(
 	  		      SimpleNode(
   		    		  objectADeclaration,
-  		    		  InSynthConst("A"),
   		    		  Map() // this is the end, no further nodes
   		          )
   		      )
@@ -109,11 +106,9 @@ object TreeExample {
 	  val query = 
 	    SimpleNode(
 	  	  queryDeclaration,
-	  	  transform(typeBottom),
 	  	  Map( // for each parameter type - how can we resolve it
 	  	      InSynthConst("String") ->
 	  	      ContainerNode(
-	  	          InSynthConst("String"),
 	  	          Set(getStringNode)
 	            )
 	        ) 
@@ -174,7 +169,7 @@ object TreeExample {
 	  //************************************
 	  // Declarations
 	  //************************************
-	  val objectADeclaration = new NormalDeclaration(
+	  val objectADeclaration = new Declaration(
 	      fullNameClassA, // full name
 	      transform(objectA), // inSynth type
 	      objectA // scala type
@@ -182,35 +177,35 @@ object TreeExample {
 	  // needs a constructor
 	  objectADeclaration.setIsApply(true)	  
 	  
-	  val m1Declaration	= new NormalDeclaration(
+	  val m1Declaration	= new Declaration(
 	      fullNameClassA + ".m1",
 	      transform(m1),
 	      m1
 	  )
-	  val m2Declaration = new NormalDeclaration(
+	  val m2Declaration = new Declaration(
 	      fullNameClassA + ".m2", // full name
 	      m2, // inSynth type (implicit conversion)
 	      m2 // scala type
 	  )
-	  val m3Declaration = new NormalDeclaration(
+	  val m3Declaration = new Declaration(
 	      fullNameClassA + ".m3", // full name
 	      m3, m3
       )
-	  val m4Declaration = new NormalDeclaration(
+	  val m4Declaration = new Declaration(
 	      fullNameClassA + ".m4", // full name
 	      m4, m4
       )
-	  val m5Declaration = new NormalDeclaration(
+	  val m5Declaration = new Declaration(
 	      fullNameClassA + ".m5", // full name
 	      m5, m5
       )
-	  val m6Declaration = new NormalDeclaration(
+	  val m6Declaration = new Declaration(
 	      fullNameClassA + ".m6", // full name
 	      m6, m6
       )		
 	  
 	  // special query declaration
-	  val queryDeclaration = new NormalDeclaration(
+	  val queryDeclaration = new Declaration(
 	      "special.name.for.query",
 	      queryType, queryType
 	    )	  
@@ -225,36 +220,39 @@ object TreeExample {
 	  // goal:ClassA object, type:ClassA
 	  // expression: this	  
 	  val thisNode = SimpleNode(
-	      objectADeclaration, objectA, Map()
+	      objectADeclaration, Map()
       )
 	    
 	  // goal:Char, type:Unit→Char
 	  // expression: m4(this)	  
 	  val m4Node = SimpleNode(
 	      m4Declaration,
-	      typeChar,
 	      Map(
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode))
+	          transform(objectA) -> ContainerNode(Set(thisNode))
           )
       )
       
       // goal:(Int→String), type:(Int→String)
 	  // expression: m2(this)
 	  val m2Node = SimpleNode(
-	      m2Declaration, Function(typeInt, typeString),
+	      m2Declaration,
 	      Map(
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode)),
+	          transform(objectA) -> ContainerNode(Set(thisNode)),
 	          transform(typeInt) ->
-	          	ContainerNode(transform(typeInt), Set(Leaf(typeInt)))
+	          	ContainerNode(Set(SimpleNode(
+	          	    { 
+	          	      val dec = new Declaration(typeInt); dec.setIsApply(true); dec	          	    	
+	          	    }, Map.empty
+          	    )))
           )
       )      
       
       // goal:String, type:(A→String)
 	  // expression: m6(this)
 	  val m6Node = SimpleNode(
-	      m6Declaration, Function(typeInt, typeString),
+	      m6Declaration,
 	      Map(
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode))
+	          transform(objectA) -> ContainerNode(Set(thisNode))
           )
       )
             
@@ -262,11 +260,14 @@ object TreeExample {
 	  // expression: m5(this, _)
 	  val m5Node = SimpleNode(
 	      m5Declaration,
-	      transform(typeLong),
 	      Map(
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode)),
-	          transform(typeInt) -> ContainerNode(transform(typeInt), 
-	          	Set( Leaf(transform(typeInt)) )
+	          transform(objectA) -> ContainerNode(Set(thisNode)),
+	          transform(typeInt) -> ContainerNode( 
+	          	Set( SimpleNode(
+	          	    { 
+	          	      val dec = new Declaration(typeInt); dec.setIsApply(true); dec	          	    	
+	          	    }, Map.empty
+          	    ) )
 	          )
           )
       )
@@ -275,10 +276,9 @@ object TreeExample {
 	  // expression: Int => m3(this, m5(this, _))
 	  val composeNode = SimpleNode(
 	      m3Declaration,
-	      Function(typeInt, typeString),
 	      Map(
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode)),
-	          transform(typeLong) -> ContainerNode(transform(typeLong), Set(m5Node))
+	          transform(objectA) -> ContainerNode(Set(thisNode)),
+	          transform(typeLong) -> ContainerNode(Set(m5Node))
           )
       )
 	    
@@ -288,15 +288,13 @@ object TreeExample {
 	  //				m4(this))	  
 	  val m1Node = SimpleNode(
 	      m1Declaration,
-	      transform(typeBoolean),
 	      Map(
-	          transform(typeChar) -> ContainerNode(InSynthConst("Char"), Set(m4Node)),
+	          transform(typeChar) -> ContainerNode(Set(m4Node)),
 	          transform(Function(typeInt, typeString)) ->
-	          	ContainerNode(
-	          	    transform(Function(typeInt, typeString)), 
+	          	ContainerNode( 
 	          	    Set(composeNode, m2Node, m6Node)
           	    ),
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode))
+	          transform(objectA) -> ContainerNode(Set(thisNode))
           )
       )
 	  
@@ -307,11 +305,9 @@ object TreeExample {
 	  val queryNode = 
 	    SimpleNode(
 	  	  queryDeclaration,
-	  	  transform(typeBottom),
 	  	  Map( // for each parameter type - how can we resolve it
 	  	      transform(typeBoolean) ->
 	  	      ContainerNode(
-	  	          InSynthConst("Boolean"),
 	  	          Set(m1Node)
 	            )
 	        ) 
@@ -369,7 +365,7 @@ object TreeExample {
 	  //************************************
 	  // Declarations
 	  //************************************
-	  val objectADeclaration = NormalDeclaration(
+	  val objectADeclaration = Declaration(
 	      fullNameClassA, // full name
 	      transform(objectA), // inSynth type
 	      objectA // scala type
@@ -377,37 +373,39 @@ object TreeExample {
 	  // needs a constructor
 	  objectADeclaration.setIsApply(true)	  
 	  
-	  val m1Declaration	= NormalDeclaration(
+	  val m1Declaration	= Declaration(
 	      fullNameClassA + ".m1",
 	      // XXX
 	      m1,
 	      //Arrow(TSet(objectA), Function(List(typeInt, typeInt), typeChar)),
 	      m1
 	  )
-	  val m2Declaration = NormalDeclaration(
+	  val m2Declaration = Declaration(
 	      fullNameClassA + ".m2", // full name
 	      m2, // inSynth type (implicit conversion)
 	      m2 // scala type
 	  )
-	  val m3Declaration = NormalDeclaration(
+	  val m3Declaration = Declaration(
 	      fullNameClassA + ".m3", // full name
 	      m3, m3
       )	  
 	  
 	  // special query declaration
-	  val queryDeclaration = NormalDeclaration(
+	  val queryDeclaration = Declaration(
 	      "special.name.for.query",
 	      queryType, queryType
 	    )	  	
 	  
-	  val outsideDeclaration = NormalDeclaration(
+	  val outsideDeclaration = Declaration(
 	      "outside",
 	      outside, outside
       )	 
-	  val intValDeclaration = NormalDeclaration(
+	  val intValDeclaration = Declaration(
 	      "A.intVal",
 	      intVal, intVal
       )	 
+            
+	  val leafIntDeclaration = new Declaration(typeInt)
 	  
 	  //************************************
 	  // InSynth proof trees
@@ -417,7 +415,6 @@ object TreeExample {
 	  // expression: d.fullname
 	  val thisNode = SimpleNode(
 	      objectADeclaration,
-	      objectA,
 	      Map()
       )
       
@@ -425,7 +422,6 @@ object TreeExample {
 	  // expression: A.intVal	  
 	  val intValNode = SimpleNode(
 	      intValDeclaration,
-	      intVal,
 	      Map()
       )
 	  
@@ -433,10 +429,10 @@ object TreeExample {
 	  // expression: (Int,Int) → m1(this)(_, _)	  
 	  val m1Node = SimpleNode(
 	      m1Declaration,
-	      Function(List(typeInt, typeInt), typeChar),
 	      Map(
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode)),
-	          transform(typeInt) -> ContainerNode(typeInt, Set(Leaf(typeInt), intValNode))
+	          transform(objectA) -> ContainerNode(Set(thisNode)),
+	          transform(typeInt) -> ContainerNode(
+	              Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode))
           )
       )
       
@@ -444,9 +440,9 @@ object TreeExample {
 	  // expression: d.fullName ("outside")	  
 	  val outsideNode = SimpleNode(
 	      outsideDeclaration,
-	      outsideDeclaration.inSynthType,
 	      Map(
-	          transform(typeInt) -> ContainerNode(typeInt, Set(Leaf(typeInt), intValNode))
+	          transform(typeInt) -> ContainerNode(
+	              Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode))
           )
       )
       
@@ -454,10 +450,9 @@ object TreeExample {
 	  // expression: (Int,Int)→m3(A)	  
 	  val m3Node = SimpleNode(
 	      m3Declaration,
-	      Function(List(typeInt, typeInt), typeChar),
 	      Map(
 	        transform(objectA) -> 
-	          ContainerNode(transform(objectA), Set(thisNode))
+	          ContainerNode(Set(thisNode))
           )
       )
       
@@ -465,12 +460,11 @@ object TreeExample {
 	  // expression: (Int, Int) → m2(this, _, _)	  
 	  val m2Node = SimpleNode(
 	      m2Declaration,
-	      Function(List(typeInt, typeInt), typeChar),
 	      Map(
 	        transform(typeInt) -> 
-        	  ContainerNode(transform(typeInt), Set(Leaf(typeInt), intValNode)),
+        	  ContainerNode(Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode)),
 	        transform(objectA) ->
-        	  ContainerNode(transform(objectA), Set(thisNode))
+        	  ContainerNode(Set(thisNode))
           )
       )     
 	  
@@ -483,11 +477,9 @@ object TreeExample {
 	  val queryNode = 
 	    SimpleNode(
 	  	  queryDeclaration,
-	  	  typeBottom,
 	  	  Map( // for each parameter type - how can we resolve it
 	  	      transform(Function(List(typeInt, typeInt), typeChar)) ->
 	  	      ContainerNode(
-	  	          Function(List(typeInt, typeInt), typeChar),
 	  	          Set(m1Node, outsideNode, m2Node, m3Node)
 	            )
 	        ) 
@@ -545,7 +537,7 @@ object TreeExample {
 	  //************************************
 	  // Declarations
 	  //************************************
-	  val objectADeclaration = NormalDeclaration(
+	  val objectADeclaration = Declaration(
 	      fullNameClassA, // full name
 	      transform(objectA), // inSynth type
 	      objectA // scala type
@@ -553,37 +545,39 @@ object TreeExample {
 	  // needs a constructor
 	  objectADeclaration.setIsApply(true)	  
 	  
-	  val m1Declaration	= NormalDeclaration(
+	  val m1Declaration	= Declaration(
 	      fullNameClassA + ".m1",
 	      // XXX
 	      m1,
 	      //Arrow(TSet(objectA), Function(List(typeInt, typeInt), typeChar)),
 	      m1
 	  )
-	  val m2Declaration = NormalDeclaration(
+	  val m2Declaration = Declaration(
 	      fullNameClassA + ".m2", // full name
 	      m2, // inSynth type (implicit conversion)
 	      m2 // scala type
 	  )
-	  val m3Declaration = NormalDeclaration(
+	  val m3Declaration = Declaration(
 	      fullNameClassA + ".m3", // full name
 	      m3, m3
       )	  
 	  
 	  // special query declaration
-	  val queryDeclaration = NormalDeclaration(
+	  val queryDeclaration = Declaration(
 	      "special.name.for.query",
 	      queryType, queryType
 	    )	  	
 	  
-	  val outsideDeclaration = NormalDeclaration(
+	  val outsideDeclaration = Declaration(
 	      "outside",
 	      outside, outside
       )	 
-	  val intValDeclaration = NormalDeclaration(
+	  val intValDeclaration = Declaration(
 	      "A.intVal",
 	      intVal, intVal
       )	 
+      
+	  val leafIntDeclaration = new Declaration(typeInt)
 	  
 	  //************************************
 	  // InSynth proof trees
@@ -593,7 +587,6 @@ object TreeExample {
 	  // expression: d.fullname
 	  val thisNode = SimpleNode(
 	      objectADeclaration,
-	      objectA,
 	      Map()
       )
       
@@ -601,7 +594,6 @@ object TreeExample {
 	  // expression: A.intVal	  
 	  val intValNode = SimpleNode(
 	      intValDeclaration,
-	      intVal,
 	      Map()
       )
 	  
@@ -609,10 +601,10 @@ object TreeExample {
 	  // expression: (Int,Int) → m1(this)(_, _)	  
 	  val m1Node = SimpleNode(
 	      m1Declaration,
-	      Function(List(typeInt, typeInt), typeChar),
 	      Map(
-	          transform(objectA) -> ContainerNode(transform(objectA), Set(thisNode)),
-	          transform(typeInt) -> ContainerNode(typeInt, Set(Leaf(typeInt), intValNode))
+	          transform(objectA) -> ContainerNode(Set(thisNode)),
+	          transform(typeInt) -> ContainerNode(
+	              Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode))
           )
       )
       
@@ -620,9 +612,9 @@ object TreeExample {
 	  // expression: d.fullName ("outside")	  
 	  val outsideNode = SimpleNode(
 	      outsideDeclaration,
-	      outsideDeclaration.inSynthType,
 	      Map(
-	          transform(typeInt) -> ContainerNode(typeInt, Set(Leaf(typeInt), intValNode))
+	          transform(typeInt) -> ContainerNode(
+	              Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode))
           )
       )
       
@@ -630,10 +622,9 @@ object TreeExample {
 	  // expression: (Int,Int)→m3(A)	  
 	  val m3Node = SimpleNode(
 	      m3Declaration,
-	      transform(Function(List(typeInt, typeInt), typeChar)),
 	      Map(
 	        transform(objectA) -> 
-	          ContainerNode(transform(objectA), Set(thisNode))
+	          ContainerNode(Set(thisNode))
           )
       )
       
@@ -641,12 +632,11 @@ object TreeExample {
 	  // expression: (Int, Int) → m2(this, _, _)	  
 	  val m2Node = SimpleNode(
 	      m2Declaration,
-	      Function(List(typeInt, typeInt), typeChar),
 	      Map(
 	        transform(typeInt) -> 
-        	  ContainerNode(transform(typeInt), Set(Leaf(typeInt), intValNode)),
+        	  ContainerNode(Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode)),
 	        transform(objectA) ->
-        	  ContainerNode(transform(objectA), Set(thisNode))
+        	  ContainerNode(Set(thisNode))
           )
       )     
 	  
@@ -659,13 +649,11 @@ object TreeExample {
 	  val queryNode = 
 	    SimpleNode(
 	  	  queryDeclaration,
-	  	  typeBottom,
 	  	  Map( // for each parameter type - how can we resolve it
 	  	      transform(Function(List(typeInt, typeInt), typeChar)) ->
 	  	      ContainerNode(
-	  	          Function(List(typeInt, typeInt), typeChar),
 	  	          Set(m1Node, outsideNode, m2Node, m3Node)
-	            )
+    		  )
 	        ) 
 	    )
       queryNode
@@ -694,13 +682,15 @@ object TreeExample {
 	    Function(List(Function(typeInt, typeChar), typeInt), typeChar),
 	    typeBottom
 	  )
+	  
+	  val intLeafNode = SimpleNode(new Declaration(typeInt), Map.empty)
 	  	  	  
 	  //************************************
 	  // Declarations
 	  //************************************
 	 	  
 	  // special query declaration
-	  val queryDeclaration = NormalDeclaration(
+	  val queryDeclaration = Declaration(
 	      "special.name.for.query",
 	      queryType, queryType
 	    )	  
@@ -712,11 +702,10 @@ object TreeExample {
       // goal:(Int→Char, Int)→Char, type:Char
 	  // expression: (Int, Int) → m2(this, _, _)	  
 	  val absNode = SimpleNode(
-	      AbsDeclaration(Function(typeInt, typeChar)),
-	      Function(List(Function(typeInt, typeChar), typeInt), typeChar),
+	      new Declaration(Function(typeInt, typeChar)),
 	      Map(
 	        transform(typeInt) -> 
-        	  ContainerNode(transform(typeInt), Set(Leaf(typeInt)))
+        	  ContainerNode(Set(intLeafNode))
           )
       )     
 	  
@@ -727,11 +716,9 @@ object TreeExample {
 	  val queryNode = 
 	    SimpleNode(
 	  	  queryDeclaration,
-	  	  typeBottom,
 	  	  Map( // for each parameter type - how can we resolve it
 	  	      transform(Function(List(Function(typeInt, typeChar), typeInt), typeChar)) ->
 	  	      ContainerNode(
-	  	          Function(List(Function(typeInt, typeChar), typeInt), typeChar),
 	  	          Set(absNode)
 	            )
 	        ) 
@@ -777,7 +764,7 @@ object TreeExample {
 	  //************************************
 	 	  
 	  // special query declaration
-	  val queryDeclaration = NormalDeclaration(
+	  val queryDeclaration = Declaration(
 	      "special.name.for.query",
 	      queryType, queryType
 	    )	  
@@ -786,15 +773,16 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************	
       
+	  val intLeafNode = SimpleNode(new Declaration(typeInt), Map.empty)
+	  
       // TODO
       // goal:(Int→Char, Int)→Char, type:Char
 	  // expression: (Int, Int) → m2(this, _, _)	????  
 	  val absNode2 = SimpleNode(
-	      AbsDeclaration(Function(List(typeInt), typeChar)),
-	      transform(typeChar),
+	      new Declaration(Function(List(typeInt), typeChar)),
 	      Map(
 	        transform(typeInt) -> 
-        	  ContainerNode(transform(typeInt), Set(Leaf(typeInt)))     	  
+        	  ContainerNode(Set(intLeafNode))     	  
           )
       )     
 	    
@@ -802,13 +790,12 @@ object TreeExample {
       // goal:(Int→Char, Int)→Char, type:Char
 	  // expression: (Int, Int) → m2(this, _, _)	????  
 	  val absNode1 = SimpleNode(
-	      AbsDeclaration(Function(typeInt, Function(typeChar, typeString))),
-	      sKombType,
+	      new Declaration(Function(typeInt, Function(typeChar, typeString))),
 	      Map(
 	        transform(typeInt) -> 
-        	  ContainerNode(transform(typeInt), Set(Leaf(typeInt))),
+        	  ContainerNode(Set(intLeafNode)),
         	transform(typeChar) ->
-        	  ContainerNode(transform(typeChar), Set(absNode2))        	  
+        	  ContainerNode(Set(absNode2))        	  
           )
       )     
 
@@ -820,11 +807,9 @@ object TreeExample {
 	  val queryNode = 
 	    SimpleNode(
 	  	  queryDeclaration,
-	  	  typeBottom,
 	  	  Map( // for each parameter type - how can we resolve it
 	  	      transform(sKombType) ->
 	  	      ContainerNode(
-	  	          sKombType,
 	  	          Set(absNode1)
 	            )
 	        ) 

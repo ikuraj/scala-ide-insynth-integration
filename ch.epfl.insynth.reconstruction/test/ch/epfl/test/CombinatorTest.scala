@@ -4,10 +4,10 @@ import ch.epfl.insynth.combinator.Combinator
 object CombinatorTest {
 
   def main(args: Array[String]): Unit = {
-//    simpleTreeCombine
-//    complexTreeCombine
-//    arrowTreeCombine
-//    overlapTreeCombine
+    simpleTreeCombine
+    complexTreeCombine
+    arrowTreeCombine
+    overlapTreeCombine
     sKombinatorTreeReconstruct
   }
   

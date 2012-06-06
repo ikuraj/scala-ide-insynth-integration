@@ -2,7 +2,7 @@ package ch.epfl.insynth.reconstruction
 
 import scala.text.Document
 
-import ch.epfl.insynth.env.NormalDeclaration
+import ch.epfl.insynth.combinator.NormalDeclaration
 import ch.epfl.insynth.reconstruction.trees._
 import ch.epfl.insynth.print._
 import ch.epfl.scala.{ trees => Scala }
@@ -33,9 +33,9 @@ object Reconstructor extends (Node => List[Output]) {
    */
   def transform(tree: Node): List[Document] = {
     tree match {
-      case Variable(tpe, name) => List( name :: ": " :: transform(tpe) ) 
-      case Identifier(tpe, NormalDeclaration(fullName, _, _)) => 
-        List(fullName)
+      case Variable(tpe, name) => List ( name )
+      case Identifier(tpe, dec) => 
+        List(dec.getSimpleName)
       case Application(tpe, params) => {
         (List[Document]() /: transform(params.head.toList)) {
     	  (listSoFar, el) => {
@@ -53,7 +53,10 @@ object Reconstructor extends (Node => List[Output]) {
     	    (List[Document]() /: transform(body)) {
     	      (listOfBodies, transformedBody) =>
     	    	listOfBodies :+ nestedBrackets(
-    			  paren(seqToDoc(vars, ",", { v:Variable => transform(v).head })) :/: "=>" :/:
+    	    	  // transform variables first
+    			  paren(seqToDoc(vars, ",", { v:Variable => v.name :: ": " :: transform(v.tpe) })) 
+    			  :/: "=>" :/:
+    			  // transform the body
 				  nestedBrackets(transformedBody)
     			)
     	    }

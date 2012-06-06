@@ -1,11 +1,12 @@
 package ch.epfl.insynth.reconstruction
 
 import scala.annotation.tailrec
-
 import ch.epfl.scala.{ trees => Scala }
 import ch.epfl.insynth.{ trees => InSynth }
+import ch.epfl.insynth.{ env => InSynthEnv }
 import ch.epfl.insynth.reconstruction.trees.{ Node => IntermediateNode, _}
-import ch.epfl.insynth.env._
+import ch.epfl.insynth.combinator._
+import java.util.logging.Logger
 
 /**
  * object which transforms the InSynth tree into an intermediate representation
@@ -24,7 +25,8 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
     val goalType = 
       root.decls.head match {
     	// TODO should be bottom type here
-      	case NormalDeclaration(_, _, Scala.Function(head :: rest, retType)) => retType
+      	case NormalDeclaration(InSynthEnv.Declaration(_, _, Scala.Function(head :: rest, retType))) 
+      		=> retType
       	case _ => throw new RuntimeException 
       }
     
@@ -128,7 +130,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 		// NOTE we eliminate duplicates in order to avoid redundant computation	            			              
 		(Map[Scala.ScalaType, Set[IntermediateNode]]() /: (parameterList distinct)) {
 	      (map, parameterType) => {
-	        println("need to find parameter for " + parameterType)	        
+	        Logger.getLogger(IntermediateTransformer.getClass.toString).info("need to find parameter for " + parameterType)	        
 	        // corresponding InSynth type
 	        val parameterTypeInSynth = typeTransform(parameterType)
 	        //println("Parameter list is: " + parameterList + "(node : " + node + ")" )
@@ -141,7 +143,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	            (Set[IntermediateNode]() /: containerNode.nodes) {
 	              (set, node) => node match {
 	                // if leaf node search the context
-	                case Leaf(`parameterTypeInSynth`) => set ++ getAllTermsFromContext(parameterType)
+	                case AbsNode(`parameterTypeInSynth`) => set ++ getAllTermsFromContext(parameterType)
 	                // if simple node with the type that we need, recursively transform it
 	                case nprime@SimpleNode(_, `parameterTypeInSynth`, _) => set ++ transform(nprime, context, parameterType)
 	                // should not happen
@@ -174,20 +176,20 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	          case nd:NormalDeclaration 
 	          if declarationHasAppropriateType(declaration, goalType) => {
 	            // check the declaration scala type
-	            val generatedApplication = nd.scalaType match {
+	            val generatedApplication = nd.getScalaType match {
 	              // treat method as a function in which the function term is
 	              // an identifier with the declaration
           		  case Scala.Method(receiver, params, retType) =>
           		    generateApplicationAccordingToFunction(
   		    		  // NOTE give flatten parameters list - Identifier knows about currying
   		    		  Scala.Function(receiver +: params.flatten, retType),
-  		    		  Identifier(nd.scalaType, nd)
+  		    		  Identifier(nd.getScalaType, nd)
 	        		)
 	        	  // generate application terms according to this function 
           		  case sf:Scala.Function =>		
           		    generateApplicationAccordingToFunction(
   		    		  sf,
-  		    		  Identifier(nd.scalaType, nd)
+  		    		  Identifier(nd.getScalaType, nd)
 	        		)
 	        	  // no need for application, directly return the corresponding identifier
           		  case sc:Scala.Const =>		

@@ -3,7 +3,7 @@ package ch.epfl.insynth.reconstruction.trees
 import scala.text.Document
 
 import ch.epfl.scala.trees.{ ScalaType => Type, _ }
-import ch.epfl.insynth.env.NormalDeclaration
+import ch.epfl.insynth.combinator.Declaration
 import ch.epfl.insynth.print._
 
 /**
@@ -36,7 +36,7 @@ case class Variable(tpe: Type, name: String) extends Leaf(tpe)
  * identifier in scope
  * @param decl declaration with more information about the identifier 
  */
-case class Identifier(tpe: Type, decl: NormalDeclaration) extends Leaf(tpe)
+case class Identifier(tpe: Type, decl: Declaration) extends Leaf(tpe)
 
 /**
  * application term
@@ -64,7 +64,7 @@ trait FormatableIntermediate extends Formatable {
 
     this match {
       case Variable(tpe, name) => paren(name :: ": " :: tpe.toString) 
-      case Identifier(tpe, NormalDeclaration(fullName, _, _)) => fullName
+      case Identifier(tpe, dec) => dec.getSimpleName
       case Application(tpe, params) => {
         val headDoc:Document = params.head.head match {
           case Variable(_, name) => name

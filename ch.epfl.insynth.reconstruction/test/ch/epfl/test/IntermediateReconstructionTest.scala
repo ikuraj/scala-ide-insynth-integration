@@ -1,9 +1,15 @@
 package ch.epfl.test
 import ch.epfl.insynth.reconstruction.IntermediateTransformer
+import ch.epfl.insynth.combinator.Combinator
 
 object IntermediateReconstructionTest {
 
   def main(args: Array[String]): Unit = {
+    simpleTreeTransform
+    complexTreeTransform
+    arrowTreeTransform
+    overlapTreeTransform
+    absApplicationTreeTransform
     sKombinatorTreeTransform
   }
   
@@ -13,7 +19,11 @@ object IntermediateReconstructionTest {
     println("simple tree")    
     simpleTree.println
     
-    val transformedTrees = IntermediateTransformer(simpleTree)
+    val prunedTree = Combinator(simpleTree, 1)
+    println("pruned tree")    
+    prunedTree.println
+    
+    val transformedTrees = IntermediateTransformer(prunedTree)
     println("after intermediate transform")
     
     println("simple tree transformed")    
@@ -28,7 +38,11 @@ object IntermediateReconstructionTest {
     println("complex tree")
     complexTree.println
     
-    val transformedTrees = IntermediateTransformer(complexTree)
+    val prunedTree = Combinator(complexTree, 100)
+    println("pruned tree")    
+    prunedTree.println
+    
+    val transformedTrees = IntermediateTransformer(prunedTree)
     println("after intermediate transform")
     
     for (tree <- transformedTrees)
@@ -39,7 +53,13 @@ object IntermediateReconstructionTest {
     val arrowTree = TreeExample.buildTreeArrowType
     
     println("arrow tree")
-    val transformedTrees = IntermediateTransformer(arrowTree)
+    arrowTree.println
+    
+    val prunedTree = Combinator(arrowTree, 100)
+    println("pruned tree")    
+    prunedTree.println    
+    
+    val transformedTrees = IntermediateTransformer(prunedTree)
     println("after intermediate transform")
     
     for (tree <- transformedTrees)
@@ -50,7 +70,7 @@ object IntermediateReconstructionTest {
     println("overlap tree")
     TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(TreeExample.buildTreeOverlapParameterTypeWithReturnType))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType)))
       tree.println
   }
   
@@ -58,7 +78,7 @@ object IntermediateReconstructionTest {
     println("abs application tree")
     TreeExample.buildTreeAbsApplication.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(TreeExample.buildTreeAbsApplication))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeAbsApplication)))
       tree.println
   }
   
@@ -67,7 +87,7 @@ object IntermediateReconstructionTest {
     println("s kombinator tree")
     TreeExample.buildTreeSKombinator.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(TreeExample.buildTreeSKombinator))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeSKombinator)))
       tree.println
   }
 
