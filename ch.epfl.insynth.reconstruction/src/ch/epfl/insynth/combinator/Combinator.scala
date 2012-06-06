@@ -1,19 +1,32 @@
 package ch.epfl.insynth.combinator
 
-import ch.epfl.insynth.env.{ Declaration => ISDeclaration, Leaf => LeafNode, _ }
 import scala.collection.mutable.PriorityQueue
+
+import ch.epfl.insynth.{ env => InSynth }
 import ch.epfl.insynth.trees._
 
-object Combinator extends ((SimpleNode, Int) => Node) {
+/**
+ * object which application transforms an InSynth representation input
+ * to the pruned tree representation
+ */
+object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
   
-  def apply(root: SimpleNode, neededCombinations: Int) = {
+  val predefinedNeededCombinations = 5
+  
+  def apply(root: InSynth.SimpleNode):SimpleNode = {
+    apply(root, predefinedNeededCombinations)
+  }
+  
+  def apply(root: InSynth.SimpleNode, neededCombinations: Int) = {
+    import DeclarationTransformer.fromInSynthDeclaration
     
+    // TODO change this temporary weight for leaves
     val WeightForLeafs = 0.5d
     
-    var pq = new PriorityQueue[Declaration]()
+    var pq = new PriorityQueue[Expression]()
     
     val rootTree:Tree = new TopTree(neededCombinations)
-    val rootDeclaration = Composite(rootTree, root.decls.head, root)
+    val rootDeclaration = Composite(rootTree, fromInSynthDeclaration(root.decls.head), root)
     
     pq += rootDeclaration
     
@@ -21,7 +34,7 @@ object Combinator extends ((SimpleNode, Int) => Node) {
       val currentDeclaration = pq.dequeue
       
       if (currentDeclaration.isPruned)
-        println("Declaration with " + currentDeclaration.getAssociatedNode + " pruned")
+        Rules.logger.fine("Declaration with " + currentDeclaration.getAssociatedNode + " pruned")
       
       if (!currentDeclaration.isPruned) {
       
@@ -34,29 +47,30 @@ object Combinator extends ((SimpleNode, Int) => Node) {
 	            case _ => throw new RuntimeException
 	          }          
 	          for (parameter <- paramList) {
-	            val paramTree = new Tree(c)
+	            val paramTree = new Tree(c, parameter)
 	            c.addChild(paramTree)
 	            for(node <- c.associatedNode.params(parameter).nodes) {
 	              node match {
-	                case sn@SimpleNode(decls, _, params) if params.isEmpty =>
+	                case sn@InSynth.SimpleNode(decls, params) if params.isEmpty =>
 	                  for (dec <- decls)
-	                    pq += Simple(paramTree, dec, sn)
-	                case sn@SimpleNode(decls, _, _) =>
+	                    if (dec.isAbstract)
+	                      pq += LeafExpression(paramTree, WeightForLeafs, sn)
+	                    else
+                    	  pq += Simple(paramTree, fromInSynthDeclaration(dec), sn)
+	                case sn@InSynth.SimpleNode(decls, _) =>
 	                  for (dec <- decls)
-	                    pq += Composite(paramTree, dec, sn)
-	                case l:LeafNode =>
-	                  pq += Leaf(paramTree, WeightForLeafs, l)
+	                    pq += Composite(paramTree, fromInSynthDeclaration(dec), sn)
 	              }
 	            }
 	          }
 	        }
 	        case s:Simple => s.associatedTree.childDone(s)
-	        case l:Leaf => l.associatedTree.childDone(l)
+	        case l:LeafExpression => l.associatedTree.childDone(l)
 	      }
       }
     }
       
-    rootDeclaration.toInSynthNode 
+    rootDeclaration.toTreeNode 
   }
   
 }
