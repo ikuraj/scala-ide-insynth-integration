@@ -1,5 +1,6 @@
 package ch.epfl.test
 import ch.epfl.insynth.combinator.Combinator
+import ch.epfl.insynth.env.SimpleNode
 
 object CombinatorTest {
 
@@ -9,7 +10,14 @@ object CombinatorTest {
     arrowTreeCombine
     overlapTreeCombine
     sKombinatorTreeReconstruct
+    //cycleTreeCombine
   }
+  
+  // XXX cannot still be instantiated according to the proof representation!
+  def cycleTreeCombine = {
+    println("combined cycle tree")
+    Combinator(TreeExample.buildTreeCycles).println
+  } 
   
   def simpleTreeCombine() = {
     println("simple tree")

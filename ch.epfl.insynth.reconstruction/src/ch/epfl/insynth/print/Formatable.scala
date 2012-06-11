@@ -2,6 +2,7 @@ package ch.epfl.insynth.print
 
 import scala.text.Document
 import Document._
+import scala.text.DocNil
 
 trait Formatable {
   def toDocument: Document
@@ -31,6 +32,12 @@ object FormatHelpers {
 
   def paren(d: Document): Document =
     group("(" :: d :: ")")
+    
+  def addOrEmpty(d1: Document, d2: Document): Document =
+    d1 match {
+	  case `DocNil` => empty
+	  case _ => d1 :: d2
+  	}
 
 //  def taggedParen2(tag: String, d1: Document, d2: Document) =
 //    taggedParen(tag, d1 :: nest(-tag.length, break :: d2))

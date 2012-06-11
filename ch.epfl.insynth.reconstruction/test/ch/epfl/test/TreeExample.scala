@@ -70,6 +70,7 @@ object TreeExample {
 	      transform(m4), // inSynth type
 	      m4 // scala type
 	    )		
+	  m4Declaration.setIsMethod(true)
 	  
 	  // special query declaration
 	  val queryDeclaration = new Declaration(
@@ -816,5 +817,312 @@ object TreeExample {
 	    )
       queryNode
 	}	
+	
+	
+	/**
+	 * Constructs a simple tree which has calls to various variants of application
+	 * (method, function, constructor)
+	 */
+	def buildTreeWithVariousFunctions = {
+	  //************************************
+	  // Goals
+	  //	find expression of type: String
+	  //	expression: query(new (this.m(), this.bla))
+	  //************************************
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // class A { ... }
+	  val objectA = Const("A")		
+	  // class B { ... }
+	  val objectB = Const("B")	
+	  // constructor B(String, Int)
+	  val constructB = Function(List(typeString, typeInt), objectB)
+	  // def m(): String	  
+	  val m = Method(objectA, List(), typeString)
+	  // int field
+	  val intField = Method(objectA, List(), typeInt)
+	  // query: String → ⊥
+	  val queryType = Function(objectB, typeBottom)
+	  
+	  // NOTE InSynth query type:
+	  // Arrow(TSet(List(Const(B))),Const($Bottom_Type_Just_For_Resolution$))
+	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	  val objectADeclaration = new Declaration(
+	      "this", // full name
+	      transform(objectA), // inSynth type
+	      objectA // scala type
+	    )
+	  // needs a constructor
+	  
+	  val mDeclaration = new Declaration(
+	      "some.package.A.m", // full name
+	      transform(m), // inSynth type
+	      m // scala type
+	    )		
+	  mDeclaration.setIsMethod(true)
+	  mDeclaration.setIsThis(false)
+	  
+	  val constructBDeclaration = new Declaration(
+	      "some.package.B", constructB, constructB
+      )
+	  constructBDeclaration.setIsConstructor(true)
+	  	  
+	  val intValDeclaration = Declaration(
+	      "A.intVal",
+	      intField, intField
+      )	 
+      intValDeclaration.setIsField(true)
+	  mDeclaration.setIsThis(true)
+	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      transform(queryType),
+	      queryType
+	    )	  
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  	  
+	  val thisNode = SimpleNode(
+	      objectADeclaration,
+	      Map()
+      )
+	  
+	  // goal:String, type:String, →B
+	  // expression: new (this.m(), this.bla)
+	  val getBNode = SimpleNode(
+	    constructBDeclaration,
+	    Map(
+          // I will get object of class A from
+          transform(typeString) ->
+	  	  ContainerNode(
+	  		  Set(
+	  		      SimpleNode(
+  		    		  mDeclaration,
+  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))
+  		          )
+  		      )
+	        ),
+          transform(typeInt) ->
+	  	  ContainerNode(
+	  		  Set(
+	  		      SimpleNode(
+  		    		  intValDeclaration,
+  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))  		    		  
+  		          )
+  		      )
+	        )
+	      )
+	    )
+	  
+      // goal:Bottom, type:B→⊥
+      // expression: query(new (this.m(), this.bla)):⊥
+	  val query = 
+	    SimpleNode(
+	  	  queryDeclaration,
+	  	  Map( // for each parameter type - how can we resolve it
+	  	      transform(objectB) ->
+	  	      ContainerNode(
+	  	          Set(getBNode)
+	            )
+	        ) 
+	    )
+	    
+	  query
+	}
+		
+	/**
+	 * Constructs a simple tree which has calls to curried methods
+	 */
+	def buildTreeWithCurryingFunctions = {
+	  //************************************
+	  // Goals
+	  //	find expression of type: String
+	  //	expression: query(this.m(intVal)(intVal))
+	  //************************************
+	  
+	  // NOTE what about curried local functions?
+	  def curriedFun(i: Int)(c: Char):Unit = {}
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // class A { ... }
+	  val objectA = Const("A")
+	  // def m(): String	  
+	  val m = Method(objectA, List(List(typeInt), List(typeInt)), typeString)
+	  // query: String → ⊥
+	  val queryType = Function(typeString, typeBottom)
+	  
+	  // NOTE InSynth query type:
+	  // Arrow(TSet(List(typeString)),Const($Bottom_Type_Just_For_Resolution$))
+	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	  val objectADeclaration = new Declaration(
+	      "this", // full name
+	      transform(objectA), // inSynth type
+	      objectA // scala type
+	    )
+	  
+	  val mDeclaration = new Declaration(
+	      "some.package.A.m", // full name
+	      transform(m), // inSynth type
+	      m // scala type
+	    )		
+	  mDeclaration.setIsMethod(true)
+	  	  	  
+	  val intValDeclaration = Declaration(
+	      "intVal",
+	      typeInt, typeInt
+      )	 
+      intValDeclaration.setIsLocal(true)
+	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      transform(queryType),
+	      queryType
+	    )	  
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  	  
+	  val thisNode = SimpleNode(
+	      objectADeclaration,
+	      Map()
+      )
+      
+      val intNode = SimpleNode(
+          intValDeclaration,
+          Map()
+      )
+	  
+	  val getStringNode = SimpleNode(
+	    mDeclaration,
+	    Map(
+          // I will get object of class A from
+          transform(typeInt) ->
+	  	  ContainerNode(
+	  		  Set(intNode)
+	        ),
+          transform(objectA) ->
+	  	  ContainerNode(
+	  		  Set(thisNode)
+	        )
+	      )
+	    )
+	  
+	  val query = 
+	    SimpleNode(
+	  	  queryDeclaration,
+	  	  Map( // for each parameter type - how can we resolve it
+	  	      transform(typeString) ->
+	  	      ContainerNode(
+	  	          Set(getStringNode)
+	            )
+	        ) 
+	    )
+	    
+	  query
+	}
+	
+	/**
+	 * Constructs a simple tree which has cycles
+	 */
+	def buildTreeCycles = {
+	  //************************************
+	  // Goals
+	  //	find expression of type: String
+	  //	expression: query(intVal | f(intVal) | f(f(intVal)) | ... )
+	  //************************************
+	  	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // def f(): Int=>Int	  
+	  val f = Function(List(typeInt), typeInt)
+	  // query: Int → ⊥
+	  val queryType = Function(typeInt, typeBottom)
+	  
+	  // NOTE InSynth query type:
+	  // Arrow(TSet(List(typeInt)),Const($Bottom_Type_Just_For_Resolution$))
+	  
+	  //************************************
+	  // Declarations
+	  //************************************	  
+	  val fDeclaration = new Declaration(
+	      "some.package.f", // full name
+	      transform(f), // inSynth type
+	      f // scala type
+	    )		
+	  fDeclaration.setIsMethod(false)
+	  fDeclaration.setIsLocal(true)
+	  	  	  
+	  val intValDeclaration = Declaration(
+	      "intVal",
+	      typeInt, typeInt
+      )	 
+      intValDeclaration.setIsLocal(true)
+	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      transform(queryType),
+	      queryType
+	    )	  
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  	        
+      val intNode = SimpleNode(
+          intValDeclaration,
+          Map()
+      )
+	  
+	  lazy val getIntNode:SimpleNode = SimpleNode(
+	    fDeclaration,
+	    Map(
+          transform(typeInt) ->
+	  	  ContainerNode(
+	  		  Set(intNode, getIntNodeRec)
+	        )
+	    )
+	  )
+	  
+	  lazy val getIntNodeRec = SimpleNode(
+	    fDeclaration,
+	    Map(
+          transform(typeInt) ->
+	  	  ContainerNode(
+	  		  Set(getIntNode)
+	        )
+	    )
+	  )
+	  
+	  
+	  val query = 
+	    SimpleNode(
+	  	  queryDeclaration,
+	  	  Map( // for each parameter type - how can we resolve it
+	  	      transform(typeInt) ->
+	  	      ContainerNode(
+	  	          Set(getIntNode)
+	            )
+	        ) 
+	    )
+	    
+	  query
+	}
 	
 }

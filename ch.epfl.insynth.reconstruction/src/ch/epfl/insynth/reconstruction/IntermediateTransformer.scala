@@ -170,6 +170,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	          // if declaration is of desired type, just return corresponding variable
 	          // NOTE this case is not needed - we will always generate the "last return
 	          // type" and introduce abstraction whenever possible
+	          // TODO think, can be introduced just as an optimization
 //	          case nd@NormalDeclaration(_, _, `goalType`) =>
 //	            set + Identifier(goalType, nd)
 	          // if declaration will return the needed type after application
