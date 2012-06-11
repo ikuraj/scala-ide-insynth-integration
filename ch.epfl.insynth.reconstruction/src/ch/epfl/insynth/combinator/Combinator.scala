@@ -24,6 +24,7 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
     val WeightForLeafs = 0.5d
     
     var pq = new PriorityQueue[Expression]()
+    var visited = Set[Expression]()
     
     val rootTree:Tree = new TopTree(neededCombinations)
     val rootDeclaration = Composite(rootTree, fromInSynthDeclaration(root.decls.head), root)
@@ -36,8 +37,14 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
       if (currentDeclaration.isPruned)
         Rules.logger.fine("Declaration with " + currentDeclaration.getAssociatedNode + " pruned")
       
-      if (!currentDeclaration.isPruned) {
+      if (visited.contains(currentDeclaration))
+        Rules.logger.info("Stumbled upon a cycle: discarding the node.")
+        
+      if (!visited.contains(currentDeclaration) &&
+          !currentDeclaration.isPruned) {
       
+    	  visited += currentDeclaration
+        
 	      currentDeclaration.getAssociatedTree addDeclaration(currentDeclaration)
 	      
 	      currentDeclaration match {
