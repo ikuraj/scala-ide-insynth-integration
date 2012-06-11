@@ -2,6 +2,8 @@ package ch.epfl.scala.trees
 
 sealed abstract class ScalaType
 
+object BottomType extends ScalaType
+
 //------------------------------------------- GROUND TYPES ----------------------------------------------------------//
 
 case class Method(receiver:ScalaType, paramss:List[List[ScalaType]], returnType:ScalaType) extends ScalaType
