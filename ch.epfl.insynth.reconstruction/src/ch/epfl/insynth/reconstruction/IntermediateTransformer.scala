@@ -20,6 +20,16 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
   type Context = List[(String, Scala.ScalaType)]
   val emptyContext = List()
   
+      
+  // NOTE can be solved with a functional solution (stream of variables, not so pretty) 
+  class VariableGenerator {
+    private var counter = 0
+	// returns a string for a fresh variable name
+	def getFreshVariableName = "var_" + { counter+=1; counter }
+  }
+  // variable for generating variable names, set to a new object in apply
+  var variableGenerator:VariableGenerator = null
+  
   def apply(root: SimpleNode) = {
     // calculate the goal type as being the only parameter in the query node
     val goalType = 
@@ -29,6 +39,9 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
       		=> retType
       	case _ => throw new RuntimeException 
       }
+    
+    // set new variable generator object
+    this.variableGenerator = new VariableGenerator
     
     // start the transformation by going from the root node (query node), empty
     // context and trying to find the goal type
@@ -45,13 +58,6 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
   private def transform(node: SimpleNode, oldContext:Context, goalType: Scala.ScalaType): Set[IntermediateNode] = {
         
     var context = oldContext
-    
-    // NOTE can be solved with a functional solution (stream of variables, not so pretty) 
-    object variableGenerator {
-      private var counter = 0
-      // returns a string for a fresh variable name
-      def getFreshVariableName = "var_" + { counter+=1; counter }
-    }
     
 	/**
 	 * @param queryType type of context variables to return
@@ -98,7 +104,12 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
         case Scala.Function(params, `goalReturnType`) => {
           val mapOfSetsOfParameterTypes = getMapTypesToParameters(params)
           val paramsSetList:List[Set[IntermediateNode]] =
-            params map { st:Scala.ScalaType => mapOfSetsOfParameterTypes(st) } 
+            params map {
+        	  (_:Scala.ScalaType) match {
+        	    case st:Scala.ScalaType => mapOfSetsOfParameterTypes(st)
+        	    case null => Set(NullLeaf).asInstanceOf[Set[IntermediateNode]]
+        	  }
+    	  	} 
           Application(
             fun,
             Set(functionNode) :: paramsSetList 
@@ -109,7 +120,12 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
         case Scala.Function(params, innerFun:Scala.Function) =>
           val mapOfSetsOfParameterTypes = getMapTypesToParameters(params)
           val paramsSetList:List[Set[IntermediateNode]] =
-            params map { st:Scala.ScalaType => mapOfSetsOfParameterTypes(st) }
+            params map {
+        	  (_:Scala.ScalaType) match {
+        	    case st:Scala.ScalaType => mapOfSetsOfParameterTypes(st)
+        	    case null => Set(NullLeaf).asInstanceOf[Set[IntermediateNode]]
+        	  }
+    	  	} 
           generateApplicationAccordingToFunction(
             innerFun,
             Application(fun, Set(functionNode) :: paramsSetList)
@@ -128,7 +144,10 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	def getMapTypesToParameters(parameterList: List[Scala.ScalaType]) = 
 		// go through all needed parameters and generate appropriate nodes
 		// NOTE we eliminate duplicates in order to avoid redundant computation	            			              
-		(Map[Scala.ScalaType, Set[IntermediateNode]]() /: (parameterList distinct)) {
+		(Map[Scala.ScalaType, Set[IntermediateNode]]() /:
+		    // NOTE filter out null values (can be in place of receivers :( )
+		    (parameterList filter { _!=null } distinct)) 
+	    {
 	      (map, parameterType) => {
 	        Logger.getLogger(IntermediateTransformer.getClass.toString).info("need to find parameter for " + parameterType)	        
 	        // corresponding InSynth type
@@ -194,8 +213,11 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	        		)
 	        	  // no need for application, directly return the corresponding identifier
           		  case sc:Scala.Const =>		
-          		    Identifier(sc, nd)    
-          		  case _ => throw new RuntimeException // cannot happen	              
+          		    Identifier(sc, nd)
+          		  case i:Scala.Instance =>
+          		    Identifier(i, nd)
+       		      // should not happen
+          		  case _ => throw new RuntimeException	              
 	            }
 	            // add generated application to the set
 	            set + generatedApplication
@@ -240,8 +262,6 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 		   */
     	  def computeAbstraction(outerContext: Context, goalType: Scala.ScalaType):
 		  (Set[IntermediateNode] => Abstraction, Context) = {
-    	    // for generating fresh variable names
-		    import variableGenerator._
 		    // "last return type" of the goal type
 	    	val neededReturnType = getReturnType(goalType)
 	    	
@@ -251,7 +271,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 		      case sf@Scala.Function(params, f:Scala.Function) => {
 			    // create an addition to the current context by inspecting all parameters
 			    // of the function
-			    val contextDelta:Context = params map { (getFreshVariableName, _) }
+			    val contextDelta:Context = params map { (variableGenerator getFreshVariableName, _) }
 			    // recursively compute the inner abstraction and the full context
 			    val innerAbstractionPair = computeAbstraction(contextDelta ++ outerContext, f)
 			    // return tuple (function, full context)
@@ -265,7 +285,7 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 		      }
 		      case sf@Scala.Function(params, `neededReturnType`) => {
 		        // create an addition to the current context
-			    val contextDelta:Context = params map { (getFreshVariableName, _) }
+			    val contextDelta:Context = params map { (variableGenerator getFreshVariableName, _) }
 			    // the recursion ends in this case
 	      		(
 	      		  // return abstraction with body calculated recursively  
@@ -296,9 +316,11 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	      getMatchingTypeFromDeclaration
 	      // NOTE no need to scan context here because it is done when parameter search
 	      // encounters a leaf node
-	      
+	    // goal type is instance type 
+	    case _:Scala.Instance =>
+	      // treat it as any const type, search declarations
+	      getMatchingTypeFromDeclaration
         // not implemented yet
-	    case _:Scala.Instance => throw new UnsupportedOperationException
 	    case _:Scala.Inheritance => throw new UnsupportedOperationException
 	    // should not happen
 	    case _ => throw new RuntimeException
@@ -343,11 +365,11 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
    * @param tpe
    * @return the return (last Const) type of the parameter scala type
    */
-  private def getReturnType(tpe: Scala.ScalaType): Scala.Const = 
+  private def getReturnType(tpe: Scala.ScalaType): Scala.ScalaType = 
     tpe match {
-      case c:Scala.Const => c
+      case _:Scala.Const | _:Scala.Instance => tpe
       case Scala.Function(params, f:Scala.Function) => getReturnType(f)
-      case Scala.Function(params, c:Scala.Const) => c
+      case Scala.Function(params, retType) => getReturnType(retType)
       case _ => throw new RuntimeException
     }
     
@@ -365,12 +387,13 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
     val goalReturnInSynthType = scalaToInSynth(goalType) match {
 	  case InSynth.Arrow(_, retType) => retType
 	  case c:InSynth.Const => c
+	  case i:InSynth.Instance => i
 	  case _ => throw new RuntimeException
     } 
     // get return type of the dec declaration
     val declarationGoalType = dec.getType match {
 	  case InSynth.Arrow(_, retType) => Some(retType)
-	  case _:InSynth.Const => Some(dec.getType)
+	  case _:InSynth.Const | _:InSynth.Instance => Some(dec.getType)
       case _ => None
     }
     

@@ -39,6 +39,12 @@ case class Variable(tpe: Type, name: String) extends Leaf(tpe)
 case class Identifier(tpe: Type, decl: Declaration) extends Leaf(tpe)
 
 /**
+ * identifier in scope
+ * @param decl declaration with more information about the identifier 
+ */
+case object NullLeaf extends Leaf(null)
+
+/**
  * application term
  * first element in params is an expression (subtree) to which other parameters are
  * applied

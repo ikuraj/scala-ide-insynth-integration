@@ -3,13 +3,10 @@ package ch.epfl.insynth.env
 import ch.epfl.insynth.trees._
 import ch.epfl.scala.trees.ScalaType
 
-case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType)
- extends FormatableIntermediate {
+case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType) extends FormatableIntermediate {
   assert(fullName != null && inSynthType != null)
   
-  // TODO some default value for testing purposes
-  //private var weight:Weight = null
-  private var weight:Weight = new Weight(1.0d)
+  private var weight:Weight = new Weight(1.0)
   
   private var method = false
   private var field = false
@@ -49,7 +46,7 @@ case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:
   
   def this(inSynthType:Type) = {
     this("#abs#", inSynthType)
-    this.setIsAbstract(true)
+    this._abstract = true
   }
 
   def getWeight = weight

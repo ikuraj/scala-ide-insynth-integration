@@ -3,15 +3,15 @@ package ch.epfl.insynth.trees
 sealed abstract class Type extends FormatableType
 
 object BottomType extends Type
-  
+
 //--------------------------------------------------- Ground Types ----------------------------------------------------------//
   
 case class Const(val name: String) extends Type
 case class Instance(val name: String, val t: List[Type]) extends Type
 case class Arrow(val paramType:TSet, val returnType:Type) extends Type
 
-// XXX TSet does not have to be a Type
-case class TSet(val list:List[Type]) {
+
+case class TSet(val list:List[Type]) extends Type {  // TODO: Maybe find better representation
   
   def this() = this(Nil)
   
@@ -38,13 +38,17 @@ case class TSet(val list:List[Type]) {
   
   def union(tpe1:TSet) = TSet.union(this, tpe1)
   
+  def contains(tpe1:Type) = list.contains(tpe1)
+  
+  def content = list
+  
 }
 
 object TSet {
 
   val empty = new TSet()
   
-  def apply(tpe:Type) = new TSet(List(tpe))
+  def apply(tpe:Type*) = new TSet(tpe.toList)
   
   def equals(tpe1:TSet, tpe2:TSet) = {
     val length1 = tpe1.list.length
@@ -72,6 +76,27 @@ object TSet {
   
 }
 
+object Type {
+  
+  def returnType(tpe:Type) = tpe match {
+    case Arrow(_,returnType) => returnType
+    case IArrow(_,returnType) => returnType
+    case t => t
+  }
+  
+  def paramTypes(tpe:Type) = tpe match {
+    case Arrow(params,_) => params.content
+    case IArrow(params,_) => params.content
+    case _ => Nil
+  }
+  
+  def paramSetType(tpe:Type) = tpe match {
+    case Arrow(params,_) => params
+    case IArrow(params,_) => params
+    case _ => TSet.empty
+  }
+}
+
 trait FormatableType extends ch.epfl.insynth.print.Formatable {
   import ch.epfl.insynth.print.FormatHelpers._
     
@@ -81,10 +106,13 @@ trait FormatableType extends ch.epfl.insynth.print.Formatable {
       case Arrow(TSet(paramList), returnType) => 
         paren(seqToDoc(paramList, ",", (_:Type).toDocument)) :: "→" :: returnType.toDocument
       case BottomType => "⊥"
+      case Instance(name, list) => name :: "[" :: seqToDoc(list, ",", (_:Type).toDocument) :: "]" 
       case _ => throw new UnsupportedOperationException
     }
   }
 }
+
+
 
 //------------------------------------------------ Polymorphic Types --------------------------------------------------------//
   

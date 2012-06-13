@@ -190,7 +190,9 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	  case Scala.Function(params, returnType) =>
 	    paren(seqToDoc(params, ",", { param:Scala.ScalaType => transform(param) } )) :/:
 	    "=>" :/: transform(returnType)	    		
-	  case Scala.Const(name) => name
+	  case Scala.Const(name) => name	    		
+	  case Scala.Instance(name, list) =>
+	    name :: sqBrackets( seqToDoc(list, ",", transform(_:Scala.ScalaType) ) )
 	  case _ => throw new RuntimeException
   	}
   
