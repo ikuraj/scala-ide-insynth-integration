@@ -12,6 +12,8 @@ object TreeExample {
 	val typeString = Const("String")
 	val typeBoolean = Const("Boolean")
 	val typeChar = Const("Char")
+	val typeFloat = Const("Float")
+	val typeDouble = Const("Double")
 	val typeUnit = Const("Unit")
 	
 	val typeBottom = Const("$Bottom_Type_Just_For_Resolution$")
@@ -1095,20 +1097,20 @@ object TreeExample {
 	    Map(
           transform(typeInt) ->
 	  	  ContainerNode(
-	  		  Set(intNode, getIntNodeRec)
+	  		  Set(intNode, getIntNode)
 	        )
 	    )
 	  )
 	  
-	  lazy val getIntNodeRec = SimpleNode(
-	    fDeclaration,
-	    Map(
-          transform(typeInt) ->
-	  	  ContainerNode(
-	  		  Set(getIntNode)
-	        )
-	    )
-	  )
+//	  lazy val getIntNodeRec = SimpleNode(
+//	    fDeclaration,
+//	    Map(
+//          transform(typeInt) ->
+//	  	  ContainerNode(
+//	  		  Set(getIntNode)
+//	        )
+//	    )
+//	  )
 	  
 	  
 	  val query = 
@@ -1118,6 +1120,143 @@ object TreeExample {
 	  	      transform(typeInt) ->
 	  	      ContainerNode(
 	  	          Set(getIntNode)
+	            )
+	        ) 
+	    )
+	    
+	  query
+	}
+	
+	/**
+	 * Constructs a simple tree which has prints without "this" keyword
+	 */
+	def buildTreeWithoutThis = {
+	  //************************************
+	  // Goals
+	  //	find expression of type: String
+	  //	expression: query([this].m1(this.m2, this.f1, [this].f2))
+	  //************************************
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // class A { ... }
+	  val objectA = Const("A")		
+	  // def m1(Char, Int, Float): String	  
+	  val m1 = Method(objectA, List(List(typeChar, typeInt, typeFloat)), typeString)
+	  // int field
+	  val intField = Method(objectA, List(), typeInt)
+	  // float field
+	  val floatField = Method(objectA, List(), typeFloat)
+	  // def m2(): Char
+	  val m2 = Method(objectA, List(), typeChar)
+	  // query: String → ⊥
+	  val queryType = Function(typeString, typeBottom)
+	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	  val objectADeclaration = new Declaration(
+	      "this", // full name
+	      transform(objectA), // inSynth type
+	      objectA // scala type
+	    )
+	  objectADeclaration.setIsThis(true)
+	  
+	  val m1Declaration = new Declaration(
+	      "some.package.A.m1", // full name
+	      transform(m1), // inSynth type
+	      m1 // scala type
+	    )		
+	  m1Declaration.setIsMethod(true)
+	  m1Declaration.setIsThis(false)
+	  m1Declaration.setHasThis(false)
+	  
+	  val m2Declaration = new Declaration(
+	      "some.package.A.m2", // full name
+	      transform(m2), // inSynth type
+	      m2 // scala type
+	    )		
+	  m2Declaration.setIsMethod(true)
+	  m2Declaration.setHasThis(false)
+	  	  	  
+	  val intFieldDeclaration = Declaration(
+	      "A.f1",
+	      intField, intField
+      )	 
+      intFieldDeclaration.setIsField(true)
+      intFieldDeclaration.setHasThis(true)
+      
+	  val floatFieldDeclaration = Declaration(
+	      "A.f2",
+	      floatField, floatField
+      )	 
+      floatFieldDeclaration.setIsField(true)
+      floatFieldDeclaration.setHasThis(false)
+	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      transform(queryType),
+	      queryType
+	    )	  
+	  queryDeclaration.setIsQuery(true)
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  	  
+	  val thisNode = SimpleNode(
+	      objectADeclaration,
+	      Map()
+      )
+	  
+	  val m1Node = SimpleNode(
+	    m1Declaration,
+	    Map(
+          transform(objectA) ->
+	  	  ContainerNode(
+	  		  Set( thisNode )
+	        ),
+          transform(typeInt) ->
+	  	  ContainerNode(
+	  		  Set(
+	  		      SimpleNode(
+  		    		  intFieldDeclaration,
+  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))  		    		  
+  		          )
+  		      )
+	        ),
+          transform(typeFloat) ->
+	  	  ContainerNode(
+	  		  Set(
+	  		      SimpleNode(
+  		    		  floatFieldDeclaration,
+  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))  		    		  
+  		          )
+  		      )
+	        ),
+          transform(typeChar) ->
+	  	  ContainerNode(
+	  		  Set(
+	  		      SimpleNode(
+  		    		  m2Declaration,
+  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))  		    		  
+  		          )
+  		      )
+	        )
+	      )
+	    )
+	  
+      // goal:Bottom, type:B→⊥
+      // expression: query(new (this.m(), this.bla)):⊥
+	  val query = 
+	    SimpleNode(
+	  	  queryDeclaration,
+	  	  Map( // for each parameter type - how can we resolve it
+	  	      transform(typeString) ->
+	  	      ContainerNode(
+	  	          Set(m1Node)
 	            )
 	        ) 
 	    )

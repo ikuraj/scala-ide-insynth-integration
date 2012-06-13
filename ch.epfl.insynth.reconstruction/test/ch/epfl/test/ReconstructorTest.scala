@@ -8,15 +8,17 @@ import ch.epfl.insynth.reconstruction.Reconstructor
 object ReconstructorTest {
 
   def main(args: Array[String]): Unit = {
-    for (tree <- 
+    val tests =      
       Array(
-        TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
-        TreeExample.buildTreeAbsApplication, TreeExample.buildTreeArrowType,
-        /*TreeExample.buildTreeCycles, */TreeExample.buildTreeOverlapParameterTypeWithReturnType,
-        TreeExample.buildTreeSKombinator, TreeExample.buildTreeWithCurryingFunctions,
-        TreeExample.buildTreeWithVariousFunctions
+//        TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
+//        TreeExample.buildTreeAbsApplication, TreeExample.buildTreeArrowType,
+//        /*TreeExample.buildTreeCycles, */TreeExample.buildTreeOverlapParameterTypeWithReturnType,
+//        TreeExample.buildTreeSKombinator, TreeExample.buildTreeWithCurryingFunctions,
+//        TreeExample.buildTreeWithVariousFunctions
+          TreeExample.buildTreeWithoutThis
       )
-    )
+    
+    for (tree <- tests )
       parametrizedTreeReconstruct(tree)      
   }
   

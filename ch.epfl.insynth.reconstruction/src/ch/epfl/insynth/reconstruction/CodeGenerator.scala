@@ -6,6 +6,7 @@ import ch.epfl.insynth.combinator.AbsDeclaration
 import ch.epfl.insynth.reconstruction.trees._
 import ch.epfl.insynth.print._
 import ch.epfl.scala.{ trees => Scala }
+import ch.epfl.insynth.combinator.NormalDeclaration
 
 /**
  * class that converts an intermediate tree into a list of output elements (elements
@@ -78,14 +79,31 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	        val appIdentifier = transform(params.head.head, App).head
 	        
 	        // check what the declaration says about the application
+            // TODO refactor - similar to the method construction 
 	        if (decl.isField) {
 	          assert(params.size == 2)
-	          // TODO refactor - similar to the method construction
-        	  // go through all the receiver objects
-        	  (List[Document]() /: transform(params(1).toList, App)) {
-		        (listOfDocumentsToReturn, objectDoc) =>
-		          listOfDocumentsToReturn :+ group(objectDoc :: "." :: appIdentifier)
-		      } 	          
+	          // if the field needs this keyword
+	          val needsThis = decl.hasThis
+	          (List[Document]() /: params(1)) {
+        	    (listDocsReceivers, receiver) => {
+    	    	  // get documents for the receiver objects (or empty if none is needed)
+    	    	  val documentsForThis = {
+    			    if (needsThis)
+			    	  receiver match {
+			          	case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
+		          		  List(empty)
+			          	case _ => transform(receiver, App) map { (_:Document) :: "." }			            
+		        	  }
+    			    else transform(receiver, App) map { (_:Document) :: "." }
+    	    	  }
+    	    	  // go through all the receiver objects and add to the list
+    	    	  (listDocsReceivers /: documentsForThis) {
+	    		    (listDocsTransformedReceiver, receiverDoc) => {
+	    		      listDocsTransformedReceiver :+ group(receiverDoc :: appIdentifier)	    		      
+	    		    }
+    	    	  }
+        	    }	        	  
+	          }	          	          
 	        } else
 	        
 	        if (!decl.isMethod) 
@@ -101,21 +119,38 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	        	firstTermFunctionTransform
 	        else // if (decl.isMethod)
 	          {
+	        	// get info about parameters
 	        	val paramsInfo = decl.scalaType match {
 	        	  case Scala.Method(_, params, _) => params
 	        	  case _ => throw new RuntimeException("Declared method but scala type is not")
 	        	}
-			    // go through all the receiver objects
-			    (List[Document]() /: transform(params(1).toList, App)) {
-			      (listOfDocumentsToReturn, objectDoc) => {
-			        // go through all combinations of parameters documents
-		    		(listOfDocumentsToReturn /: 
-		    			getParamsCombinations(params.drop(2), paramsInfo)) {
-		    		  (list, paramsDoc) => list :+
-					    group(objectDoc :: "." :: appIdentifier :: paramsDoc)
-		    		}		      
-			      }
-			    }
+	        	// if the method needs this keyword
+	        	val needsThis = decl.hasThis
+	        	(List[Document]() /: params(1)) {
+			      (listDocsReceivers, receiver) => {
+			        // get documents for the receiver objects (or empty if none is needed)
+			        val documentsForThis = {
+			          if (!needsThis)
+		        		receiver match {
+				          case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
+				            List(empty)
+				          case _ => transform(receiver, App) map { (_:Document) :: "." }			            
+				        }
+			          else transform(receiver, App) map { (_:Document) :: "." }
+			        }
+				    // go through all the receiver objects and add to the list
+				    (listDocsReceivers /: documentsForThis) {
+				      (listDocsTransformedReceiver, receiverDoc) => {
+				        // go through all combinations of parameters documents
+			    		(listDocsTransformedReceiver /: getParamsCombinations(params.drop(2), paramsInfo)) {
+			    		  // and add them to the list
+			    		  (listDocsTransformedParameters, paramsDoc) => listDocsTransformedParameters :+
+						    group(receiverDoc :: appIdentifier :: paramsDoc)
+			    		}		      
+				      }
+				    }
+			      }	        	  
+	        	}
           	  }
 			}
           // function that is created as an argument or anything else
