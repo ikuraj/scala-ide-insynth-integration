@@ -55,6 +55,13 @@ extends Combinations with Ordered[Expression] {
   
   // reconstruct the output tree node
   def toTreeNode:Node
+  
+  // for set operations
+  override def equals(o: Any) = o match {
+    case that: Expression => that.getAssociatedNode.equals(this.getAssociatedNode)
+    case _ => false
+  }
+  override def hashCode = getAssociatedNode.hashCode
 } 
 
 //case class TopMostDeclaration(var rootTree: Tree)
