@@ -6,6 +6,9 @@ import ch.epfl.scala.trees.ScalaType
 case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType) extends FormatableIntermediate {
   assert(fullName != null && inSynthType != null)
   
+  // TODO to be added
+  def getObjectName = "Object"
+  
   private var weight:Weight = new Weight(1.0)
   
   private var method = false
