@@ -56,6 +56,8 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
    * @return set of nodes that describe how to generate expression of goalType
    */
   private def transform(node: SimpleNode, oldContext:Context, goalType: Scala.ScalaType): Set[IntermediateNode] = {
+    Logger.getLogger(IntermediateTransformer.getClass.toString).entering(
+      this.getClass().getName(), "transform", node.toString)
         
     var context = oldContext
     
@@ -227,9 +229,9 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	          case ad:AbsDeclaration 
 	          if declarationHasAppropriateType(declaration, goalType) => {
 	            // get all variables from the context that can generate type that we want
-	            val absFunctions = getAllFunctionsFromContextByInSynthType(ad getType)
+	            val absDeclarations = getAllFunctionsFromContextByInSynthType(ad getType)
 	            // for all such variables from the context generate an application node
-	            (Set[IntermediateNode]() /: absFunctions) {
+	            (Set[IntermediateNode]() /: absDeclarations) {
 	              (set, variable) => {
 	                variable.tpe match {
 	                  case fun:Scala.Function =>
@@ -237,6 +239,8 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 	                    set + generateApplicationAccordingToFunction(
 	                    		fun, Variable(fun, variable.name)
                     		  )
+	                  case sc:Scala.Const =>		
+          		    	set + Variable(sc, variable.name)
             		  // should not happen 
 	                  case _ => throw new RuntimeException
 	                }
@@ -262,6 +266,8 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
 		   */
     	  def computeAbstraction(outerContext: Context, goalType: Scala.ScalaType):
 		  (Set[IntermediateNode] => Abstraction, Context) = {
+    	    Logger.getLogger(IntermediateTransformer.getClass.toString).entering(this.getClass().getName(), "computeAbstraction")
+	        Logger.getLogger(IntermediateTransformer.getClass.toString).info("computing abstraction")
 		    // "last return type" of the goal type
 	    	val neededReturnType = getReturnType(goalType)
 	    	

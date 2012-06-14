@@ -60,9 +60,9 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	              node match {
 	                case sn@InSynth.SimpleNode(decls, params) if params.isEmpty =>
 	                  for (dec <- decls)
-	                    if (dec.isAbstract)
-	                      pq += LeafExpression(paramTree, WeightForLeafs, sn)
-	                    else
+//	                    if (dec.isAbstract)
+//	                      pq += LeafExpression(paramTree, WeightForLeafs, sn)
+//	                    else
                     	  pq += Simple(paramTree, fromInSynthDeclaration(dec), sn)
 	                case sn@InSynth.SimpleNode(decls, _) =>
 	                  for (dec <- decls)
@@ -72,7 +72,8 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	          }
 	        }
 	        case s:Simple => s.associatedTree.childDone(s)
-	        case l:LeafExpression => l.associatedTree.childDone(l)
+	        case l:LeafExpression => throw new RuntimeException
+//	        case l:LeafExpression => l.associatedTree.childDone(l)
 	      }
       }
     }
