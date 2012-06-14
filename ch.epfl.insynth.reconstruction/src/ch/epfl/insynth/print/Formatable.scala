@@ -32,7 +32,7 @@ object FormatHelpers {
     group("(" :: nest(1, break :: d) :/: ")")
 	
   def nestedBrackets(d: Document): Document =
-    group(/*"{" :: */nest(1, break :: d) /*:/: "}"*/)
+    group("{" :: nest(1, break :: d) :/: "}")
 
   def sqBrackets(d: Document) =
     group("[" :: d :: "]")

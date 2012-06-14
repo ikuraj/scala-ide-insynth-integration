@@ -1,17 +1,31 @@
 package ch.epfl.test
 import ch.epfl.insynth.combinator.Combinator
 import ch.epfl.insynth.env.SimpleNode
+import ch.epfl.insynth.env.SimpleNode
 
 object CombinatorTest {
 
   def main(args: Array[String]): Unit = {
-    simpleTreeCombine
-    complexTreeCombine
-    arrowTreeCombine
-    overlapTreeCombine
-    sKombinatorTreeReconstruct
-    //cycleTreeCombine
+    val tests =      
+      Array(
+//        TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
+//        TreeExample.buildTreeAbsApplication, TreeExample.buildTreeArrowType,
+//        /*TreeExample.buildTreeCycles, */TreeExample.buildTreeOverlapParameterTypeWithReturnType,
+//        TreeExample.buildTreeSKombinator, TreeExample.buildTreeWithCurryingFunctions,
+//        TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
+        TreeExample.buildTreeIdentityFunction
+      )
+    
+    for (tree <- tests )
+      parametrizedCombine(tree) 
   }
+  
+  def parametrizedCombine(sn: SimpleNode) = {
+    println("original tree")
+    sn.println
+    println("combined tree")
+    Combinator(sn).println
+  } 
   
   // XXX cannot still be instantiated according to the proof representation!
   def cycleTreeCombine = {

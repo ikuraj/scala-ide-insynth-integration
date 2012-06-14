@@ -840,7 +840,7 @@ object TreeExample {
 	  // class B { ... }
 	  val objectB = Const("B")	
 	  // constructor B(String, Int)
-	  val constructB = Function(List(typeString, typeInt), objectB)
+	  val constructB = Method(null, List(typeString, typeInt), objectB)
 	  // def m(): String	  
 	  val m = Method(objectA, List(), typeString)
 	  // int field
@@ -1257,6 +1257,66 @@ object TreeExample {
 	  	      transform(typeString) ->
 	  	      ContainerNode(
 	  	          Set(m1Node)
+	            )
+	        ) 
+	    )
+	    
+	  query
+	}
+	
+	
+	/**
+	 * Constructs a simple tree which has prints without "this" keyword
+	 */
+	def buildTreeIdentityFunction = {
+	  //************************************
+	  // Goals
+	  //	find expression of type: Int=>Int
+	  //	expression: query(x:Int => Int)
+	  //************************************
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  
+	  val neededType = Function(typeInt, typeInt)
+		
+	  val queryType = Function(neededType, typeBottom)
+	  
+	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	  	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      transform(queryType),
+	      queryType
+	    )	  
+	  queryDeclaration.setIsQuery(true)
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  	  	  
+	  val intLeafNode = SimpleNode(new Declaration(typeInt), Map.empty)
+
+	  val absNode = SimpleNode(
+	      new Declaration(Function(typeInt, typeInt)),
+	      Map(
+	        transform(typeInt) -> 
+        	  ContainerNode(Set(intLeafNode))      	  
+          )
+      )     
+	  
+	  val query = 
+	    SimpleNode(
+	  	  queryDeclaration,
+	  	  Map( // for each parameter type - how can we resolve it
+	  	      transform(Function(typeInt, typeInt)) ->
+	  	      ContainerNode(
+	  	          Set(intLeafNode)
 	            )
 	        ) 
 	    )

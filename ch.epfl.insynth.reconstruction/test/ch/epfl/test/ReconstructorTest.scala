@@ -11,11 +11,13 @@ object ReconstructorTest {
     val tests =      
       Array(
         TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
-        TreeExample.buildTreeAbsApplication, TreeExample.buildTreeArrowType,
+        TreeExample.buildTreeAbsApplication,
+        TreeExample.buildTreeArrowType,
         /*TreeExample.buildTreeCycles, */TreeExample.buildTreeOverlapParameterTypeWithReturnType,
-        TreeExample.buildTreeSKombinator, TreeExample.buildTreeWithCurryingFunctions,
-        TreeExample.buildTreeWithVariousFunctions,
-        TreeExample.buildTreeWithoutThis
+        TreeExample.buildTreeSKombinator, 
+          TreeExample.buildTreeWithCurryingFunctions,
+        TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
+        TreeExample.buildTreeIdentityFunction
       )
     
     for (tree <- tests )

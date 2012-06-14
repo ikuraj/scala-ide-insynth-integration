@@ -1,16 +1,42 @@
 package ch.epfl.test
 import ch.epfl.insynth.reconstruction.IntermediateTransformer
 import ch.epfl.insynth.combinator.Combinator
+import ch.epfl.insynth.env.Node
+import ch.epfl.insynth.env.SimpleNode
 
 object IntermediateReconstructionTest {
 
   def main(args: Array[String]): Unit = {
-    simpleTreeTransform
-    complexTreeTransform
-    arrowTreeTransform
-    overlapTreeTransform
-    absApplicationTreeTransform
-    sKombinatorTreeTransform
+    val tests =      
+      Array(
+//        TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
+//        TreeExample.buildTreeAbsApplication, TreeExample.buildTreeArrowType,
+//        /*TreeExample.buildTreeCycles, */TreeExample.buildTreeOverlapParameterTypeWithReturnType,
+//        TreeExample.buildTreeSKombinator, TreeExample.buildTreeWithCurryingFunctions,
+//        TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
+        TreeExample.buildTreeIdentityFunction
+      )
+    
+    for (tree <- tests )
+      parametrizedTreeTransform(tree) 
+  }
+  
+  def parametrizedTreeTransform(node: SimpleNode) = {    
+    node.println
+    
+    val prunedTree = Combinator(node)
+    println("pruned tree")    
+    prunedTree.println
+    
+    val transformedTrees = IntermediateTransformer(prunedTree)
+    println("after intermediate transform")
+    
+    println("simple tree transformed") 
+    assert(transformedTrees.size > 0)
+    for (term <- transformedTrees) {
+	  term.println
+	  println(term)
+    }    
   }
   
   def simpleTreeTransform() = {
