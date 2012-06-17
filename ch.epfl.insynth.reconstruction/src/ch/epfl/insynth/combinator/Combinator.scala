@@ -1,15 +1,21 @@
 package ch.epfl.insynth.combinator
 
 import scala.collection.mutable.PriorityQueue
-
 import ch.epfl.insynth.{ env => InSynth }
 import ch.epfl.insynth.trees._
+import java.util.logging.Logger
+import java.util.logging.ConsoleHandler
+import ch.epfl.insynth.env.FormatNode
+import java.util.logging.Level
 
 /**
  * object which application transforms an InSynth representation input
  * to the pruned tree representation
  */
 object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
+  
+  val logger = Rules.logger
+  val logApply = Logger.getLogger(logger.getName + ".apply")
   
   // predefined default number of combinations
   val predefinedNeededCombinations = 5
@@ -21,6 +27,10 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
   
   // apply with number of combinatinos needed
   def apply(root: InSynth.SimpleNode, neededCombinations: Int) = {
+    // logging
+    logApply.entering(getClass.getName, "apply")
+    logApply.info("Entering combinator step (root: "+ FormatNode(root) + ", combinations: " + neededCombinations)
+    
     // import transformer from InSynth to intermediate declaration
     import DeclarationTransformer.fromInSynthDeclaration
     
@@ -40,7 +50,7 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
     // declare root Tree which starts the hierarchy 
     val rootTree:Tree = new TopTree(neededCombinations)
     // a single declaration of the root Tree is the one corresponding to the root node
-    val rootDeclaration = Composite(rootTree, fromInSynthDeclaration(root.decls.head), root)
+    val rootDeclaration = Composite(rootTree, fromInSynthDeclaration(root.getDecls.head), root)
     
     /* start the traversal */
     
@@ -55,9 +65,9 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
       
       // if current declaration is pruned or already visited on this path, log
       if (currentDeclaration.isPruned)
-        Rules.logger.fine("Declaration with " + currentDeclaration.getAssociatedNode + " pruned")
+        logApply.fine("Declaration with " + FormatNode(currentDeclaration.getAssociatedNode) + " pruned")
       if (visited.contains(currentDeclaration))
-        Rules.logger.info("Stumbled upon a cycle: discarding the node.")
+        logApply.info("Stumbled upon a cycle (discarding the node: " + FormatNode(currentDeclaration.getAssociatedNode) + ")")
         
       // if current declaration is pruned or already visited on this path, ignore it
       if (!visited.contains(currentDeclaration) && !currentDeclaration.isPruned) {
@@ -80,13 +90,14 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	            c.addChild(paramTree)
 	            
 	            // for each child node in associated InSynth nodes for the parameter
-	            for(node <- c.associatedNode.params(parameter).nodes) {
+	            for(node <- c.associatedNode.getParams(parameter).nodes) {
 	              // according to the type of node
 	              // create a declaration and insert the pair into the queue
-	              node match {
-	                // for a simple node insert simple expressions 
-	                case sn@InSynth.SimpleNode(decls, params) if params.isEmpty =>
+	              
+	              // if there are no parameters insert simple nodes
+	              if (node.getParams.isEmpty){
 	                  // for each of its declarations
+	                  val decls = node.getDecls
 	                  for (dec <- decls) {
 	                    
 	                    // NOTE we are not dealing with "Leaf expressions" anymore
@@ -96,19 +107,21 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	                    
 	                    // new pair of simple expression and extended path
 	                    val newPair = 
-	                      (Simple(paramTree, fromInSynthDeclaration(dec), sn), visited + c)
+	                      (Simple(paramTree, fromInSynthDeclaration(dec), node), visited + c)
                         // add new pair to the queue 
                     	pq += newPair
-	                  }
-	                // for a composite node insert composite expressions 
-	                case sn@InSynth.SimpleNode(decls, _) =>
+	                  }	                
+                  // if there are parameters insert composite nodes
+	              } else {
+	                  // for each of its declarations
+	                  val decls = node.getDecls
 	                  for (dec <- decls) {
 	                    // new pair of simple expression and extended path
 	                    val newPair = 
-	                      (Composite(paramTree, fromInSynthDeclaration(dec), sn), visited + c)
+	                      (Composite(paramTree, fromInSynthDeclaration(dec), node), visited + c)
                         // add new pair to the queue 
 	                    pq += newPair
-	                  }
+	                  }	                
 	              }
 	            }
 	          }
@@ -123,9 +136,15 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	      }
       }
     }
+    
+    if (rootDeclaration.isPruned)
+      logger.log(Level.SEVERE, "Root declaration is pruned!")      
+    if (!rootDeclaration.isDone)
+      logger.log(Level.SEVERE, "Root declaration is not done!")
+    logApply.exiting(getClass.getName, "apply")
       
     // return transformed pruned tree as a result
-    rootDeclaration.toTreeNode 
+    rootDeclaration.toTreeNode
   }
   
 }
