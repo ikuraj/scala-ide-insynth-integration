@@ -53,6 +53,12 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	  else
 	    (appId :/: params) 
     }        
+    def doParenRecApp(receiverDoc: Document, appId: Document, params: Document) = {
+      if (parenthesesRequired) 
+        (receiverDoc :: "." :: appId :: paren(params)) 
+	  else
+	    (receiverDoc :/: appId :/: params) 
+    }        
     def doParen(d: Document) = if (parenthesesRequired) paren(d) else d
     
     tree match {
@@ -110,7 +116,9 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	          assert(params(1).size == 1)
 	          assert(params(1).head == NullLeaf)
 	          // set if we need parentheses
-	          parenthesesRequired = params.drop(2).size > 0
+	          parenthesesRequired = 
+	            // if there are any parameters or ctx is as receiver (App)
+	            params.drop(2).size > 0 || ctx == App
         	  // go through all combinations of parameters documents
     		  return (List[Document]() /: getParamsCombinations(params.drop(2))) {
 	    		(list, paramsDoc) => list :+
@@ -118,8 +126,9 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 			  }	
 	        }
 	        // method is on some object
-	        if (decl.belongsToObject) {	     
-	          assert(params(1) == NullLeaf)     
+	        if (decl.belongsToObject) {	
+	          assert(params(1).size == 1)
+	          assert(params(1).head == NullLeaf)     
         	  // get info about parameters
         	  val paramsInfo = decl.scalaType match {
 	        	case Scala.Method(_, params, _) => params
@@ -132,7 +141,7 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	    		(list, paramsDoc) => list :+
 				  // TODO when to generate dot and when not??
 				  //group(decl.getObjectName :: "." :: doParen(appIdentifier, paramsDoc))
-				  group(decl.getObjectName :/: doParenApp(appIdentifier, paramsDoc))
+				  group(doParenRecApp(decl.getObjectName, appIdentifier, paramsDoc))
 			  }	
 	        }	          
 	        
@@ -306,7 +315,7 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
           assert(1 == paramsInfo.size)
           assert(params.size == lastList.size)
           // return the list of transformed last parentheses parameters
-          getParamsCombinations(params) map { paren(_:Document) }
+          getParamsCombinations(params)
         case currentList :: restOfTheList => {
           val currentListDocuments = getParamsCombinations(params take currentList.size)
           // go through all recursively got documents
@@ -314,7 +323,9 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
             (list, currentDocument) =>
               // add the combination with current parentheses documents
               list ++ currentListDocuments map {
-                paren(_:Document) :: currentDocument
+                paren(_:Document) ::
+                // if rest of the list is just one element it will be returned with no parentheses
+                { if (restOfTheList.size == 1) currentDocument else paren(currentDocument) }
               }
           }
         }
