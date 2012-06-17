@@ -1,6 +1,7 @@
 package ch.epfl.insynth.combinator
 
 import ch.epfl.insynth.trees.Type
+import ch.epfl.insynth.trees.FormatType
 
 /**
  * can return the type of the (sub)tree
@@ -12,7 +13,7 @@ trait Typable {
 /**
  * abstract tree node
  */
-abstract class Node(tpe: Type) extends Typable with FormatableIntermediate {
+abstract class Node(tpe: Type) extends Typable {
   def getType: Type = tpe  
 }
 
@@ -27,33 +28,37 @@ extends Node(tpe) {
 /**
  * container for tree nodes
  */
-case class ContainerNode(var nodes:Set[Node]) extends FormatableIntermediate {
+case class ContainerNode(var nodes:Set[Node]) {
   def addNode(node:Node) {
     nodes += node
   }  
   def getNodes = nodes
 }
 
-trait FormatableIntermediate extends ch.epfl.insynth.print.Formatable {
-  def toDocument = {
+case class FormatPrNode(node: Node) extends ch.epfl.insynth.print.Formatable {
+  def toDocument = toDocument(node)
+  
+  def toDocument(node: Any): scala.text.Document = {
     import ch.epfl.insynth.print.FormatHelpers._
 
-    this match {
-      case AbsNode(tpe) => "Leaf" :: paren(tpe.toDocument)
+    node match {
+      case AbsNode(tpe) => "Leaf" :: paren(FormatType(tpe).toDocument)
       case SimpleNode(decls, tpe, map) =>
-        "SimpleNode" :: paren(tpe.toDocument) :: nestedBrackets(
+        "SimpleNode" :: paren(FormatType(tpe).toDocument) :: nestedBrackets(
             seqToDoc(decls, ",", { d:Declaration => strToDoc(d.getSimpleName) })
             :/:
             seqToDoc(map.toList, ",", 
               { 
-            	p:(Type, ContainerNode) => paren(p._1.toDocument) :: "->" ::
-            	nestedBrackets(p._2.toDocument)
+            	p:(Type, ContainerNode) => paren(FormatType(p._1).toDocument) :: "->" ::
+            	nestedBrackets(toDocument(p._2))
               }
             )
         )
       case ContainerNode(nodes) =>
-        nestedBrackets(seqToDoc(nodes.toList, ",", (_:Node).toDocument))
+        nestedBrackets(seqToDoc(nodes.toList, ",", toDocument(_:Node)))
         //"Container"
+      // should not happen
+      case _ => throw new RuntimeException
     }
   }
 }

@@ -3,11 +3,8 @@ package ch.epfl.insynth.env
 import ch.epfl.insynth.trees._
 import ch.epfl.scala.trees.ScalaType
 
-case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType) extends FormatableIntermediate {
+case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType) {
   assert(fullName != null && inSynthType != null)
-  
-  // TODO to be added
-  def getObjectName = "Object"
   
   private var weight:Weight = new Weight(1.0)
   
@@ -24,8 +21,9 @@ case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:
   private var _this = false
   private var _abstract = false
   private var constructor = false
+  private var objectName:String = null
   
-  private val simpleName = fullName.substring(fullName.lastIndexOf(".")+1)
+  private var simpleName:String = null
 
   private val returnType = inSynthType match {
     case Arrow(_,retType) => retType
@@ -52,13 +50,24 @@ case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:
     this._abstract = true
   }
 
+  // TODO to be added
+  def getObjectName = this.objectName  
+  def setObjectName(objectName:String) {this.objectName = objectName}
+    
+    
   def getWeight = weight
   
   def setWeight(weight:Weight){this.weight = weight}
   
   def getType = inSynthType
-    
-  def getSimpleName = simpleName
+
+  def getSimpleName = if (simpleName != null) simpleName 
+                      else {
+                        val temp = if (constructor) fullName.substring(0, fullName.lastIndexOf("."))
+                                   else fullName
+                        simpleName = temp.substring(temp.lastIndexOf(".")+1)
+                        simpleName
+                      }
 
   def getReturnType = returnType
   

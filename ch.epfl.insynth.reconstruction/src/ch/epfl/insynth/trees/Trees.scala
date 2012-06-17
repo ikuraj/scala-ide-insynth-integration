@@ -1,6 +1,6 @@
 package ch.epfl.insynth.trees
 
-sealed abstract class Type extends FormatableType
+sealed abstract class Type// extends FormatableType
 
 object BottomType extends Type
 
@@ -97,16 +97,18 @@ object Type {
   }
 }
 
-trait FormatableType extends ch.epfl.insynth.print.Formatable {
+case class FormatType(tpe: Type) extends ch.epfl.insynth.print.Formatable {
   import ch.epfl.insynth.print.FormatHelpers._
-    
-  def toDocument = {    
-    this match {
+  
+  override def toDocument = toDocument(tpe)
+  
+  def toDocument(tpe: Type): scala.text.Document = {    
+    tpe match {
       case Const(name) => name
       case Arrow(TSet(paramList), returnType) => 
-        paren(seqToDoc(paramList, ",", (_:Type).toDocument)) :: "→" :: returnType.toDocument
+        paren(seqToDoc(paramList, ",", toDocument(_:Type))) :: "→" :: toDocument(returnType)
       case BottomType => "⊥"
-      case Instance(name, list) => name :: "[" :: seqToDoc(list, ",", (_:Type).toDocument) :: "]" 
+      case Instance(name, list) => name :: "[" :: seqToDoc(list, ",", toDocument(_:Type)) :: "]" 
       case _ => throw new UnsupportedOperationException
     }
   }
