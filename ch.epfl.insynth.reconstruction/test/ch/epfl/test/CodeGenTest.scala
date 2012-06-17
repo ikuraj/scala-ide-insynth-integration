@@ -3,8 +3,11 @@ import ch.epfl.insynth.reconstruction.IntermediateTransformer
 import ch.epfl.insynth.reconstruction.CodeGenerator
 import ch.epfl.insynth.combinator.Combinator
 import ch.epfl.insynth.env.SimpleNode
+import ch.epfl.insynth.env.FormatNode
 
 object CodeGenTest {
+  
+  implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
 
   def main(args: Array[String]): Unit = {
     parametrizedTreeReconstruct(TreeExample.buildTreeWithCurryingFunctions)

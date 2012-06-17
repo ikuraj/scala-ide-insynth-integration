@@ -3,8 +3,13 @@ import ch.epfl.insynth.reconstruction.IntermediateTransformer
 import ch.epfl.insynth.combinator.Combinator
 import ch.epfl.insynth.env.Node
 import ch.epfl.insynth.env.SimpleNode
+import ch.epfl.insynth.env.FormatNode
+import ch.epfl.insynth.combinator.FormatPrNode
 
 object IntermediateReconstructionTest {
+  
+  implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
+  implicit def toPrFormatNode(sn: ch.epfl.insynth.combinator.Node) = FormatPrNode(sn)
 
   def main(args: Array[String]): Unit = {
     val tests =      

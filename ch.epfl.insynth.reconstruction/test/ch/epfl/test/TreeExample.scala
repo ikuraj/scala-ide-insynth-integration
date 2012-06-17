@@ -3,6 +3,8 @@ package ch.epfl.test
 import ch.epfl.insynth.env._
 import ch.epfl.scala.trees._
 import ch.epfl.insynth.trees.{ Const=>InSynthConst, Type=>InSynthType, _ }
+import scala.collection.mutable.{ Map => MutableMap }
+import scala.collection.mutable.{ Set => MutableSet }
 
 object TreeExample {
 	val fullNameClassA = "some.package.A"
@@ -27,7 +29,7 @@ object TreeExample {
 	private implicit def scalaTypeToInSynthType(t: ScalaType): InSynthType = transform(t)
 	
 	// this **** can't work....
-	type NodeMap = Map[InSynthType, ContainerNode]
+	type NodeMap = scala.collection.mutable.Map[ScalaType, Node]
 
 	def main(args: Array[String]): Unit = {
 	  buildSimpleTree
@@ -88,16 +90,16 @@ object TreeExample {
 	  // XXX Unit→String is not the same as ()→String
 	  // goal:String, type:A→String
 	  // expression: m4(this):String
-	  val getStringNode = SimpleNode(
+	  val getStringNode = new SimpleNode(
 	    m4Declaration,
-	    Map(
+	    MutableMap(
           // I will get object of class A from
           transform(objectA) ->
-	  	  ContainerNode(
-	  		  Set(
-	  		      SimpleNode(
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
   		    		  objectADeclaration,
-  		    		  Map() // this is the end, no further nodes
+  		    		  MutableMap() // this is the end, no further nodes
   		          )
   		      )
 	        )
@@ -107,12 +109,12 @@ object TreeExample {
       // goal:Bottom, type:String→⊥
       // expression: query(m4(this, Unit)):⊥
 	  val query = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      InSynthConst("String") ->
-	  	      ContainerNode(
-	  	          Set(getStringNode)
+	  	      new ContainerNode(
+	  	          MutableSet(getStringNode)
 	            )
 	        ) 
 	    )
@@ -217,59 +219,59 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************
 	  
-	  // XXX found out that there is a non-needed redundancy, ContainerNode type
+	  // XXX found out that there is a non-needed redundancy, new ContainerNode type
 	  // is actually not needed?
 	  
 	  // goal:ClassA object, type:ClassA
 	  // expression: this	  
-	  val thisNode = SimpleNode(
-	      objectADeclaration, Map()
+	  val thisNode = new SimpleNode(
+	      objectADeclaration, MutableMap()
       )
 	    
 	  // goal:Char, type:Unit→Char
 	  // expression: m4(this)	  
-	  val m4Node = SimpleNode(
+	  val m4Node = new SimpleNode(
 	      m4Declaration,
-	      Map(
-	          transform(objectA) -> ContainerNode(Set(thisNode))
+	      MutableMap(
+	          transform(objectA) -> new ContainerNode(MutableSet(thisNode))
           )
       )
       
       // goal:(Int→String), type:(Int→String)
 	  // expression: m2(this)
-	  val m2Node = SimpleNode(
+	  val m2Node = new SimpleNode(
 	      m2Declaration,
-	      Map(
-	          transform(objectA) -> ContainerNode(Set(thisNode)),
+	      MutableMap(
+	          transform(objectA) -> new ContainerNode(MutableSet(thisNode)),
 	          transform(typeInt) ->
-	          	ContainerNode(Set(SimpleNode(
+	          	new ContainerNode(MutableSet(new SimpleNode(
 	          	    { 
 	          	      val dec = new Declaration(typeInt); dec.setIsApply(true); dec	          	    	
-	          	    }, Map.empty
+	          	    }, MutableMap.empty
           	    )))
           )
       )      
       
       // goal:String, type:(A→String)
 	  // expression: m6(this)
-	  val m6Node = SimpleNode(
+	  val m6Node = new SimpleNode(
 	      m6Declaration,
-	      Map(
-	          transform(objectA) -> ContainerNode(Set(thisNode))
+	      MutableMap(
+	          transform(objectA) -> new ContainerNode(MutableSet(thisNode))
           )
       )
             
       // goal: Long, type:(Int→Long)
 	  // expression: m5(this, _)
-	  val m5Node = SimpleNode(
+	  val m5Node = new SimpleNode(
 	      m5Declaration,
-	      Map(
-	          transform(objectA) -> ContainerNode(Set(thisNode)),
-	          transform(typeInt) -> ContainerNode( 
-	          	Set( SimpleNode(
+	      MutableMap(
+	          transform(objectA) -> new ContainerNode(MutableSet(thisNode)),
+	          transform(typeInt) -> new ContainerNode( 
+	          	MutableSet( new SimpleNode(
 	          	    { 
 	          	      val dec = new Declaration(typeInt); dec.setIsApply(true); dec	          	    	
-	          	    }, Map.empty
+	          	    }, MutableMap.empty
           	    ) )
 	          )
           )
@@ -277,11 +279,11 @@ object TreeExample {
       
       // goal:(Int→String), type:(Long→String)
 	  // expression: Int => m3(this, m5(this, _))
-	  val composeNode = SimpleNode(
+	  val composeNode = new SimpleNode(
 	      m3Declaration,
-	      Map(
-	          transform(objectA) -> ContainerNode(Set(thisNode)),
-	          transform(typeLong) -> ContainerNode(Set(m5Node))
+	      MutableMap(
+	          transform(objectA) -> new ContainerNode(MutableSet(thisNode)),
+	          transform(typeLong) -> new ContainerNode(MutableSet(m5Node))
           )
       )
 	    
@@ -289,15 +291,15 @@ object TreeExample {
 	  // expression: m1(this, 
       //				m2(this) |  m3(this) ∘ m5(this) | Int→m6(this), 
 	  //				m4(this))	  
-	  val m1Node = SimpleNode(
+	  val m1Node = new SimpleNode(
 	      m1Declaration,
-	      Map(
-	          transform(typeChar) -> ContainerNode(Set(m4Node)),
+	      MutableMap(
+	          transform(typeChar) -> new ContainerNode(MutableSet(m4Node)),
 	          transform(Function(typeInt, typeString)) ->
-	          	ContainerNode( 
-	          	    Set(composeNode, m2Node, m6Node)
+	          	new ContainerNode( 
+	          	    MutableSet(composeNode, m2Node, m6Node)
           	    ),
-	          transform(objectA) -> ContainerNode(Set(thisNode))
+	          transform(objectA) -> new ContainerNode(MutableSet(thisNode))
           )
       )
 	  
@@ -306,12 +308,12 @@ object TreeExample {
 	  //			m2(this) |  m3(this) ∘ m5(this) | Int→m6(this), 
 	  //			m4(this)	)):⊥
 	  val queryNode = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(typeBoolean) ->
-	  	      ContainerNode(
-	  	          Set(m1Node)
+	  	      new ContainerNode(
+	  	          MutableSet(m1Node)
 	            )
 	        ) 
 	    )
@@ -380,7 +382,7 @@ object TreeExample {
 	      fullNameClassA + ".m1",
 	      // XXX
 	      m1,
-	      //Arrow(TSet(objectA), Function(List(typeInt, typeInt), typeChar)),
+	      //Arrow(TMutableSet(objectA), Function(List(typeInt, typeInt), typeChar)),
 	      m1
 	  )
 	  val m2Declaration = Declaration(
@@ -416,58 +418,58 @@ object TreeExample {
 	  
 	  // goal:A, type: A
 	  // expression: d.fullname
-	  val thisNode = SimpleNode(
+	  val thisNode = new SimpleNode(
 	      objectADeclaration,
-	      Map()
+	      MutableMap()
       )
       
       // goal:Int, type:Int
 	  // expression: A.intVal	  
-	  val intValNode = SimpleNode(
+	  val intValNode = new SimpleNode(
 	      intValDeclaration,
-	      Map()
+	      MutableMap()
       )
 	  
 	  // goal:(Int→Char), type:A→Int→Char
 	  // expression: (Int,Int) → m1(this)(_, _)	  
-	  val m1Node = SimpleNode(
+	  val m1Node = new SimpleNode(
 	      m1Declaration,
-	      Map(
-	          transform(objectA) -> ContainerNode(Set(thisNode)),
-	          transform(typeInt) -> ContainerNode(
-	              Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode))
+	      MutableMap(
+	          transform(objectA) -> new ContainerNode(MutableSet(thisNode)),
+	          transform(typeInt) -> new ContainerNode(
+	              MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode))
           )
       )
       
       // goal:(Int→Char), type:(Int→Char)
 	  // expression: d.fullName ("outside")	  
-	  val outsideNode = SimpleNode(
+	  val outsideNode = new SimpleNode(
 	      outsideDeclaration,
-	      Map(
-	          transform(typeInt) -> ContainerNode(
-	              Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode))
+	      MutableMap(
+	          transform(typeInt) -> new ContainerNode(
+	              MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode))
           )
       )
       
       // goal:(Char), type:(A→Char)
 	  // expression: (Int,Int)→m3(A)	  
-	  val m3Node = SimpleNode(
+	  val m3Node = new SimpleNode(
 	      m3Declaration,
-	      Map(
+	      MutableMap(
 	        transform(objectA) -> 
-	          ContainerNode(Set(thisNode))
+	          new ContainerNode(MutableSet(thisNode))
           )
       )
       
       // goal:(Int→Char), type:((Int,A)→Char)
 	  // expression: (Int, Int) → m2(this, _, _)	  
-	  val m2Node = SimpleNode(
+	  val m2Node = new SimpleNode(
 	      m2Declaration,
-	      Map(
+	      MutableMap(
 	        transform(typeInt) -> 
-        	  ContainerNode(Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode)),
+        	  new ContainerNode(MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode)),
 	        transform(objectA) ->
-        	  ContainerNode(Set(thisNode))
+        	  new ContainerNode(MutableSet(thisNode))
           )
       )     
 	  
@@ -478,12 +480,12 @@ object TreeExample {
       //	(Int,Int) -> m3(this) | outside
       //					):⊥
 	  val queryNode = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(Function(List(typeInt, typeInt), typeChar)) ->
-	  	      ContainerNode(
-	  	          Set(m1Node, outsideNode, m2Node, m3Node)
+	  	      new ContainerNode(
+	  	          MutableSet(m1Node, outsideNode, m2Node, m3Node)
 	            )
 	        ) 
 	    )
@@ -588,58 +590,58 @@ object TreeExample {
 	  
 	  // goal:A, type: A
 	  // expression: d.fullname
-	  val thisNode = SimpleNode(
+	  val thisNode = new SimpleNode(
 	      objectADeclaration,
-	      Map()
+	      MutableMap()
       )
       
       // goal:Int, type:Int
 	  // expression: A.intVal	  
-	  val intValNode = SimpleNode(
+	  val intValNode = new SimpleNode(
 	      intValDeclaration,
-	      Map()
+	      MutableMap()
       )
 	  
 	  // goal:(Int→Char), type:A→Int→Char
 	  // expression: (Int,Int) → m1(this)(_, _)	  
-	  val m1Node = SimpleNode(
+	  val m1Node = new SimpleNode(
 	      m1Declaration,
-	      Map(
-	          transform(objectA) -> ContainerNode(Set(thisNode)),
-	          transform(typeInt) -> ContainerNode(
-	              Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode))
+	      MutableMap(
+	          transform(objectA) -> new ContainerNode(MutableSet(thisNode)),
+	          transform(typeInt) -> new ContainerNode(
+	              MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode))
           )
       )
       
       // goal:(Int→Char), type:(Int→Char)
 	  // expression: d.fullName ("outside")	  
-	  val outsideNode = SimpleNode(
+	  val outsideNode = new SimpleNode(
 	      outsideDeclaration,
-	      Map(
-	          transform(typeInt) -> ContainerNode(
-	              Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode))
+	      MutableMap(
+	          transform(typeInt) -> new ContainerNode(
+	              MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode))
           )
       )
       
       // goal:(Char), type:(A→Char)
 	  // expression: (Int,Int)→m3(A)	  
-	  val m3Node = SimpleNode(
+	  val m3Node = new SimpleNode(
 	      m3Declaration,
-	      Map(
+	      MutableMap(
 	        transform(objectA) -> 
-	          ContainerNode(Set(thisNode))
+	          new ContainerNode(MutableSet(thisNode))
           )
       )
       
       // goal:(Int→Char), type:((Int,A)→Char)
 	  // expression: (Int, Int) → m2(this, _, _)	  
-	  val m2Node = SimpleNode(
+	  val m2Node = new SimpleNode(
 	      m2Declaration,
-	      Map(
+	      MutableMap(
 	        transform(typeInt) -> 
-        	  ContainerNode(Set(SimpleNode(leafIntDeclaration, Map.empty), intValNode)),
+        	  new ContainerNode(MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode)),
 	        transform(objectA) ->
-        	  ContainerNode(Set(thisNode))
+        	  new ContainerNode(MutableSet(thisNode))
           )
       )     
 	  
@@ -650,12 +652,12 @@ object TreeExample {
       //	(Int,Int) -> m3(this) | outside
       //					):⊥
 	  val queryNode = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(Function(List(typeInt, typeInt), typeChar)) ->
-	  	      ContainerNode(
-	  	          Set(m1Node, outsideNode, m2Node, m3Node)
+	  	      new ContainerNode(
+	  	          MutableSet(m1Node, outsideNode, m2Node, m3Node)
     		  )
 	        ) 
 	    )
@@ -686,7 +688,7 @@ object TreeExample {
 	    typeBottom
 	  )
 	  
-	  val intLeafNode = SimpleNode(new Declaration(typeInt), Map.empty)
+	  val intLeafNode = new SimpleNode(new Declaration(typeInt), MutableMap.empty)
 	  	  	  
 	  //************************************
 	  // Declarations
@@ -704,11 +706,11 @@ object TreeExample {
       
       // goal:(Int→Char, Int)→Char, type:Char
 	  // expression: (Int, Int) → m2(this, _, _)	  
-	  val absNode = SimpleNode(
+	  val absNode = new SimpleNode(
 	      new Declaration(Function(typeInt, typeChar)),
-	      Map(
+	      MutableMap(
 	        transform(typeInt) -> 
-        	  ContainerNode(Set(intLeafNode))
+        	  new ContainerNode(MutableSet(intLeafNode))
           )
       )     
 	  
@@ -717,12 +719,12 @@ object TreeExample {
       //	(Int→Char, Int) -> _(_)
       //					):⊥
 	  val queryNode = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(Function(List(Function(typeInt, typeChar), typeInt), typeChar)) ->
-	  	      ContainerNode(
-	  	          Set(absNode)
+	  	      new ContainerNode(
+	  	          MutableSet(absNode)
 	            )
 	        ) 
 	    )
@@ -776,29 +778,29 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************	
       
-	  val intLeafNode = SimpleNode(new Declaration(typeInt), Map.empty)
+	  val intLeafNode = new SimpleNode(new Declaration(typeInt), MutableMap.empty)
 	  
       // TODO
       // goal:(Int→Char, Int)→Char, type:Char
 	  // expression: (Int, Int) → m2(this, _, _)	????  
-	  val absNode2 = SimpleNode(
+	  val absNode2 = new SimpleNode(
 	      new Declaration(Function(List(typeInt), typeChar)),
-	      Map(
+	      MutableMap(
 	        transform(typeInt) -> 
-        	  ContainerNode(Set(intLeafNode))     	  
+        	  new ContainerNode(MutableSet(intLeafNode))     	  
           )
       )     
 	    
       // TODO
       // goal:(Int→Char, Int)→Char, type:Char
 	  // expression: (Int, Int) → m2(this, _, _)	????  
-	  val absNode1 = SimpleNode(
+	  val absNode1 = new SimpleNode(
 	      new Declaration(Function(typeInt, Function(typeChar, typeString))),
-	      Map(
+	      MutableMap(
 	        transform(typeInt) -> 
-        	  ContainerNode(Set(intLeafNode)),
+        	  new ContainerNode(MutableSet(intLeafNode)),
         	transform(typeChar) ->
-        	  ContainerNode(Set(absNode2))        	  
+        	  new ContainerNode(MutableSet(absNode2))        	  
           )
       )     
 
@@ -808,12 +810,12 @@ object TreeExample {
       //	(Int→Char, Int) -> _(_)
       //					):⊥????
 	  val queryNode = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(sKombType) ->
-	  	      ContainerNode(
-	  	          Set(absNode1)
+	  	      new ContainerNode(
+	  	          MutableSet(absNode1)
 	            )
 	        ) 
 	    )
@@ -892,32 +894,32 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************
 	  	  
-	  val thisNode = SimpleNode(
+	  val thisNode = new SimpleNode(
 	      objectADeclaration,
-	      Map()
+	      MutableMap()
       )
 	  
 	  // goal:String, type:String, →B
 	  // expression: new (this.m(), this.bla)
-	  val getBNode = SimpleNode(
+	  val getBNode = new SimpleNode(
 	    constructBDeclaration,
-	    Map(
+	    MutableMap(
           // I will get object of class A from
           transform(typeString) ->
-	  	  ContainerNode(
-	  		  Set(
-	  		      SimpleNode(
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
   		    		  mDeclaration,
-  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))
+  		    		  MutableMap( transform(objectA) -> new ContainerNode(MutableSet( thisNode )))
   		          )
   		      )
 	        ),
           transform(typeInt) ->
-	  	  ContainerNode(
-	  		  Set(
-	  		      SimpleNode(
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
   		    		  intValDeclaration,
-  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))  		    		  
+  		    		  MutableMap( transform(objectA) -> new ContainerNode(MutableSet( thisNode )))  		    		  
   		          )
   		      )
 	        )
@@ -927,12 +929,12 @@ object TreeExample {
       // goal:Bottom, type:B→⊥
       // expression: query(new (this.m(), this.bla)):⊥
 	  val query = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(objectB) ->
-	  	      ContainerNode(
-	  	          Set(getBNode)
+	  	      new ContainerNode(
+	  	          MutableSet(getBNode)
 	            )
 	        ) 
 	    )
@@ -999,38 +1001,38 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************
 	  	  
-	  val thisNode = SimpleNode(
+	  val thisNode = new SimpleNode(
 	      objectADeclaration,
-	      Map()
+	      MutableMap()
       )
       
-      val intNode = SimpleNode(
+      val intNode = new SimpleNode(
           intValDeclaration,
-          Map()
+          MutableMap()
       )
 	  
-	  val getStringNode = SimpleNode(
+	  val getStringNode = new SimpleNode(
 	    mDeclaration,
-	    Map(
+	    MutableMap(
           // I will get object of class A from
           transform(typeInt) ->
-	  	  ContainerNode(
-	  		  Set(intNode)
+	  	  new ContainerNode(
+	  		  MutableSet(intNode)
 	        ),
           transform(objectA) ->
-	  	  ContainerNode(
-	  		  Set(thisNode)
+	  	  new ContainerNode(
+	  		  MutableSet(thisNode)
 	        )
 	      )
 	    )
 	  
 	  val query = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(typeString) ->
-	  	      ContainerNode(
-	  	          Set(getStringNode)
+	  	      new ContainerNode(
+	  	          MutableSet(getStringNode)
 	            )
 	        ) 
 	    )
@@ -1057,7 +1059,7 @@ object TreeExample {
 	  val queryType = Function(typeInt, typeBottom)
 	  
 	  // NOTE InSynth query type:
-	  // Arrow(TSet(List(typeInt)),Const($Bottom_Type_Just_For_Resolution$))
+	  // Arrow(TMutableSet(List(typeInt)),Const($Bottom_Type_Just_For_Resolution$))
 	  
 	  //************************************
 	  // Declarations
@@ -1087,39 +1089,41 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************
 	  	        
-      val intNode = SimpleNode(
+      val intNode = new SimpleNode(
           intValDeclaration,
-          Map()
+          MutableMap()
       )
 	  
-	  lazy val getIntNode:SimpleNode = SimpleNode(
+	  val getIntNode:SimpleNode = new SimpleNode(
 	    fDeclaration,
-	    Map(
-          transform(typeInt) ->
-	  	  ContainerNode(
-	  		  Set(intNode, getIntNode)
-	        )
-	    )
+	    MutableMap()
 	  )
 	  
-//	  lazy val getIntNodeRec = SimpleNode(
+	  getIntNode.getParams +=
+	    (
+          transform(typeInt) ->
+	  	  new ContainerNode(
+	  		  MutableSet(intNode, getIntNode)
+	        )
+	    )
+	  
+//	  lazy val getIntNodeRec = new SimpleNode(
 //	    fDeclaration,
-//	    Map(
+//	    MutableMap(
 //          transform(typeInt) ->
-//	  	  ContainerNode(
-//	  		  Set(getIntNode)
+//	  	  new ContainerNode(
+//	  		  MutableSet(getIntNode)
 //	        )
 //	    )
 //	  )
-	  
-	  
+	  	  
 	  val query = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(typeInt) ->
-	  	      ContainerNode(
-	  	          Set(getIntNode)
+	  	      new ContainerNode(
+	  	          MutableSet(getIntNode)
 	            )
 	        ) 
 	    )
@@ -1206,42 +1210,42 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************
 	  	  
-	  val thisNode = SimpleNode(
+	  val thisNode = new SimpleNode(
 	      objectADeclaration,
-	      Map()
+	      MutableMap()
       )
 	  
-	  val m1Node = SimpleNode(
+	  val m1Node = new SimpleNode(
 	    m1Declaration,
-	    Map(
+	    MutableMap(
           transform(objectA) ->
-	  	  ContainerNode(
-	  		  Set( thisNode )
+	  	  new ContainerNode(
+	  		  MutableSet( thisNode )
 	        ),
           transform(typeInt) ->
-	  	  ContainerNode(
-	  		  Set(
-	  		      SimpleNode(
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
   		    		  intFieldDeclaration,
-  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))  		    		  
+  		    		  MutableMap( transform(objectA) -> new ContainerNode(MutableSet( thisNode )))  		    		  
   		          )
   		      )
 	        ),
           transform(typeFloat) ->
-	  	  ContainerNode(
-	  		  Set(
-	  		      SimpleNode(
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
   		    		  floatFieldDeclaration,
-  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))  		    		  
+  		    		  MutableMap( transform(objectA) -> new ContainerNode(MutableSet( thisNode )))  		    		  
   		          )
   		      )
 	        ),
           transform(typeChar) ->
-	  	  ContainerNode(
-	  		  Set(
-	  		      SimpleNode(
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
   		    		  m2Declaration,
-  		    		  Map( transform(objectA) -> ContainerNode(Set( thisNode )))  		    		  
+  		    		  MutableMap( transform(objectA) -> new ContainerNode(MutableSet( thisNode )))  		    		  
   		          )
   		      )
 	        )
@@ -1251,12 +1255,12 @@ object TreeExample {
       // goal:Bottom, type:B→⊥
       // expression: query(new (this.m(), this.bla)):⊥
 	  val query = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(typeString) ->
-	  	      ContainerNode(
-	  	          Set(m1Node)
+	  	      new ContainerNode(
+	  	          MutableSet(m1Node)
 	            )
 	        ) 
 	    )
@@ -1300,23 +1304,124 @@ object TreeExample {
 	  // InSynth proof trees
 	  //************************************
 	  	  	  
-	  val intLeafNode = SimpleNode(new Declaration(typeInt), Map.empty)
+	  val intLeafNode = new SimpleNode(new Declaration(typeInt), MutableMap.empty)
 
-	  val absNode = SimpleNode(
+	  val absNode = new SimpleNode(
 	      new Declaration(Function(typeInt, typeInt)),
-	      Map(
+	      MutableMap(
 	        transform(typeInt) -> 
-        	  ContainerNode(Set(intLeafNode))      	  
+        	  new ContainerNode(MutableSet(intLeafNode))      	  
           )
       )     
 	  
 	  val query = 
-	    SimpleNode(
+	    new SimpleNode(
 	  	  queryDeclaration,
-	  	  Map( // for each parameter type - how can we resolve it
+	  	  MutableMap( // for each parameter type - how can we resolve it
 	  	      transform(Function(typeInt, typeInt)) ->
-	  	      ContainerNode(
-	  	          Set(intLeafNode)
+	  	      new ContainerNode(
+	  	          MutableSet(intLeafNode)
+	            )
+	        ) 
+	    )
+	    
+	  query
+	}
+
+	/**
+	 * Constructs a simple tree which has constructor with no parameters in two contexts
+	 * should output parentheses only in one case
+	 */
+	def buildTreeWithConstructors = {
+	  //************************************
+	  // Goals
+	  //	find expression of type: String
+	  //	expression: query(f(new A().f, new A))
+	  //************************************
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // class A { ... }
+	  val objectA = Const("A")		
+	  // constructor A()
+	  val constructA = Method(null, List(), objectA)
+	  // def f(Int, A): String	  
+	  val f = Function(List(typeInt, objectA), typeString)
+	  // int field
+	  val intField = Method(objectA, List(), typeInt)
+	  // query: String → ⊥
+	  val queryType = Function(typeString, typeBottom)
+	  
+	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	  	  
+	  val fDeclaration = new Declaration(
+	      "some.package.A.f", // full name
+	      transform(f), // inSynth type
+	      f // scala type
+	    )		
+	  fDeclaration.setIsMethod(false)
+	  fDeclaration.setIsThis(false)
+	  
+	  val constructADeclaration = new Declaration(
+	      "some.package.A", constructA, constructA
+      )
+	  constructADeclaration.setIsConstructor(true)
+	  	  
+	  val intValDeclaration = Declaration(
+	      "A.intVal",
+	      intField, intField
+      )	 
+      intValDeclaration.setIsField(true)
+	  intValDeclaration.setIsThis(false)
+	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      transform(queryType),
+	      queryType
+	    )	  
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  	              
+	  val constructANode = new SimpleNode( 
+	      constructADeclaration,
+	      MutableMap()
+      )
+      
+	  val getStringNode = new SimpleNode(
+	    fDeclaration,
+	    MutableMap(
+          transform(objectA) ->
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      constructANode
+  		      )
+	        ),
+          transform(typeInt) ->
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
+  		    		  intValDeclaration,
+  		    		  MutableMap( transform(objectA) -> new ContainerNode(MutableSet( constructANode )))  		    		  
+  		          )
+  		      )
+	        )
+	      )
+	    )
+	  
+	  val query = 
+	    new SimpleNode(
+	  	  queryDeclaration,
+	  	  MutableMap(
+	  	      transform(typeString) ->
+	  	      new ContainerNode(
+	  	          MutableSet(getStringNode)
 	            )
 	        ) 
 	    )

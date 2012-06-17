@@ -13,11 +13,13 @@ object ReconstructorTest {
         TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
         TreeExample.buildTreeAbsApplication,
         TreeExample.buildTreeArrowType,
-        /*TreeExample.buildTreeCycles, */TreeExample.buildTreeOverlapParameterTypeWithReturnType,
+        TreeExample.buildTreeCycles, 
+        TreeExample.buildTreeOverlapParameterTypeWithReturnType,        
         TreeExample.buildTreeSKombinator, 
           TreeExample.buildTreeWithCurryingFunctions,
         TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
-        TreeExample.buildTreeIdentityFunction
+        TreeExample.buildTreeIdentityFunction,
+        TreeExample.buildTreeWithConstructors
       )
     
     for (tree <- tests )

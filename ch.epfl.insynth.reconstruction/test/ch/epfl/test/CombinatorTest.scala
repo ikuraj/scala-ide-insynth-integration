@@ -1,36 +1,42 @@
 package ch.epfl.test
 import ch.epfl.insynth.combinator.Combinator
+import ch.epfl.insynth.combinator.FormatPrNode
 import ch.epfl.insynth.env.SimpleNode
-import ch.epfl.insynth.env.SimpleNode
+import ch.epfl.insynth.env.FormatNode
 
 object CombinatorTest {
+  
+  implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
+  implicit def toPrFormatNode(sn: ch.epfl.insynth.combinator.Node) = FormatPrNode(sn)
 
   def main(args: Array[String]): Unit = {
-    val tests =      
-      Array(
+//    val tests =      
+//      Array(
 //        TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
 //        TreeExample.buildTreeAbsApplication, TreeExample.buildTreeArrowType,
-//        /*TreeExample.buildTreeCycles, */TreeExample.buildTreeOverlapParameterTypeWithReturnType,
+//          TreeExample.buildTreeOverlapParameterTypeWithReturnType,
 //        TreeExample.buildTreeSKombinator, TreeExample.buildTreeWithCurryingFunctions,
 //        TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
-        TreeExample.buildTreeIdentityFunction
-      )
-    
-    for (tree <- tests )
-      parametrizedCombine(tree) 
+//        TreeExample.buildTreeIdentityFunction
+//      )
+//    
+//    for (tree <- tests )
+//      parametrizedCombine(tree) 
+          cycleTreeCombine
   }
   
   def parametrizedCombine(sn: SimpleNode) = {
     println("original tree")
-    sn.println
+    FormatNode(sn).println
     println("combined tree")
-    Combinator(sn).println
+    FormatPrNode(Combinator(sn)).println
   } 
   
   // XXX cannot still be instantiated according to the proof representation!
   def cycleTreeCombine = {
     println("combined cycle tree")
-    Combinator(TreeExample.buildTreeCycles).println
+    val cycleTree = TreeExample.buildTreeCycles
+    Combinator(cycleTree).println
   } 
   
   def simpleTreeCombine() = {
