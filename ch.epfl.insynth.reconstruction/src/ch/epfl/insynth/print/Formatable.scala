@@ -27,6 +27,9 @@ object FormatHelpers {
   
   def paren(d: Document): Document =
     group("(" :: d :: ")")
+    
+  def brackets(d: Document): Document =
+    group("{" :/: d :/: "}")
 	
   def nestedParen(d: Document): Document =
     group("(" :: nest(1, break :: d) :/: ")")
