@@ -35,7 +35,11 @@ case class ContainerNode(var nodes:Set[Node]) {
   def getNodes = nodes
 }
 
-case class FormatPrNode(node: Node) extends ch.epfl.insynth.print.Formatable {
+object FormatPrNode {
+    def apply(node: Node) = new FormatPrNode(node: Node)
+}
+
+class FormatPrNode(node: Node) extends ch.epfl.insynth.print.Formatable {
   def toDocument = toDocument(node)
   
   def toDocument(node: Any): scala.text.Document = {
