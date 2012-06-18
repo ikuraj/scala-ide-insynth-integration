@@ -30,9 +30,12 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
     // logging
     logApply.entering(getClass.getName, "apply")
     logApply.info("Entering combinator step (root: "+ FormatNode(root) + ", combinations: " + neededCombinations)
-    
+        
     // import transformer from InSynth to intermediate declaration
     import DeclarationTransformer.fromInSynthDeclaration
+    
+    // reset so that pruning is not done
+    Rules.doPruning = false
     
     // TODO change this temporary weight for leaves
     val WeightForLeafs = 0.5d
@@ -74,6 +77,10 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
       
     	  // add explored declaration to its associated tree as explored
 	      currentDeclaration.getAssociatedTree addDeclaration(currentDeclaration)
+	      
+          // logging
+          logApply.fine("Adding expression " + currentDeclaration.toString + " to its tree")
+	      
 	      // check the type of the current declaration
 	      currentDeclaration match {
 	        // Composite represents a declaration with children 
@@ -108,6 +115,9 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	                    // new pair of simple expression and extended path
 	                    val newPair = 
 	                      (Simple(paramTree, fromInSynthDeclaration(dec), node), visited + c)
+	                      
+                        // logging
+	                    logApply.fine("Adding simple " + dec.getSimpleName + " to the queue")
                         // add new pair to the queue 
                     	pq += newPair
 	                  }	                
@@ -119,6 +129,9 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	                    // new pair of simple expression and extended path
 	                    val newPair = 
 	                      (Composite(paramTree, fromInSynthDeclaration(dec), node), visited + c)
+	                      	                      
+                        // logging
+	                    logApply.fine("Adding composite " + dec.getSimpleName + " to the queue")
                         // add new pair to the queue 
 	                    pq += newPair
 	                  }	                
@@ -144,7 +157,14 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
     logApply.exiting(getClass.getName, "apply")
       
     // return transformed pruned tree as a result
-    rootDeclaration.toTreeNode
+    val result = rootDeclaration.toTreeNode
+    
+    // log
+    logger.info("Returning from apply with result (reconstruction structures): " + FormatCombinations(rootDeclaration) )
+    logger.info("Returning from apply with result: " + FormatPrNode(result) )
+    logger.info("Number of combinations found: " + rootDeclaration.getNumberOfCombinations )
+    
+    result
   }
   
 }

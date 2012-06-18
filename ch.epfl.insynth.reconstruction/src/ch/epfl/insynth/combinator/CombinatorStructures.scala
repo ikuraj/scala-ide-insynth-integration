@@ -23,8 +23,8 @@ object Rules {
   
   {
     Logger.getLogger("reconstruction.combination").setLevel(Level.FINEST)
-//    Logger.getLogger("reconstruction.combination.apply").setLevel(Level.OFF)
-//    Logger.getLogger("reconstruction.combination.structures").setLevel(Level.FINEST)
+    Logger.getLogger("reconstruction.combination.apply").setLevel(Level.FINEST)
+    Logger.getLogger("reconstruction.combination.structures").setLevel(Level.FINEST)
   }
   
   var doPruning = false
@@ -256,6 +256,9 @@ extends Expression(origDecl.getWeight, associatedTree, associatedNode) {
       }
     )
   }
+  
+  override def toString =
+    "Composite(" + origDecl.getSimpleName + ")"
 }
 
 /**
@@ -278,6 +281,9 @@ extends Expression(origDecl.getWeight, associatedTree, associatedNode) {
   }
   
   override def isDone = !isPruned
+  
+  override def toString =
+    "Simple(" + origDecl.getSimpleName + ")"
 }
 
 /**
@@ -295,4 +301,34 @@ extends Expression(weight, associatedTree, associatedNode) {
   }
   
   override def isDone = !isPruned
+  
+  override def toString =
+    "LeafExpression"
+}
+
+case class FormatCombinations(comb: Combinations) extends ch.epfl.insynth.print.Formatable {
+  override def toDocument = toDocument(comb)
+  
+  def toDocument(comb: Combinations): scala.text.Document = {
+    import ch.epfl.insynth.print.FormatHelpers._
+    import scala.text.Document._
+
+    comb match {
+      case tree:Tree =>
+        "Tree" :: paren(FormatType(tree.tpe).toDocument) :/: 
+        "[Done?" :: tree.isDone.toString :: "]" :: 
+        nestedBrackets(
+          seqToDoc(tree.decls.toList, ", ", { e:Expression => toDocument(e) })
+        )
+        //associatedTree: Tree, origDecl: Declaration, associatedNode: InSynth.SimpleNode
+      case composite:Composite =>
+        "Composite" :: paren(composite.origDecl.getSimpleName) :/:
+        "[Done?" :: composite.isDone.toString :: "]" ::
+        nestedBrackets(seqToDoc(composite.children.toList, ", ", { e:Tree => toDocument(e) }))
+      case simple:Simple =>
+        "Simple" :: paren(simple.origDecl.getSimpleName)
+      case leaf:LeafExpression =>
+        "Leaf"
+    }
+  }
 }
