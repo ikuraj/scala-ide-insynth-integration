@@ -27,26 +27,43 @@ class ContainerNode(var nodes:Set[SimpleNode]) extends Node {
   def getNodes = nodes
 }
 
-case class FormatNode(node: Node) extends ch.epfl.insynth.print.Formatable {
-  override def toDocument = toDocument(node)
+case class FormatNode(node: Node, simple: Boolean = false) extends ch.epfl.insynth.print.Formatable {
+  override def toDocument = toDocument(node, Set.empty)
   
-  def toDocument(node: Node): scala.text.Document = {
+  def toDocument(node: Node, visited: Set[Node]): scala.text.Document = {
     import ch.epfl.insynth.print.FormatHelpers._
+    import scala.text.Document._
 
+    if (!simple)
     node match {
       case sn:SimpleNode =>
         "SimpleNode" :: nestedBrackets(
-            seqToDoc(sn.getDecls, ",", { d:Declaration => strToDoc(d.getSimpleName) })
-//            :/:
-//            seqToDoc(map.toList, ",", 
-//              { 
-//            	p:(Type, ContainerNode) => paren(p._1.toDocument) :: "->" ::
-//            	nestedBrackets(p._2.toDocument)
-//              }
-//            )
+            "decls: " :/: nestedBrackets(seqToDoc(sn.getDecls, ",", { d:Declaration => strToDoc(d.getSimpleName) }))
+            :/:
+            "params: " :: break :: seqToDoc(sn.getParams.toList, ",", 
+              { 
+            	p:(Type, ContainerNode) => FormatType(p._1).toDocument :: "->" ::
+            	nestedBrackets(toDocument(p._2, visited + node))
+              }
+            )
         )
       case cn:ContainerNode =>
-        nestedBrackets(seqToDoc(cn.getNodes.toList, ",", toDocument(_:Node)))        
+        nestedBrackets(seqToDoc(cn.getNodes.toList, ",", 
+        { sn:SimpleNode => 
+          	if (visited contains sn) 
+      		  "already visited (" :: sn.getDecls.head.getSimpleName :: ")"
+      		else
+      		  toDocument(sn, visited)
+        }
+        ))        
+    }
+    
+    else 
+    node match {
+      case sn:SimpleNode =>
+        "SimpleNode" :: paren(sn.getDecls.head.getSimpleName)
+      case cn:ContainerNode =>
+        "Container" :: paren(cn.getNodes.size)  
     }
   }
 }
