@@ -70,11 +70,11 @@ extends Combinations with Ordered[Expression] {
   def toTreeNode:Node
   
   // for set operations
-  override def equals(o: Any) = o match {
-    case that: Expression => that.getAssociatedNode.equals(this.getAssociatedNode)
-    case _ => false
-  }
-  override def hashCode = getAssociatedNode.hashCode
+//  override def equals(o: Any) = o match {
+//    case that: Expression => that.getAssociatedNode.equals(this.getAssociatedNode)
+//    case _ => false
+//  }
+//  override def hashCode = getAssociatedNode.hashCode
 } 
 
 //case class TopMostDeclaration(var rootTree: Tree)
@@ -96,7 +96,7 @@ extends Combinations
   // larger weight)
   var minWeight = Double.MaxValue
   
-  def addDeclaration(dec: Expression){
+  def addDeclaration(dec: Expression) {
     decls += dec
   }
   def getDeclarations:Set[Expression] = decls
@@ -194,7 +194,7 @@ extends Expression(origDecl.getWeight, associatedTree, associatedNode) {
     // NOTE we can get a call to childDone again but minWeight will be the same as
     // previously set getWeight (we need >)
     if (Rules.doPruning && getWeight > associatedTree.minWeight && !isPruned) {
-    	Rules.logger.info("Pruning Composite (" + FormatNode(associatedNode) + ")")
+    	Rules.logger.info("Pruning Composite (" + FormatNode(associatedNode, true) + ")")
     	setPruned(true)
     	// do not add done child up the hierarchy
     }

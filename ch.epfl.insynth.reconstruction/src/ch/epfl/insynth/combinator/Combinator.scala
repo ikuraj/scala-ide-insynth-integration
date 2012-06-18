@@ -15,7 +15,7 @@ import java.util.logging.Level
 object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
   
   val logger = Rules.logger
-  val logApply = Logger.getLogger(logger.getName + ".apply")
+  val logApply = Logger.getLogger("reconstruction.combination.apply")//(logger.getName + ".apply")
   
   // predefined default number of combinations
   val predefinedNeededCombinations = 5
@@ -42,7 +42,7 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
       
     // pair type that will be put in the priority queue
     // ( expression to be explored, a set of expressions visited on the path )
-    type ExpressionPair = (Expression, Set[Expression])
+    type ExpressionPair = (Expression, Set[InSynth.Node])
     // priority queue
     var pq = new PriorityQueue[ExpressionPair]() (
       // ordering defined on the expressions  
@@ -58,7 +58,7 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
     /* start the traversal */
     
     // add the root declaration and an empty set
-    val startTuple = (rootDeclaration, Set[Expression]())
+    val startTuple = (rootDeclaration, Set[InSynth.Node]())
     pq += startTuple
     
     // while there is something in the queue
@@ -67,19 +67,21 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
       val (currentDeclaration, visited) = pq.dequeue
       
       // if current declaration is pruned or already visited on this path, log
-      if (currentDeclaration.isPruned)
-        logApply.fine("Declaration with " + FormatNode(currentDeclaration.getAssociatedNode) + " pruned")
-      if (visited.contains(currentDeclaration))
-        logApply.info("Stumbled upon a cycle (discarding the node: " + FormatNode(currentDeclaration.getAssociatedNode) + ")")
+      if (currentDeclaration.isPruned) {
+        logApply.fine("Declaration with " + FormatNode(currentDeclaration.getAssociatedNode, true) + " pruned")
+      }
+      if (visited.contains(currentDeclaration.getAssociatedNode)) {
+        logApply.info("Stumbled upon a cycle (discarding the node: " + FormatNode(currentDeclaration.getAssociatedNode, true) + ")")
+      }
         
       // if current declaration is pruned or already visited on this path, ignore it
-      if (!visited.contains(currentDeclaration) && !currentDeclaration.isPruned) {
+      if (!visited.contains(currentDeclaration.getAssociatedNode) && !currentDeclaration.isPruned) {
       
     	  // add explored declaration to its associated tree as explored
 	      currentDeclaration.getAssociatedTree addDeclaration(currentDeclaration)
 	      
           // logging
-          logApply.fine("Adding expression " + currentDeclaration.toString + " to its tree")
+          logApply.info("Adding expression " + currentDeclaration.toString + " to its tree")
 	      
 	      // check the type of the current declaration
 	      currentDeclaration match {
@@ -114,7 +116,10 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	                    
 	                    // new pair of simple expression and extended path
 	                    val newPair = 
-	                      (Simple(paramTree, fromInSynthDeclaration(dec), node), visited + c)
+	                      (
+                            Simple(paramTree, fromInSynthDeclaration(dec), node),
+                            visited + c.getAssociatedNode
+                		  )
 	                      
                         // logging
 	                    logApply.fine("Adding simple " + dec.getSimpleName + " to the queue")
@@ -128,7 +133,10 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	                  for (dec <- decls) {
 	                    // new pair of simple expression and extended path
 	                    val newPair = 
-	                      (Composite(paramTree, fromInSynthDeclaration(dec), node), visited + c)
+	                      (
+                            Composite(paramTree, fromInSynthDeclaration(dec), node), 
+	                        visited + c.getAssociatedNode
+                		  )
 	                      	                      
                         // logging
 	                    logApply.fine("Adding composite " + dec.getSimpleName + " to the queue")
@@ -150,10 +158,12 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
       }
     }
     
-    if (rootDeclaration.isPruned)
-      logger.log(Level.SEVERE, "Root declaration is pruned!")      
-    if (!rootDeclaration.isDone)
+    if (rootDeclaration.isPruned) {
+      logger.log(Level.SEVERE, "Root declaration is pruned!")
+    }
+    if (!rootDeclaration.isDone) {
       logger.log(Level.SEVERE, "Root declaration is not done!")
+    }
     logApply.exiting(getClass.getName, "apply")
       
     // return transformed pruned tree as a result
