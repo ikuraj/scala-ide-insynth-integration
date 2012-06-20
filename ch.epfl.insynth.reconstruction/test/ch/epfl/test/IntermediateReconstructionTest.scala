@@ -1,5 +1,6 @@
 package ch.epfl.test
 import ch.epfl.insynth.reconstruction.IntermediateTransformer
+import ch.epfl.insynth.reconstruction.trees.FormatableIntermediate
 import ch.epfl.insynth.combinator.Combinator
 import ch.epfl.insynth.env.Node
 import ch.epfl.insynth.env.SimpleNode
@@ -39,7 +40,7 @@ object IntermediateReconstructionTest {
     println("simple tree transformed") 
     assert(transformedTrees.size > 0)
     for (term <- transformedTrees) {
-	  term.println
+	  FormatableIntermediate(term).println
 	  println(term)
     }    
   }
@@ -59,7 +60,7 @@ object IntermediateReconstructionTest {
     
     println("simple tree transformed")    
     for (term <- transformedTrees){
-	  term.println
+	  FormatableIntermediate(term).println
     }
   }
   
@@ -77,7 +78,7 @@ object IntermediateReconstructionTest {
     println("after intermediate transform")
     
     for (tree <- transformedTrees)
-      tree.println
+      FormatableIntermediate(tree).println
   }
   
   def arrowTreeTransform() = {
@@ -94,7 +95,7 @@ object IntermediateReconstructionTest {
     println("after intermediate transform")
     
     for (tree <- transformedTrees)
-      tree.println
+      FormatableIntermediate(tree).println
   }
   
   def overlapTreeTransform() = {
@@ -102,7 +103,7 @@ object IntermediateReconstructionTest {
     TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
     println("after intermediate transform")
     for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType)))
-      tree.println
+      FormatableIntermediate(tree).println
   }
   
   def absApplicationTreeTransform() = {
@@ -110,7 +111,7 @@ object IntermediateReconstructionTest {
     TreeExample.buildTreeAbsApplication.println
     println("after intermediate transform")
     for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeAbsApplication)))
-      tree.println
+      FormatableIntermediate(tree).println
   }
   
   
@@ -119,7 +120,7 @@ object IntermediateReconstructionTest {
     TreeExample.buildTreeSKombinator.println
     println("after intermediate transform")
     for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeSKombinator)))
-      tree.println
+      FormatableIntermediate(tree).println
   }
 
 }

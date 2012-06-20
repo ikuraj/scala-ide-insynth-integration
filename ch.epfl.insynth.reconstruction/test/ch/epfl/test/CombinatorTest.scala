@@ -10,18 +10,18 @@ object CombinatorTest {
   implicit def toPrFormatNode(sn: ch.epfl.insynth.combinator.Node) = FormatPrNode(sn)
 
   def main(args: Array[String]): Unit = {
-//    val tests =      
-//      Array(
-//        TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
-//        TreeExample.buildTreeAbsApplication, TreeExample.buildTreeArrowType,
-//          TreeExample.buildTreeOverlapParameterTypeWithReturnType,
-//        TreeExample.buildTreeSKombinator, TreeExample.buildTreeWithCurryingFunctions,
-//        TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
-//        TreeExample.buildTreeIdentityFunction
-//      )
-//    
-//    for (tree <- tests )
-//      parametrizedCombine(tree) 
+    val tests =      
+      Array(
+        TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
+        TreeExample.buildTreeAbsApplication, TreeExample.buildTreeArrowType,
+          TreeExample.buildTreeOverlapParameterTypeWithReturnType,
+        TreeExample.buildTreeSKombinator, TreeExample.buildTreeWithCurryingFunctions,
+        TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
+        TreeExample.buildTreeIdentityFunction
+      )
+    
+    for (tree <- tests )
+      parametrizedCombine(tree) 
           cycleTreeCombine
   }
   
