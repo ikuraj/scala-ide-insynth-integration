@@ -1,0 +1,27 @@
+We have described the InSynth tool, mainly its code generation process and its integration with the Eclipse IDE. 
+Code generation module is incorporated into the InSynth tool and extends the resolution module which searches for expressions of a given type in a type environment while minimizing a metric on the type binding in order to extrapolate and synthesize the most optimal meaningful code snippets and reports them to the developer.
+We implemented the module in three passes and while its implementation offers presented functionality, its design allows convenient extension to support more advanced functionalities.   
+Among the key features of the code generation module is the process which takes proof trees from the resolution phase as the input, extracts only necessary information according to specified weight functions and produces code snippets which are valid and appropriately formatted.  
+
+\subsection{Related Work}
+
+There has been work on tools that provide similar functionalities such as InSynth.
+There are tools for Haskell that do an API search. The Hoogle \cite{Hoogle} and Hayoo \cite{Hayoo} search engines perform search but rely on user inputs and search only for function names inside APIs. Djinn \cite{Djinn} employs a similar idea as InSynth but does not consider weights for its searches.
+Some tools like Prospector \cite{Mandelin:2005:JMH:1065010.1065018} and XSnippet \cite{Sahavechaphan:2006:XMS:1167515.1167508} base their search only on a corpus of collected code rather then searching for possible solutions to be synthesized.
+
+The tool demo on the InSynth tool \cite{demo_paper} suggested the use of theorem prover for classical logic for synthesis. 
+In contrast, the current view of our problem is more related to the type inhabitation problem, and intuitionistic logic.
+Furthermore, in our approach a method to derive initial weights of declarations is provided, which can prove very important for obtaining useful results.
+
+\subsection{Future Work}
+
+The future work that will happen in a near future would definitely include work on full integration with the Eclipse IDE.
+Besides generating expression only when the developer invokes the typing assist after declaring a value with a specified type, InSynth could be used to synthesize code expressions in places such as method call parameters and places where the Scala type inferencer can determine the needed expression type.
+Some more advanced features that could be built into the Eclipse IDE would be to include incremental resolution in which user inputs can aid the resolution process and make InSynth much more interactive.
+
+Since InSynth currently supports only type inhabitation problem solving for fully instantiated \textit{ground terms}, one idea would be to extend InSynth to cope with polymorphic types, bounded quantification and reasoning about type variance. 
+Very attractive idea is to introduce a corpus of source code (projects written in Scala) and to mine the corpus in order to obtain weighting function for terms and even specific patterns of terms and thus synthesize more useful code snippets.
+
+An implementation of certain semantic checks on the synthesized code would greatly contribute to the practical value of InSynth since by the current process, semantically useless code snippets can be generated (e.g. new \textit{List[Int]().head} can be generated as a code snippet of type \textit{Int}).
+
+% Although InSynth tool still lacks the incorporation and implementation of some useful ideas and features, as such it has proven to be quite useful for practical development, and 

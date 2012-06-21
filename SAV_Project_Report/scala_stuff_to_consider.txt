@@ -1,0 +1,33 @@
+classes, fields, method
+semicolon inference
+singleton objects
+
+function literals
+((x:Int)=> x>0)
+((x)=> x>0) type inference
+(x => x>0)
+(_:Int) + (_:Int) (first + second argument)
+
+partially applied functions
+println _
+if sum takes 3 params, sum _ is the same 
+sum(1, _:Int, 5)
+we can ommit _ if fun is expected, if not then we have to write it : foreach(println)
+
+special call forms:
+repeated params
+named params
+default params
+
+currying
+
+by name parameter, give a function parameter without specifying arguments ?? (to postpone evaluation)
+
+take a look at:
+compostition
+hiearachy
+traits
+statefull objects
+type parametrization
+abstract members
+implicit conersion

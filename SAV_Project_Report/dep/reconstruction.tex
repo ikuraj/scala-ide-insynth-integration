@@ -1,0 +1,86 @@
+\begin{algorithm}[ht]
+\caption{Transformation procedure}
+\label{alg:transformation}
+\begin{algorithmic}[1]
+
+\REQUIRE{InSynth tree, appropriate $\lambda$ declarations}
+
+\STATE{let $r$ be the root of the InSynth tree} \COMMENT{the root, query node,
+has type $(? \rightarrow \bot)$}
+
+\RETURN{Transform($\emptyset$, $r$)}
+
+\end{algorithmic}
+\end{algorithm}
+
+The transformation starts with the root node $r$ and an empty typing context
+(environment).
+The algorithm recursively calls the $Transform$ procedure given in Algorithm
+\ref{alg:transform_call}.
+
+% \floatname{algorithm}{Procedure}
+% \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+% \renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+\begin{algorithm}[ht]
+\caption{Transform}
+\label{alg:transform_call}
+\begin{algorithmic}[1]
+
+\REQUIRE{
+	%term $t$, 
+	context $\Gamma$, node $n$}
+% \COMMENT{The procedure requires:}
+% \STATE\COMMENT{since the call is recursive, the term resolved in this
+% procedure $x$, will be applied to $t$, i.e. we will have $\lambda$ expression $(t x)$}
+\STATE\COMMENT{context $\Gamma$ is the current typing context when resolving the
+current term $x$} \STATE\COMMENT{node $n$ is the current node (InSynth SimpleNode) which provides information about resolvent of the current goal type}
+
+\IF{goal is of type $(X \Rightarrow Y)$}
+\FORALL{nodes $n'$ with goals of type $Y$}
+\FORALL{parameter types $X_i$ in $X$ according to real type}
+\STATE{let $x_i$ be fresh variable of type $X_i$}
+\ENDFOR
+\STATE{let $a$ be an abstraction which takes all parameters in
+$X$}
+\COMMENT{$a = (\lambda x_1:X_1. (\lambda x_2:X_2. \ldots (\lambda
+x_n:X_n.\textrm{ ``\_``})))$}
+\FORALL {$t'$ in Transform(\Gamma $\cup (\bigcup_i x_i:X_i)$, $n'$)}
+\RETURN {plug $t'$ into the abstraction $a$}
+\COMMENT {in place of ``\_``}
+\ENDFOR
+\ENDFOR
+\ENDIF
+\IF{goal is of type $X$}
+\FORALL{declaration $d$ in declarations in $n$}
+
+\IF{type of $d$ is $X$}
+\STATE{return expression of $d$}
+\ELSIF{type of $d$ is $X_1 \Rightarrow X_2 \Rightarrow \ldots \Rightarrow X_n
+\Rightarrow X$}
+\FOR{$i$ in $1..n$}
+\IF{there is a leaf child $n'$ of node $n$}
+\STATE{let $S_i$ be the set of all variables $v$ such that $v:X_i \in \Gamma$}
+\ENDIF
+\FORALL{child $n'$ nodes of $n$ with goal type of $X_i$}
+% \STATE{find child $n'$ of node $n$ with goal type of $X_1$}
+\STATE{let $S_i =$ $S_i$ $\cup$ Transform($\Gamma$, $n'$)}
+\ENDFOR
+\ENDFOR
+\FORALL{combination $x_1, x_2, \ldots, x_n$ of elements $x_1 \in S_1, x_2 \in
+S_2, \ldots, x_n \in S_n$}
+\RETURN{$x_1$ $x_2$ $\ldots$ $x_n$}
+\COMMENT{application of $x_n$ to $x_1$ $\ldots$ $x_{n-1}$}
+\ENDFOR
+\ENDIF
+\ENDFOR
+\ENDIF
+
+\end{algorithmic}
+\end{algorithm}
+
+\textit{Note:} The line $return$ $x$ in the procedure $Transform$ does not
+designate a conventional return call from a function, but rather an indication that such
+result $x$ should be returned as one of the results (more
+specifically, $Transform$ returns a set of terms which contains all terms which
+are prepended with the $return$ command in the Algorithm \ref{alg:transform_call}).

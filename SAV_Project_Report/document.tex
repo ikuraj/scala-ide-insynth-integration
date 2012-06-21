@@ -1,0 +1,178 @@
+%%This is a very basic article template.
+%%There is just one section and two subsections.
+\documentclass[preprint, nocopyrightspace]{sigplanconf}
+
+% 10-11pt suggested
+
+% \usepackage[dvips, bookmarks, colorlinks=false, pdfborder={0 0 0}, pdftitle={Semester project}, pdfauthor={Ivan Kuraj}, pdfsubject={Improving the finite element assembly procedure using expression template}, pdfkeywords={finite elements, template metaprogramming}]{hyperref} %for creating links in the pdf version and other additional pdf attributes, no effect on the printed document
+% \usepackage[final]{pdfpages} %for embedding another pdf, remove if not required
+
+% \usepackage[paper=a4paper,dvips,top=2cm,left=1cm,right=1cm,
+%     foot=2cm,bottom=3cm]{geometry}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage[pdftex]{graphicx} %for embedding images
+\DeclareGraphicsExtensions{.png,.jpg}
+\graphicspath{{./img/}}
+\usepackage{subfigure}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\newtheorem{definition}{Definiton}
+
+\usepackage{mathpartir}
+\usepackage{textcomp}
+
+\newcommand{\cL}{{\cal L}}
+
+\usepackage{xspace}
+\newcommand{\LC}{$\lambda$-calculus\xspace}
+
+\newcommand\Lang[1]{\textsl{#1}}
+
+\title{\Lang{InSynth} tool proof translation and (\Lang{Scala}) code generation
+\thanks{The work in this paper is focused on an extension of previous version of the InSynth tool developed at EPFL LARA laboratory}}
+\subtitle{and integration into the \Lang{Eclipse} IDE}
+
+\authorinfo{Ivan Kuraj\and Tihomer Gvero \and Viktor Kuncak}
+{\'{E}cole Polytechnique F\'{e}d\'{e}rale de Lausanne}
+{\{first name\}.\{last name\}@epfl.ch}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Developing modern software applications typically involves composing functionality from existing libraries.
+This task is difficult because libraries may expose many methods to the developer.
+To help developers in such scenarios, a useful technique can be to synthesize and suggest valid expressions of a given type at a given program point to developer, whenever he asks for it. 
+
+\Lang{InSynth} is a tool for interactive synthesis of code snippets.
+ The code synthesis approach behind \Lang{InSynth} is based on the type inhabitation problem with weighted type assignments. 
+Weights indicate preferences to certain type bindings; they guide the search and enable the ranking of solutions.
+
+This paper focuses on the ``back-end'' module that has the role of code generation and code snippet output, its interaction with the type inhabitation problem solver module and integration of \Lang{InSynth} into the \Lang{Eclipse} IDE
+\footnote{this work contributes to the InSynth tool idea presented in \cite{EPFL-REPORT-170040}}.
+
+The overall experience with \Lang{InSynth} in \Lang{Eclipse} indicates that this approach to synthesizing and suggesting code fragments goes beyond currently available techniques and is a useful functionality of software development environments.
+The positive feedback from \Lang{Eclipse} \Lang{Scala} IDE plugin, a popular development environment for \Lang{Scala}, community, promises us that such a feature will bring huge advantage to \Lang{Eclipse} \Lang{Scala} IDE over other IDEs with respect to \Lang{Scala} development.
+\end{abstract}
+\terms
+Languages, Verification
+\keywords
+Type Inhabitation, Program Synthesis, Typing assist, \Lang{Scala}, \Lang{Eclipse}
+
+\section{Introduction}
+\label{sec:introduction}
+
+Libraries are one of the biggest assets for today’s software developers, enabling developers to build on the shoulders of their predecessors. 
+Useful libraries often evolve into complex application programming interfaces (\Lang{API}s) with a large number of classes and methods.
+It can be difficult for a developer to start using such APIs productively, even for simple tasks \cite{EPFL-REPORT-170040}.
+Even if that is not the case, in many popular languages, there exists code constructs of non-negligible size that represent specific combination of API calls and are used very frequently.
+Such constructs tend to take developer's precious time to write them and even introduce chances to write them incorrectly.
+
+Existing Integrated Development Environments (\Lang{IDE}s) help developers to use APIs by providing code completion functionality.
+For example, an IDE can offer a list of applicable members to a given receiver object, extracted by finding the declared type of the object.
+These efforts usually rely on simple syntactical API searches and do not consider the semantics of offered code snippets at the given program point.
+Such functionality suggests an interesting general direction of improving modern IDEs:
+introduce the ability to search and synthesize type-correct code fragments and offer them as suggestions to the developer (as presented in \cite{EPFL-REPORT-170040}).
+
+In general, existing tools use forward-directed completion in which developer provides a starting value (e.g. a part of an identifier) and the tool bases its search on such starting input.
+The \Lang{InSynth} tool uses an observation that developers can productively use backward-directed completion in which, when identifying a computation step, the developer has the type of a desired code construct in mind.
+\footnote{Note that this idea can be extended to work without providing the starting type, with languages which provide type inference}
+Therefore \Lang{InSynth} does not require the developer to indicate starting fragments of code explicitly. 
+Instead, \Lang{InSynth} uses an ambitious approach that considers all values in scope as the candidate leaf values from which expressions can be synthesized.
+Forward search typed values are not necessary and may be used to direct the synthesis.
+
+% ******Goals of InSynth******* responsive, modular, \ldots
+
+This paper describes the contributions of the InSynth tool which at the focuses on the Scala language \cite{odersky:scala} and integrates into the Eclipse IDE \cite{eclipse_foundation} as a plugin. 
+
+\subsection{Motivating example}
+
+In the next example we illustrate the functionality of the InSynth tool integrated in Eclipse as a plugin.
+Figure \ref{fig:Eclipse_example} depicts a portion of an visible editor in Eclipse IDE and the code suggestions returned by the InSynth tool and how they are shown to the developer. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.45\textwidth]{eclipse}
+\caption{InSynth integration in Eclipse}
+\label{fig:Eclipse_example}
+\end{figure}
+
+The example shows a situation in which the developer has already written some Scala declarations and invokes the Eclipse typing assist functionality which in turn calls the InSynth code synthesis while having the typing pointer at a place for definition of the value which is declared to be of type \textit{StreamTokenizer}.
+In such a scenario, InSynth tool is called with the given program context, needed type and visible declarations as the input.
+After some specific predefined time working in the background, the developer is provided with a some predefined number of code snippets which were found and ranked the best by InSynth in the given time.
+The developer can choose to insert one of such provided code snippets and dramatically reduce the time needed to define the declared \textit{StreamTokenizer} value.
+ 
+% Effectivness in given exmplae, so much terms\ldots blah blah
+ 
+\subsection{Paper outline}
+
+The introduction that sets up the context and a motivating example for the work in this paper for are already given in the Introduction section (Section \ref{sec:introduction}).
+We then describe the design of the InSynth tool in terms of modules that InSynth consists of and the phases that are carried out when InSynth tool is invoked by the IDE in Section \ref{sec:design}.
+The same section presents design decisions and rationales, algorithms used and implementation aspects involved in InSynth.
+In Section \ref{sec:evaluation} a brief evaluation of the InSynth synthesis process and features is given.
+Finally the paper is concluded in Section \ref{sec:conclusions} together with mentioning related work to InSynth and also some ideas for the future work.  
+ 
+\section{Design}
+\label{sec:design}
+
+In this section we will describe the design of the InSynth tool in high-level of details, introduce the module that uses theorem proving techniques to search for valid code expressions, describe the concepts used in the code generation process and its implementation and justify adopted design decisions along the way. 
+
+\subsection{High-level overview}
+
+InSynth can be thought of as being partitioned into two main modules: 1) proof resolution module and 2) code generation module.
+The overview of InSynth design is given in Figure \ref{fig:InSynth_modules}. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.45\textwidth]{sav_prez/in_synth_to_export}
+\caption{InSynth modules}
+\label{fig:InSynth_modules}
+\end{figure}
+
+The first, resolution module gets as input program context and a given type to synthesize (which are passed to it from the IDE) and its task is to search for all possible combinations of code constructs so that the resulting expressions are typable in the given program point to the desired type.
+This search uses somewhat simplified representation of program context so that it makes utilization of certain theorem proving techniques feasible and efficient.
+The output of the proof resolution phase represents proofs that involve simplified language constructs and witness that code expressions of the given type can be constructed.
+Such proofs are passed to the code generation module which uses additional information about the program to extrapolate code from them and synthesize code snippets, which when inserted at the desired location in the program evaluate to the given type and the overall program compiles, and feeds them back to the IDE so that they can finally be given as suggestions to the developer.   
+\input{resolution}
+
+\subsection{Code generation}
+
+In this section we will describe the code generation module which has the task of extrapolating and synthesis of code snippets from the proof trees obtained as a result of the resolution phase.
+
+The overview of the code generation phase is given in Figure \ref{fig:InSynth_code_generation}. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.45\textwidth]{sav_prez/code_generation_steps}
+\caption{InSynth code generation phase}
+\label{fig:InSynth_code_generation}
+\end{figure}
+
+The code generation phase starts when the resolution phase finished (although its design allows starting the code generation phase as soon as possible and running it in parallel with the resolution phase while receiving partial proof tree updates\footnote{the functionality is considered to be implemented in future work}) and works on the proof tree representation.
+The input to the code generation phase besides the constructed proof trees includes the maximal amount of time for the computation (a constraint put on the InSynth tool for responsiveness) and the number of code snippets that should be generated and fed back to the developer.
+
+The first step of the code generation phase is to extract a proof subtree (and transform it into very similar pruned tree representation) which is guaranteed to hold enough information for generation of sufficient number of code snippets with the lowest weight.
+The second step takes such pruned proof trees, consults embedded information about the program environment and constructs an intermediate representation tree which holds enough information about the structure of code and program declarations used in the synthesis.
+The third step takes the intermediate representation tree and applies transformations which generate a set of Scala code snippets and reports them back to the Eclipse IDE and the developer.
+
+\input{reconstruction}
+
+\section{Evaluation}
+\label{sec:evaluation}
+\input{evaluation}
+
+\section{Conclusions}
+\label{sec:conclusions}
+\input{conclusion}
+
+\bibliographystyle{abbrvnat}
+
+\bibliography{main}
+
+
+\end{document}
