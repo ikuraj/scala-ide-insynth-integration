@@ -9,6 +9,8 @@ import ch.epfl.insynth.combinator.FormatPrNode
 
 object IntermediateReconstructionTest {
   
+  val numberOfCombinations = 15
+  
   implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
   implicit def toPrFormatNode(sn: ch.epfl.insynth.combinator.Node) = FormatPrNode(sn)
 
@@ -30,7 +32,7 @@ object IntermediateReconstructionTest {
   def parametrizedTreeTransform(node: SimpleNode) = {    
     node.println
     
-    val prunedTree = Combinator(node)
+    val prunedTree = Combinator(node, numberOfCombinations)
     println("pruned tree")    
     prunedTree.println
     
@@ -102,7 +104,7 @@ object IntermediateReconstructionTest {
     println("overlap tree")
     TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType)))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, numberOfCombinations)))
       FormatableIntermediate(tree).println
   }
   
@@ -110,7 +112,7 @@ object IntermediateReconstructionTest {
     println("abs application tree")
     TreeExample.buildTreeAbsApplication.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeAbsApplication)))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeAbsApplication, numberOfCombinations)))
       FormatableIntermediate(tree).println
   }
   
@@ -119,7 +121,7 @@ object IntermediateReconstructionTest {
     println("s kombinator tree")
     TreeExample.buildTreeSKombinator.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeSKombinator)))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeSKombinator, numberOfCombinations)))
       FormatableIntermediate(tree).println
   }
 

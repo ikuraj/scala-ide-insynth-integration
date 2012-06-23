@@ -6,6 +6,8 @@ import ch.epfl.insynth.env.FormatNode
 
 object CombinatorTest {
   
+  val numberOfCombinations = 15
+  
   implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
   implicit def toPrFormatNode(sn: ch.epfl.insynth.combinator.Node) = FormatPrNode(sn)
 
@@ -29,14 +31,14 @@ object CombinatorTest {
     println("original tree")
     FormatNode(sn).println
     println("combined tree")
-    FormatPrNode(Combinator(sn)).println
+    FormatPrNode(Combinator(sn, numberOfCombinations)).println
   } 
   
   // XXX cannot still be instantiated according to the proof representation!
   def cycleTreeCombine = {
     println("combined cycle tree")
     val cycleTree = TreeExample.buildTreeCycles
-    Combinator(cycleTree).println
+    Combinator(cycleTree, numberOfCombinations).println
   } 
   
   def simpleTreeCombine() = {

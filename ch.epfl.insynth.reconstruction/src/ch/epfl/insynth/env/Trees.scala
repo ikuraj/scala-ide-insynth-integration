@@ -6,7 +6,7 @@ import scala.collection.mutable.Set
 
 import scala.collection.mutable.Map
 
-trait Node // extends FormatableIntermediate
+trait Node
 
 class SimpleNode(decls:List[Declaration], params:Map[Type, ContainerNode]) extends Node {
   def getDecls = decls

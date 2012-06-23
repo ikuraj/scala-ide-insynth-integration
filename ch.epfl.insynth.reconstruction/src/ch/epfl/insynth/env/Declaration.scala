@@ -3,7 +3,7 @@ package ch.epfl.insynth.env
 import ch.epfl.insynth.trees._
 import ch.epfl.scala.trees.ScalaType
 
-case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType) {
+case class Declaration(val fullName:String, val inSynthType:Type, val scalaType:ScalaType){
   assert(fullName != null && inSynthType != null)
   
   private var weight:Weight = new Weight(1.0)

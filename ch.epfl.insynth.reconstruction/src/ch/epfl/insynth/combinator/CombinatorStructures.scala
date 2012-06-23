@@ -8,6 +8,8 @@ import ch.epfl.insynth.reconstruction.trees.NullLeaf
 import ch.epfl.insynth.env.FormatNode
 import java.util.logging.Level
 import java.util.logging.ConsoleHandler
+import java.util.logging.FileHandler
+import java.util.logging.SimpleFormatter
 
 // TODO set required combinations in each Tree node after we hit the limit in the top
 // tree
@@ -25,7 +27,7 @@ object Rules {
   val logStructures = Logger.getLogger("reconstruction.combination.structures")
   val logApply = Logger.getLogger("reconstruction.combination.apply")
   
-  val isLogging = false
+  val isLogging = true
   
   // static code for loggers setup
   {    
@@ -36,14 +38,17 @@ object Rules {
     for (handler <- Logger.getLogger("reconstruction.combination.structures").getHandlers)
       Logger.getLogger("reconstruction.combination.structures").removeHandler(handler)
       
-    Logger.getLogger("reconstruction.combination").setLevel(Level.FINER)
-    Logger.getLogger("reconstruction.combination.apply").setLevel(Level.FINER)
-    Logger.getLogger("reconstruction.combination.structures").setLevel(Level.FINER)
+    Logger.getLogger("reconstruction.combination").setLevel(Level.FINE)
+    Logger.getLogger("reconstruction.combination.apply").setLevel(Level.FINE)
+    Logger.getLogger("reconstruction.combination.structures").setLevel(Level.INFO)
       
-    val handler = new ConsoleHandler();
+    val handler = new FileHandler("%h/combinator%u.log");
+    handler.setFormatter(new SimpleFormatter)
     // PUBLISH this level
-    handler.setLevel(Level.FINER);
-    //Logger.getLogger("reconstruction.combination").addHandler(handler);
+    handler.setLevel(Level.FINEST);
+    Logger.getLogger("reconstruction.combination").addHandler(handler);
+//    Logger.getLogger("reconstruction.combination.apply").addHandler(handler);
+//    Logger.getLogger("reconstruction.combination.structures").addHandler(handler);
   }
   
   // if the pruning started
@@ -157,7 +162,7 @@ extends Combinations
     // logging
     if (Rules.isLogging) {
 	    Rules.logStructures.entering(getClass.getName, "toTreeNode")
-	    Rules.logStructures.info("toTreeNode started on Tree: " + FormatType(tpe))
+	    Rules.logStructures.fine("toTreeNode started on Tree: " + FormatType(tpe))
     }
     
     // transform only those expressions that are done
@@ -217,7 +222,7 @@ extends Tree(null, BottomType)
   override def childDone(decl: Expression):Unit = {
     Rules.logStructures.info("Child done at top tree called.")
     if (neededCombinations <= getNumberOfCombinations) {
-      Rules.logger.info("Yes we found enough combinations, will start pruning.")
+      Rules.logger.info("Yes we found enough combinations(" + getNumberOfCombinations + ", will start pruning.")
       Rules.doPruning = true
     }
   }
@@ -240,7 +245,9 @@ extends Expression(associatedTree, associatedNode) {
   var doneChildren: Set[Tree] = Set()
   
   def addChild(decl: Tree) = {
+    if (Rules.isLogging)
     Rules.logger.fine("Added child " + decl + " to composite " + origDecl.getSimpleName)
+    
     children += decl 
   }
   
@@ -290,7 +297,7 @@ extends Expression(associatedTree, associatedNode) {
     // logging
     if (Rules.isLogging) {
 		Rules.logStructures.entering(getClass.getName, "toTreeNode")
-		Rules.logStructures.info("toTreeNode started on Composite: " + origDecl.getSimpleName)
+		Rules.logStructures.fine("toTreeNode started on Composite: " + origDecl.getSimpleName)
 		if (!(children &~ doneChildren).isEmpty) {
 		  Rules.logger.warning("Composite " + origDecl.getSimpleName + " toTree has not all children done "
 		    + "(children: " + ("" /: children){ (s, t) => s + ", "  + FormatType(t.tpe) } 
@@ -337,7 +344,7 @@ extends Expression(associatedTree, associatedNode) {
     // logging
     if (Rules.isLogging) {
 	    Rules.logStructures.entering(getClass.getName, "toTreeNode")
-	    Rules.logStructures.info("toTreeNode started on: " + origDecl.getSimpleName)
+	    Rules.logStructures.fine("toTreeNode started on: " + origDecl.getSimpleName)
     }
     SimpleNode(
       List(origDecl), associatedTree.tpe, Map[Type, ContainerNode]()
@@ -365,7 +372,7 @@ extends Expression(associatedTree, associatedNode) {
     // logging
     if (Rules.isLogging) {
 	    Rules.logStructures.entering(getClass.getName, "toTreeNode")    
-	    Rules.logStructures.info("toTreeNode started on: " + FormatNode(associatedNode, true))
+	    Rules.logStructures.fine("toTreeNode started on: " + FormatNode(associatedNode, true))
     }
     AbsNode(associatedTree.tpe)
   }

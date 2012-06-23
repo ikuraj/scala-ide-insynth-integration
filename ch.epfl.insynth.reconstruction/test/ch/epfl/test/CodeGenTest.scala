@@ -7,6 +7,8 @@ import ch.epfl.insynth.env.FormatNode
 
 object CodeGenTest {
   
+  val numberOfCombinations = 15
+  
   implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
 
   def main(args: Array[String]): Unit = {
@@ -40,7 +42,7 @@ object CodeGenTest {
     println("intial tree")
     givenTree.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(givenTree)))
+    for (tree <- IntermediateTransformer(Combinator(givenTree, numberOfCombinations)))
     {
 	  for (output <- CodeGenerator(tree)) {
 	    println("----------------")
@@ -55,7 +57,7 @@ object CodeGenTest {
     println("simple tree")    
     simpleTree.println
     
-    val transformedTrees = IntermediateTransformer(Combinator(simpleTree))
+    val transformedTrees = IntermediateTransformer(Combinator(simpleTree, numberOfCombinations))
     println("after intermediate transform")
     
     println("simple tree transformed")    
@@ -72,7 +74,7 @@ object CodeGenTest {
     println("complex tree")
     complexTree.println
     
-    val transformedTrees = IntermediateTransformer(Combinator(complexTree))
+    val transformedTrees = IntermediateTransformer(Combinator(complexTree, numberOfCombinations))
     println("after intermediate transform")
     
     for (tree <- transformedTrees){
@@ -87,7 +89,7 @@ object CodeGenTest {
     val arrowTree = TreeExample.buildTreeArrowType
     
     println("arrow tree")
-    val transformedTrees = IntermediateTransformer(Combinator(arrowTree))
+    val transformedTrees = IntermediateTransformer(Combinator(arrowTree, numberOfCombinations))
     println("after intermediate transform")
     
     for (tree <- transformedTrees){
@@ -102,7 +104,7 @@ object CodeGenTest {
     println("overlap tree")
     TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType)))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, numberOfCombinations)))
     {
 	  for (output <- CodeGenerator(tree)) {
 	    println("----------------")
@@ -115,7 +117,7 @@ object CodeGenTest {
     println("abs application tree")
     TreeExample.buildTreeAbsApplication.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeAbsApplication)))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeAbsApplication, numberOfCombinations)))
     {
 	  for (output <- CodeGenerator(tree)) {
 	    println("----------------")
@@ -128,7 +130,7 @@ object CodeGenTest {
     println("s kombinator tree")
     TreeExample.buildTreeSKombinator.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeSKombinator)))
+    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeSKombinator, numberOfCombinations)))
     {
 	  for (output <- CodeGenerator(tree)) {
 	    println("----------------")

@@ -1,6 +1,6 @@
 package ch.epfl.insynth.trees
 
-sealed abstract class Type// extends FormatableType
+sealed abstract class Type
 
 object BottomType extends Type
 
