@@ -5,7 +5,7 @@ import java.util.logging._
 object Config {
   // logging
     
-  val outputFilename = "/home/ivcha/development/workspace_gsoc/InSynth_CompilerPlugin/out/output.txt"
+  val outputFilename = "/home/ivcha/git/scala-ide-insynth-integration/InSynth_CompilerPlugin/out/output.txt"
   
   // defines loggers
   val logger = Logger.getLogger("insynth.plugin")
