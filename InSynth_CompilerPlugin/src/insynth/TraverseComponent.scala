@@ -26,7 +26,7 @@ class TraverseComponent (val global: Global) extends PluginComponent {
   
   type TreeMapType = String
   type TypeMapType = String
-  implicit def treeToString(tree: Tree) = tree.toString
+  implicit def treeToString(tree: Tree) = fullName(tree)
   implicit def typeToString(tree: Type) = tree.toString
   
   var methodTypeMap: mutable.Map[TreeMapType, mutable.Map[TypeMapType, ReturnTypeAnalyzer.ValueType]] = null
@@ -46,7 +46,8 @@ class TraverseComponent (val global: Global) extends PluginComponent {
       import Utility._
       for ( (method, appArgs) <- methodMap) {
         val xmlToWrite = 
-        <method name= { treeToString(appArgs.fun) }>
+          appArgs.toXML
+        /*<method name= { treeToString(appArgs.fun) }>
           <returnTypes>
         {
           for ((tpe, occurences) <- methodTypeMap(method)) yield {        
@@ -66,7 +67,7 @@ class TraverseComponent (val global: Global) extends PluginComponent {
       		</argument>  
       	}
       	  </arguments>
-      	</method>
+      	</method>*/
       	
         appendToFile(Config.outputFilename, XMLable(xmlToWrite))
       }
@@ -75,14 +76,15 @@ class TraverseComponent (val global: Global) extends PluginComponent {
   }
 
   def newTraverser(): Traverser = new ForeachTreeTraverser(check)
-
-  def fullName(sym:Symbol) = "method " + sym.fullName + sym.tpe.paramTypes.map(x => x.typeSymbol.fullName).mkString(" ",",","")
+ 
   def fullName(tree: Tree) = 
-    if (tree.symbol != null) tree.symbol.fullName
+    if (tree.symbol != null) {
+      val sym = tree.symbol
+	  sym.fullName + sym.tpe.paramTypes.map(x => x.typeSymbol.fullName).mkString("(",",",")")
+    }
     else "null"
   def getType(tree: Tree): TypeMapType = {
-	if (tree.symbol != null) tree.symbol.tpe.toString
-	else "NullType"
+	tree.tpe.typeSymbol.fullName
   }
   
   type Tree = TraverseComponent.this.global.Tree
@@ -91,39 +93,58 @@ class TraverseComponent (val global: Global) extends PluginComponent {
     case Apply(fun, args) => {
       if (Config.isLogging) {
         logger.info("application of "+ fun + " with params: " + args.mkString(" ", ",", ""))
-        logger.info("method full name: " + fullName(fun.symbol))
+        logger.info("method full name: " + fullName(fun))
       }
       ApplicationAnalyzer(fun, args)
-      ReturnTypeAnalyzer(fun)
-      
-      fun match {
-        case _:Apply | _: ApplyDynamic =>
-    	  logger.info("found an application " + fun + " within an application " + tree)
-        case _ =>
-      }
+      //ReturnTypeAnalyzer(fun)
     }
     case ApplyDynamic(qual, args) => {
       if (Config.isLogging) {
         logger.info("application of "+ qual + " with params: " + args.mkString(" ", ",", ""))
       }
       ApplicationAnalyzer(qual, args)
-      ReturnTypeAnalyzer(qual)
+      //ReturnTypeAnalyzer(qual)
     }
     case _ => ()
   }
   
   object ApplicationAnalyzer {
+    
+    lazy val logger = Config.loggerAppAnalyzer    
+    
+    def getInnermostApplicationRec(tree: Tree, level: Int): (Tree, Int) = tree match {
+	  case Apply(fun, args) => {
+	  	logger.fine("found an inner application " + fun + " within an application " + tree)
+	  	getInnermostApplicationRec(fun, level + 1)
+	  }
+	  case _: ApplyDynamic => throw new RuntimeException
+	  case Select(qualifier, name) if "apply" == name.toString.trim => {
+	  	logger.fine("Select(qualifier, name), name: " + name + ")")
+	  	getInnermostApplicationRec(qualifier, level)
+	  }
+	  case t => {
+	  	logger.fine("case t => (t: " + t + ")")
+	    (t, level)
+	  }
+    }
+    
     def apply(fun: Tree, args: List[Tree]) {
       logger.entering("ApplicationAnalyzer", "apply", Array(fun, args.mkString(" ", ",", "")))
+      
+      val (innerApp, pos) = getInnermostApplicationRec(fun, 0)
+      logger.fine("(innerApp, pos) = " + innerApp + ", " + pos)
+      
       // get an ApplicationArguments object from the map or create a new one
       // record a call with given arguments
-      logger.info("methodMap.contains(" + fun + "): " + methodMap.contains(fun))
-      methodMap getOrElseUpdate(fun, new ApplicationArguments(fun)) recordCall args
-      logger.info("methodMap.contains(" + fun + "): " + methodMap.contains(fun))
+      //logger.info("methodMap.contains(" + fun + "): " + methodMap.contains(fun))
+      methodMap getOrElseUpdate(innerApp, new ApplicationArguments(innerApp)) recordCall (pos, args)
+      //logger.info("methodMap.contains(" + fun + "): " + methodMap.contains(fun))
     }
   }
   
   object ReturnTypeAnalyzer {
+    
+    lazy val logger = Config.loggerReturnTypeAnalyzer
     
     private def onlyReturnType(rawReturn: Type): Type = rawReturn match {
       case MethodType(_, resultType) => onlyReturnType(resultType)
@@ -144,11 +165,13 @@ class TraverseComponent (val global: Global) extends PluginComponent {
 	    
       //Function type
 	  case TypeRef(pre: Type, sym: Symbol, args: List[Type])
-	    if(definitions.isFunctionType(tpe)) =>
+	    if(definitions.isFunctionType(tpe)) => {
+	    logger.finest("case TypeRef matched")
 	    val list = args.init.map(traverse)
-	    val result = traverse(args.last)
+	    val result = traverse(args.last)	    
 	      
 	    result
+      }
 	      
 	  //TODO: => Type  
 	  /*case TypeRef(pre: Type, sym: Symbol, args: List[Type])
@@ -158,13 +181,17 @@ class TraverseComponent (val global: Global) extends PluginComponent {
 	    
 	  //Polymorphic instantiated types
 	  case TypeRef(pre: Type, sym: Symbol, args: List[Type])
-	    if (!sym.isMonomorphicType && !args.isEmpty)=>
-	      sym.fullName + args.map(traverse) mkString("[", ",", "]")
+	    if (!sym.isMonomorphicType && !args.isEmpty) => {
+    	  logger.finest("case TypeRef matched - if (!sym.isMonomorphicType && !args.isEmpty)")
+	      sym.fullName + (args.map(traverse) mkString("[", ",", "]"))
+	    }
 	     
 	  //Base types
-	  case TypeRef(pre: Type, sym: Symbol, args: List[Type]) =>
+	  case TypeRef(pre: Type, sym: Symbol, args: List[Type]) => {
+    	logger.finest("case TypeRef matched")
 	    if (!sym.isTypeParameter) sym.fullName	      
 	      else throw new Exception("<<Parametrized types not supported: "+tpe.getClass.getName+">>")
+	  }
 	    
 	  case _ => throw new Exception("<<Not supported: "+tpe.getClass.getName+">>") 
     }
@@ -179,7 +206,7 @@ class TraverseComponent (val global: Global) extends PluginComponent {
     }
     
     def apply(fun: Tree) {
-      logger.entering("ApplicationAnalyzer", "apply", fun )
+      logger.entering("ReturnTypeAnalyzer", "apply", fun )
       val methodType = fun.symbol.tpe
       val typeString: String = getReturnType(methodType) 
       logger.info("getType(fun)" + typeString )
@@ -190,6 +217,8 @@ class TraverseComponent (val global: Global) extends PluginComponent {
   }
   
   class ApplicationArguments(val fun: Tree) extends XMLable {  
+    
+    lazy val logger = Config.loggerAppInfo
     
     case class ValueType(tpe: String) {
       var occurences = 0      
@@ -203,18 +232,47 @@ class TraverseComponent (val global: Global) extends PluginComponent {
     // its type) and stores number of occurrences of that parameter in place of given
     // argument
     // TODO add declared type of argument
-    var argsOccurences: Array[(TypeMapType, mutable.Map[TreeMapType, ValueType])] = new Array(fun.tpe.paramTypes.size)
+    var argsOccurences: Array[Array[(TypeMapType, mutable.Map[TreeMapType, ValueType])]] =
+      //new Array(fun.tpe.paramTypes.size)
+      (for (list <- getApplicationInfo(fun.tpe)) yield
+      	(for (tpe <- list) yield
+  		  (typeToString(tpe), mutable.Map[TreeMapType, ValueType]())
+	    ).toArray
+      ).toArray
     
-    for (ind <- 0 until argsOccurences.size) {
-      argsOccurences(ind) = (fun.tpe.paramTypes(ind).toString, mutable.Map.empty)
+    private def getApplicationInfo(methodType: Type): List[List[Type]] = {
+      logger.entering("ApplicationArguments", "getApplicationInfo", methodType)
+      logger.fine("Application is: " + fun)
+      
+      def getApplicationInfoMethodRec(methodType: Type, collectedList: List[List[Type]]): (List[List[Type]], Type) = methodType match {
+        case MethodType(params, resultType) => getApplicationInfoMethodRec( resultType, collectedList :+ (params map { _.tpe }) )
+        case t => (collectedList, t)
+      }
+      
+      def getApplicationInfoFunctionRec(functionType: Type, collectedList: List[List[Type]]): List[List[Type]] = functionType match {
+        case TypeRef(pre: Type, sym: Symbol, args: List[Type]) if(definitions.isFunctionType(functionType)) =>
+          getApplicationInfoFunctionRec(args.last, collectedList :+ args.init)
+        case t => collectedList
+      }
+      
+      val (types, resultType) = getApplicationInfoMethodRec(methodType, List.empty)
+      val typesFunction = getApplicationInfoFunctionRec(resultType, List.empty)
+      
+      val result = types ++ typesFunction
+      logger.exiting("ApplicationArguments", "getApplicationInfo", result)
+      result
     }
     
-    def recordCall(params: List[Tree]) {
+//    for (ind <- 0 until argsOccurences.size) {
+//      argsOccurences(ind) = (fun.tpe.paramTypes(ind).toString, mutable.Map.empty)
+//    }
+    
+    def recordCall(posGroup: Int, params: List[Tree]) {
       logger.entering("ApplicationArguments", "recordCall", params)
       logger.info("Param size is: " + params.size)
-      assert(argsOccurences.size == params.size)
+      assert(argsOccurences(posGroup).size == params.size)
       // iterate over collection of recorded arguments and given parameters
-      for (((tpe, argMap), par) <- argsOccurences zip params) {
+      for (((tpe, argMap), par) <- argsOccurences(posGroup) zip params) {
         // into appropriate argument map, increase or insert new occurrence of given parameter
         assert(argMap!=null)
         assert(par!=null)
@@ -227,24 +285,28 @@ class TraverseComponent (val global: Global) extends PluginComponent {
 
     override def toXML = {
       logger.entering("ApplicationArguments", "toXML")
-      logger.fine("argsOccurences.size = " + argsOccurences.size)
-  	  for ((tpe, arg) <- argsOccurences)
-        for ( (par, occurences) <- arg) {
-    	  logger.fine("par in argsOccurences: " + par + " " + occurences)
-          assert(par!=null)
-          //assert(par.symbol!=null)
-        }
+//  	  for ((tpe, arg) <- argsOccurences)
+//        for ( (par, occurences) <- arg) {
+//    	  logger.fine("par in argsOccurences: " + par + " " + occurences)
+//          assert(par!=null)
+//          //assert(par.symbol!=null)
+//        }
       	    
       <method name= { treeToString(fun) }>
       	{ 
-      	  for ((tpe, arg) <- argsOccurences) yield
+      	  for (argsOccurencesList <- argsOccurences) yield
+      	    <argumentGroup>
+      	  {
+      	  for ((tpe, arg) <- argsOccurencesList) yield
       		<argument type= { tpe }>
       		{ for ( (par, value) <- arg) yield
       		  <parameter name= { par.toString }
       			type= { value.tpe }
       			occurences= { value.occurences.toString }/>
   		    }
-      		</argument>  
+      		</argument>
+      	  }
+      	    </argumentGroup>
       	}
       </method>
     }

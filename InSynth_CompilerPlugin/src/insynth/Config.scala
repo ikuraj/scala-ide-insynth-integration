@@ -9,12 +9,17 @@ object Config {
   
   // defines loggers
   val logger = Logger.getLogger("insynth.plugin")
+  val loggerAppAnalyzer = Logger.getLogger("insynth.plugin.ApplicationAnalyzer")
+  val loggerAppInfo = Logger.getLogger("insynth.plugin.ApplicationArguments")
+  val loggerReturnTypeAnalyzer = Logger.getLogger("insynth.plugin.ReturnTypeAnalyzer")
+  
+  
   
   val isLogging = true
   
   // static code for loggers setup
   {  
-    val array = Array(logger)
+    val array = Array(logger, loggerAppInfo, loggerAppAnalyzer, loggerReturnTypeAnalyzer)
     
     // remove all handlers
     for (logger <- array)
@@ -22,11 +27,16 @@ object Config {
       logger.removeHandler(handler)
       
     logger.setLevel(Level.FINEST)
+    loggerAppInfo.setLevel(Level.FINEST)
+    loggerAppAnalyzer.setLevel(Level.FINEST)
+    loggerReturnTypeAnalyzer.setLevel(Level.FINEST)
+    
       
     val handler = new FileHandler("%h/insynthplugin%u.log");
     handler.setFormatter(new SimpleFormatter)
     // PUBLISH this level
     handler.setLevel(Level.FINEST);
-    logger.addHandler(handler);
+    //loggerAppAnalyzer.addHandler(handler);
+    loggerAppAnalyzer.addHandler(handler);
   }
 }
