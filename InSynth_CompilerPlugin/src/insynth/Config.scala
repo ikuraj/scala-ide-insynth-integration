@@ -37,6 +37,6 @@ object Config {
     // PUBLISH this level
     handler.setLevel(Level.FINEST);
     //loggerAppAnalyzer.addHandler(handler);
-    loggerAppAnalyzer.addHandler(handler);
+    logger.addHandler(handler);
   }
 }
