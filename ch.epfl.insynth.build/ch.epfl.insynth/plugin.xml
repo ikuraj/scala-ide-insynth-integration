@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="insynth_completions"
+         name="InSynth completion proposals"
+         point="org.eclipse.jdt.ui.javaCompletionProposalComputer">
+      <proposalCategory
+            icon="icons/scala.png"></proposalCategory>
+   </extension>
+   <extension
+         id="InsynthCompletions"
+         name="InSynth Completions"
+         point="org.eclipse.jdt.ui.javaCompletionProposalComputer">
+      <javaCompletionProposalComputer
+            activate="true"
+            categoryId="ch.epfl.insynth.core.insynth_completions"
+            class="ch.epfl.insynth.core.completion.InsynthCompletionProposalComputer">
+         <partition
+               type="__dftl_partition_content_type">
+         </partition>
+      </javaCompletionProposalComputer>
+   </extension>
+
+</plugin>

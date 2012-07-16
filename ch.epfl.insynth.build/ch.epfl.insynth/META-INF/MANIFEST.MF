@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Insynth Core
+Bundle-SymbolicName: ch.epfl.insynth;singleton:=true
+Bundle-Version: 0.0.1.qualifier
+Bundle-Activator: ch.epfl.insynth.core.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.scala-ide.scala.compiler;bundle-version="2.9.2",
+ org.scala-ide.scala.library;bundle-version="2.9.3",
+ org.eclipse.jdt,
+ org.eclipse.jdt.ui,
+ org.eclipse.jface.text,
+ org.eclipse.jdt.core,
+ org.scala-ide.sdt.core;bundle-version="2.1.0",
+ org.eclipse.core.resources;bundle-version="3.7.100",
+ org.scala-ide.sdt.aspects;bundle-version="2.1.0",
+ org.eclipse.ui.editors;bundle-version="3.7.0"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: lib/ch.epfl.insynth.library.jar,
+ .
+Export-Package: ch.epfl.insynth.reconstruction;uses:="scala.collection.immutable,ch.epfl.insynth.env",
+ ch.epfl.insynth.reconstruction.codegen,
+ ch.epfl.insynth.reconstruction.combinator,
+ ch.epfl.insynth.reconstruction.intermediate
