@@ -148,8 +148,8 @@
 
 	<!-- scm configuration is require to extract the github hash -->
 	<scm>
-		<connection>scm:git://github.com/skyluc/scalatest.git</connection>
-		<url>https://github.com/skyluc/scalatest</url>
+		<connection>scm:git://github.com/kaptoxic/scala-ide-insynth-integration.git</connection>
+		<url>https://github.com/kaptoxic/scala-ide-insynth-integration/tree/master/ch.epfl.insynth.build</url>
 	</scm>
 
 	<dependencyManagement>
@@ -384,4 +384,5 @@
 		</plugins>
 	</build>
 
+	<url>https://github.com/kaptoxic/scala-ide-insynth-integration/tree/master/ch.epfl.insynth.build</url>
 </project>
