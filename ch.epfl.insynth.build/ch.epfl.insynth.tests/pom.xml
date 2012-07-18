@@ -21,6 +21,7 @@
   </dependencies>
 
   <build>
+    <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
         <!-- configuration of which test suite to run -->
@@ -28,7 +29,7 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <configuration>
           <testSuite>${project.artifactId}</testSuite>
-          <testClass>ch.epfl.insynth.test.TestSuite</testClass>
+          <testClass>ch.epfl.insynth.test.TestsSuite</testClass>
         </configuration>
       </plugin>
       <plugin>

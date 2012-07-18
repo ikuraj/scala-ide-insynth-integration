@@ -13,4 +13,4 @@ Require-Bundle: org.scala-ide.scala.library,
  org.scala-ide.sdt.core
 Import-Package: scala.tools.eclipse.testsetup,
  org.aspectj.weaver.loadtime.definition
-Fragment-Host: ch.epfl.insynth;bundle-version="0.0.1.qualifier"
+Fragment-Host: ch.epfl.insynth;bundle-version="0.0.1"
