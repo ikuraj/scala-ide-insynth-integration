@@ -1,6 +1,5 @@
 package examplepkg1
 
-//Does not work
 object A {
   def m():Int = 0
 }
@@ -8,6 +7,6 @@ object A {
 class Example1 {
 
   def main(){
-    //val a:Int = 
+    val a:Int =  /*!*/
   }  
 }

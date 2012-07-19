@@ -24,7 +24,7 @@ import ch.epfl.insynth.core.completion.InnerFinder
 import scala.collection.JavaConversions
 import scala.collection.JavaConverters
 
-object CompletionTests extends TestProjectSetup("completion")
+object CompletionTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests")
 
 class CompletionTests {
   import CompletionTests._

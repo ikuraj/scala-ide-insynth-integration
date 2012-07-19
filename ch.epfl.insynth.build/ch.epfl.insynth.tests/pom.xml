@@ -29,7 +29,7 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <configuration>
           <testSuite>${project.artifactId}</testSuite>
-          <testClass>ch.epfl.insynth.test.TestsSuite</testClass>
+          <testClass>ch.epfl.insynth.test.TestSuite</testClass>
         </configuration>
       </plugin>
       <plugin>
