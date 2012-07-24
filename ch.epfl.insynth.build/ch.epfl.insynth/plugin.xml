@@ -21,5 +21,20 @@
          </partition>
       </javaCompletionProposalComputer>
    </extension>
+   
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+     <initializer
+           class="ch.epfl.insynth.core.preferences.InSynthPreferencePageInitializer">
+     </initializer>
+  </extension>
+  
+   
+   <extension point="org.eclipse.ui.preferencePages">
+      <page class="ch.epfl.insynth.core.preferences.InSynthPreferences"
+            category="org.scala-ide.sdt.core.preferences"
+            name="InSynth"
+            id="ch.epfl.insynth.preferences.InSynth"/>
+   </extension>
 
 </plugin>
