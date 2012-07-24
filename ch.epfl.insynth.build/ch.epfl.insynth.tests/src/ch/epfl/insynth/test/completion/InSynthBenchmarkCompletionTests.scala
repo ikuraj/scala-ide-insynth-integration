@@ -25,7 +25,7 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConverters
 import scala.tools.eclipse.testsetup.TestProjectSetup
 
-object InSynthBenchmarkCompletionTests extends TestProjectSetup("completion"/*, bundleName = "ch.epfl.insynth.tests"*/)
+object InSynthBenchmarkCompletionTests extends TestProjectSetup("benchmarks", bundleName = "ch.epfl.insynth.tests")
 
 class InSynthBenchmarkCompletionTests {
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
