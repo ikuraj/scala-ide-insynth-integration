@@ -18,8 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors;bundle-version="3.7.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: lib/ch.epfl.insynth.library.jar,
- .
+Bundle-ClassPath: .,
+ target/lib/ch.epfl.insynth.library-0.0.1-SNAPSHOT.jar
 Export-Package: ch.epfl.insynth.reconstruction;uses:="scala.collection.immutable,ch.epfl.insynth.env",
  ch.epfl.insynth.reconstruction.codegen,
  ch.epfl.insynth.reconstruction.combinator,
