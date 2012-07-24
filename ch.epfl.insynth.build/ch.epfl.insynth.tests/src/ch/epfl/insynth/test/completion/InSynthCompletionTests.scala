@@ -14,198 +14,55 @@ import org.eclipse.jdt.core.search.{ SearchEngine, IJavaSearchConstants, IJavaSe
 import org.eclipse.jdt.core.IJavaElement
 import org.junit.Ignore
 import scala.tools.nsc.util.OffsetPosition
-import scala.tools.eclipse.completion.{ CompletionProposal, ScalaCompletions }
+import scala.tools.eclipse.completion.ScalaCompletions
+import scala.tools.eclipse.completion.CompletionProposal
+import ch.epfl.insynth.core.completion.InsynthCompletionProposalComputer
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext
 import org.eclipse.jdt.core.ICompilationUnit
 import org.eclipse.core.runtime.NullProgressMonitor
-import java.util.logging.Logger
-import org.eclipse.jface.text.contentassist.ICompletionProposal
+import ch.epfl.insynth.core.completion.InnerFinder
+import scala.collection.JavaConversions
+import scala.collection.JavaConverters
+import scala.tools.eclipse.testsetup.TestProjectSetup
 
-import ch.epfl.insynth.core.completion.InsynthCompletionProposalComputer
-
-object InSynthCompletionTests extends TestProjectSetup("insynth"/*, bundleName= "ch.epfl.insynth.tests"*/)
+object InSynthCompletionTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests")
+//object InSynthCompletionTests extends TestProjectSetup("completion")
 
 class InSynthCompletionTests {
-  import InSynthCompletionTests._
-
-  import org.eclipse.core.runtime.IProgressMonitor
-  import org.eclipse.jface.text.IDocument
-import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext
-
-
-  private def bla(path2source: String) {
-    val unit = compilationUnit(path2source)//.asInstanceOf[ScalaCompilationUnit]
-    
-    assertTrue(false)
-    // first, 'open' the file by telling the compiler to load it
-//    project.withSourceFile(unit) { (src, compiler) =>
-//      val dummy = new Response[Unit]
-//      compiler.askReload(List(src), dummy)
-//      dummy.get
-//
-//      val tree = new Response[compiler.Tree]
-//      compiler.askType(src, true, tree)
-//      tree.get
-//
-//      val contents = unit.getContents
-//      // mind that the space in the marker is very important (the presentation compiler 
-//      // seems to get lost when the position where completion is asked 
-//      val positions = SDTTestUtils.positionsOf(contents, " /*!*/")
-//      val content = unit.getContents.mkString
-//
-//      val completion = new ScalaCompletions
-//      for (i <- 0 until positions.size) {
-//        val pos = positions(i)
-//
-//        val position = new scala.tools.nsc.util.OffsetPosition(src, pos)
-//        var wordRegion = ScalaWordFinder.findWord(content, position.point)
-//
-//        val insynthPropComp = new InsynthCompletionProposalComputer
-//        //        val selection = mock(classOf[ISelectionProvider])
-//
-//        /* FIXME:
-//         * I would really love to call `completion.computeCompletionProposals`, but for some unclear 
-//         * reason that call is not working. Some debugging shows that the position is not right (off by one), 
-//         * however, increasing the position makes the computed `wordRegion` wrong... hard to understand where 
-//         * the bug is!
-//        val textViewer = mock(classOf[ITextViewer])
-//        when(textViewer.getSelectionProvider()).thenReturn(selection)
-//        val document = mock(classOf[IDocument])
-//        when(document.get()).thenReturn(content)
-//        when(textViewer.getDocument()).thenReturn(document)
-//        val monitor = mock(classOf[IProgressMonitor])
-//        val context = new ContentAssistInvocationContext(textViewer, position.offset.get)
-//        import collection.JavaConversions._
-//        val completions: List[ICompletionProposal] = completion.computeCompletionProposals(context, monitor).map(_.asInstanceOf[ICompletionProposal]).toList
-//        */
-//
-//        //body(i, position, completion.findCompletions(wordRegion)(pos + 1, unit)(src, compiler))
-//        val context = new JavaContentAssistInvocationContext(unit.asInstanceOf[ICompilationUnit])
-//        import scala.collection.JavaConverters._
-//        
-//        val list:List[ICompletionProposal] = insynthPropComp.computeCompletionProposals(context, new NullProgressMonitor).asScala.toList
-//        
-//        assertTrue("size" + list.size, false)
-//      }
-//    }()
-  }
-
-  private def withCompletions(path2source: String)(body: (Int, OffsetPosition, List[ICompletionProposal]) => Unit) {
-    val unit = compilationUnit(path2source).asInstanceOf[ScalaCompilationUnit]
-
-    // first, 'open' the file by telling the compiler to load it
-    project.withSourceFile(unit) { (src, compiler) =>
-      val dummy = new Response[Unit]
-      compiler.askReload(List(src), dummy)
-      dummy.get
-
-      val tree = new Response[compiler.Tree]
-      compiler.askType(src, true, tree)
-      tree.get
-
-      val contents = unit.getContents
-      // mind that the space in the marker is very important (the presentation compiler 
-      // seems to get lost when the position where completion is asked 
-      val positions = SDTTestUtils.positionsOf(contents, " /*!*/")
-      val content = unit.getContents.mkString
-
-      val completion = new ScalaCompletions
-      for (i <- 0 until positions.size) {
-        val pos = positions(i)
-
-        val position = new scala.tools.nsc.util.OffsetPosition(src, pos)
-        var wordRegion = ScalaWordFinder.findWord(content, position.point)
-
-        //val insynthPropComp = new InsynthCompletionProposalComputer
-        //        val selection = mock(classOf[ISelectionProvider])
-
-        /* FIXME:
-         * I would really love to call `completion.computeCompletionProposals`, but for some unclear 
-         * reason that call is not working. Some debugging shows that the position is not right (off by one), 
-         * however, increasing the position makes the computed `wordRegion` wrong... hard to understand where 
-         * the bug is!
-        val textViewer = mock(classOf[ITextViewer])
-        when(textViewer.getSelectionProvider()).thenReturn(selection)
-        val document = mock(classOf[IDocument])
-        when(document.get()).thenReturn(content)
-        when(textViewer.getDocument()).thenReturn(document)
-        val monitor = mock(classOf[IProgressMonitor])
-        val context = new ContentAssistInvocationContext(textViewer, position.offset.get)
-        import collection.JavaConversions._
-        val completions: List[ICompletionProposal] = completion.computeCompletionProposals(context, monitor).map(_.asInstanceOf[ICompletionProposal]).toList
-        */
-
-        //body(i, position, completion.findCompletions(wordRegion)(pos + 1, unit)(src, compiler))
-        //val context = new JavaContentAssistInvocationContext(unit.asInstanceOf[ICompilationUnit])
-        //import scala.collection.JavaConverters._
-        
-        //val list:List[ICompletionProposal] = insynthPropComp.computeCompletionProposals(context, new NullProgressMonitor).asScala.toList
-        //body(i, position, list)
-      }
-    }()
-  }
+	val testProjectSetup = new CompletionUtility(InSynthCompletionTests)
+	
+	import testProjectSetup._
 
   /**
-   * @param withImportProposal take in account proposal for types not imported yet
+   * Test that completion shows only accessible members.
    */
-  private def runTest(path2source: String)(expectedCompletions: List[String]*) {
-
-    withCompletions(path2source) { (i, position, compl) =>
-
-      var completions = compl
-      
-      assertEquals(5, completions.size)
-      assertTrue(completions.mkString, false)
-
-      // remove parens as the compiler trees' printer has been slightly modified in 2.10 
-      // (and we need the test to pass for 2.9.0/-1 and 2.8.x as well).
-//      val completionsNoParens: List[String] = completions.map(c => normalizeCompletion(c.display)).sorted
-//      val expectedNoParens: List[String] = expectedCompletions(i).map(normalizeCompletion).sorted
-//
-//      println("Found following completions @ position (%d,%d):".format(position.line, position.column))
-//      completionsNoParens.foreach(e => println("\t" + e))
-//      println()
-//
-//      println("Expected completions:")
-//      expectedNoParens.foreach(e => println("\t" + e))
-//      println()
-//
-//      assertTrue("Found %d completions @ position (%d,%d), Expected %d"
-//        .format(completionsNoParens.size, position.line, position.column, expectedNoParens.size),
-//        completionsNoParens.size == expectedNoParens.size) // <-- checked condition
-//
-//      completionsNoParens.zip(expectedNoParens).foreach {
-//        case (found, expected) =>
-//          assertTrue("Found `%s`, expected `%s`".format(found, expected), found == expected)
-//      }
-    }
-  }
-
-  /**
-   * Transform the given completion proposal into a string that is (hopefully)
-   *  compiler-version independent.
-   *
-   *  Transformations are:
-   *    - remove parenthesis
-   *    - java.lang.String => String
-   */
-  private def normalizeCompletion(str: String): String = {
-    str.replace("(", "").replace(")", "").replace("java.lang.String", "String")
-  }
-
   @Test
-  def test1() {
-    val oraclePos10 = List("A sdfm")
-
-    //runTest("examplepkg1/Example1.scala")(oraclePos10)
+  def testExample1() {
+    val oraclePos11 = List("A m", "0")
     
-    //bla("examplepkg1/Example1.scala")
-    bla("asdasdas")
+    val exampleCompletions = List(CheckContains(oraclePos11), CheckNumberOfCompletions(5))
+    
+    checkCompletions("examplepkg1/Example1.scala")(exampleCompletions)
   }
   
   @Test
-  @Ignore("aaa")
-  def test2() {
+  def testExample2() {
+    val oraclePos14 = List("new A().a()", "new A() m b")
     
+    val exampleCompletions = List(CheckContains(oraclePos14))
+    
+    checkCompletions("examplepkg2/Example2.scala")(exampleCompletions)
   }
+  
+  @Test
+  def testExample3() {
+    val oraclePos12regex = List("new A\\(\\) m1 \\{ (\\S+) => new A\\(\\) m2 \\1 \\}",
+        "new A\\(\\) m1 \\{ (\\S+) => new A\\(\\) m2 l1 \\}")
+    val oraclePos12strings = List("\"?\"")
+    
+    val exampleCompletions = List(CheckRegexContains(oraclePos12regex), CheckContains(oraclePos12strings))
+    
+    checkCompletions("examplepkg3/Example3.scala")(exampleCompletions)
+  }
+
 }
