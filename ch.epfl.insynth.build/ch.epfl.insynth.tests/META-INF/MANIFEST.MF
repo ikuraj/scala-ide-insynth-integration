@@ -9,8 +9,7 @@ Bundle-ClassPath: .,
  target/lib/ch.epfl.insynth.library-0.0.1-SNAPSHOT.jar
 Require-Bundle: org.scala-ide.scala.library,
  org.eclipse.equinox.weaving.aspectj,
- org.junit4;bundle-version="4.8.1",
- org.scala-ide.sdt.core
-Import-Package: scala.tools.eclipse.testsetup,
- org.aspectj.weaver.loadtime.definition
+ org.junit4;bundle-version="4.8.1"
+Import-Package: org.aspectj.weaver.loadtime.definition,
+ scala.tools.eclipse.testsetup
 Fragment-Host: ch.epfl.insynth;bundle-version="0.0.1"
