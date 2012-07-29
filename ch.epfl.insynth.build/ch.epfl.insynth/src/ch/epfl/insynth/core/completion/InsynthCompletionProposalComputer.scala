@@ -24,6 +24,8 @@ import ch.epfl.insynth.env.InitialEnvironmentBuilder
 import ch.epfl.insynth.env.Declaration
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.reconstruction.Reconstructor
+import ch.epfl.insynth.core.Activator
+import scala.tools.eclipse.logging.HasLogger
 
 /* 
 TODO:
@@ -31,79 +33,83 @@ TODO:
 
 */
 
+object InnerFinder extends ((ScalaCompilationUnit, Int) => java.util.List[ICompletionProposal]) with HasLogger {
+  def apply(scu: ScalaCompilationUnit, position: Int): java.util.List[ICompletionProposal] = {
+    import java.util.Collections.{ emptyList => javaEmptyList }
 
-  object InnerFinder extends ((ScalaCompilationUnit, Int) => java.util.List[ICompletionProposal]) {
-    def apply(scu: ScalaCompilationUnit, position: Int): java.util.List[ICompletionProposal] = {
-      import java.util.Collections.{ emptyList => javaEmptyList }
-			          
-      var oldContent:Array[Char] = scu.getContents
-      
-      scu.withSourceFile {
-        (sourceFile, compiler) =>
-          
-          if(compiler != InSynthWrapper.compiler){
-        	  InSynthWrapper.compiler = compiler
-              InSynthWrapper.insynth = new InSynth(compiler)
-          } else {
-        	  if (InSynthWrapper.insynth == null){
-        		  InSynthWrapper.insynth = new InSynth(compiler)
-        	  }
+    var oldContent: Array[Char] = scu.getContents
+
+    scu.withSourceFile {
+      (sourceFile, compiler) =>
+
+        if (compiler != InSynthWrapper.compiler) {
+          InSynthWrapper.compiler = compiler
+          InSynthWrapper.insynth = new InSynth(compiler)
+        } else {
+          if (InSynthWrapper.insynth == null) {
+            InSynthWrapper.insynth = new InSynth(compiler)
           }
-          
-          //Getting builder for the first time
-          if (InSynthWrapper.builder == null){
-            InSynthWrapper.builder = new InitialEnvironmentBuilder()
-            if (Config.loadPredefs){
-              InSynthWrapper.predefDecls = InSynthWrapper.insynth.getPredefDecls()
-              InSynthWrapper.builder.addDeclarations(InSynthWrapper.predefDecls)
-            }
-          } // else builder is already prepared
-          
-          compiler.askReload(scu, getNewContent(position, oldContent))
+        }
 
-          var results = List.empty[Output]
-          InSynthWrapper.builder.synchronized{
+        //Getting builder for the first time
+        if (InSynthWrapper.builder == null) {
+          InSynthWrapper.builder = new InitialEnvironmentBuilder()
+          if (Config.loadPredefs) {
+            InSynthWrapper.predefDecls = InSynthWrapper.insynth.getPredefDecls()
+            InSynthWrapper.builder.addDeclarations(InSynthWrapper.predefDecls)
+          }
+        } // else builder is already prepared
+
+        compiler.askReload(scu, getNewContent(position, oldContent))
+
+        var results = List.empty[Output]
+        try {
+          InSynthWrapper.builder.synchronized {
             val solution = InSynthWrapper.insynth.getSnippets(sourceFile.position(position), InSynthWrapper.builder)
-            
-            results =  if (solution != null) Reconstructor(solution.getNodes.head) else Nil
+
+            results = if (solution != null) Reconstructor(solution.getNodes.head) else Nil
           }
-          
-          val sortedResults = results.sortWith((x,y) => x.getWieght.getValue < y.getWieght.getValue).map(x => x.getSnippet)// + "   w = "+x.getWieght.getValue)
-                       
-          val list1:java.util.List[ICompletionProposal] = new java.util.LinkedList[ICompletionProposal]()
-          
-          var i = sortedResults.length
-          sortedResults.foreach(x =>{  
-              list1.add(new InSynthCompletitionProposal(x, i))
-              i -=1
-            }
-          )
-          
-          //Make a new builder
-          val pl = new PredefBuilderLoader()
-          pl.start()
-          
-          list1
-         }(javaEmptyList())
-    }
-  
+        } catch {
+          case ex =>
+            logger.error("InSynth synthesis failed.", ex)
+            results = Nil
+        }
+
+        val sortedResults = results.sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue).map(x => x.getSnippet) // + "   w = "+x.getWieght.getValue)
+
+        val list1: java.util.List[ICompletionProposal] = new java.util.LinkedList[ICompletionProposal]()
+
+        var i = sortedResults.length
+        sortedResults.foreach(x => {
+          list1.add(new InSynthCompletitionProposal(x, i))
+          i -= 1
+        })
+
+        //Make a new builder
+        val pl = new PredefBuilderLoader()
+        pl.start()
+
+        list1
+    }(javaEmptyList())
+  }
+
   private def getNewContent(position: Int, oldContent: Array[Char]): Array[Char] = {
     val (cont1, cont2) = oldContent.splitAt(position)
-    
+
     val mark = ";{  ;exit()};".toCharArray
-      
+
     val newContent = Array.ofDim[Char](oldContent.length + mark.length)
-    
+
     System.arraycopy(cont1, 0, newContent, 0, cont1.length)
     System.arraycopy(mark, 0, newContent, cont1.length, mark.length)
     System.arraycopy(cont2, 0, newContent, cont1.length + mark.length, cont2.length)
-    
+
     println("New content:")
-    newContent.foreach{print}
+    newContent.foreach { print }
     //println()
     newContent
   }
-  }
+}
 
 class InsynthCompletionProposalComputer extends IJavaCompletionProposalComputer {
   
