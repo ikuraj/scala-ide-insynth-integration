@@ -25,9 +25,9 @@ class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPrefer
 
   setDescription("Setting for the InSynth plugin.")
   
-  override def createFieldEditors() {      
-    println("createFieldEditors")
+  override def createFieldEditors() {
     addField(new IntegerFieldEditor(OfferedSnippetsPropertyString, "Number of snippets", getFieldEditorParent))
+    addField(new IntegerFieldEditor(MaximumTimePropertyString, "Maximum computation time (ms)", getFieldEditorParent))
   }
 
   override def createContents(parent: Composite): Control = {
@@ -48,5 +48,6 @@ class InSynthPreferencePageInitializer extends AbstractPreferenceInitializer {
     val store = Activator.getDefault.getPreferenceStore
 
     store.setDefault(OfferedSnippetsPropertyString, NumberOfOfferedSnippets)
+    store.setDefault(MaximumTimePropertyString, MaximumTime)
   }
 }

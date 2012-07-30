@@ -13,27 +13,32 @@ import ch.epfl.insynth.Config
  * object which application transforms an InSynth representation input
  * to the pruned tree representation
  */
-object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
+object Combinator extends ((InSynth.SimpleNode, Int, Int) => Node) {
   
+  // general logger for the combinator step
   val logger = Rules.logger
+  // logging actions inside the application
   val logApply = Rules.logApply//(logger.getName + ".apply")
+  // logging interactions with the priority queue
   val logPQAdding = Config.logPQAdding
-  
-//  // predefined default number of combinations
-//  val predefinedNeededCombinations = 15
-//  
-//  // apply without specifying the number of combinations
-//  def apply(root: InSynth.SimpleNode):SimpleNode = {
-//    apply(root, predefinedNeededCombinations)
-//  }
-  
-  // apply with number of combinatinos needed
-  def apply(root: InSynth.SimpleNode, neededCombinations: Int):SimpleNode = {
+      
+  /**
+   * perform the transformation - apply with number of combinations needed, the resulting
+   * pruned tree will encode at least this number of combinations
+   * @param root root of the input proof tree
+   * @param neededCombinations number of combinations needed
+   * @param maximumTime maximal number of milliseconds the combinator should take
+   * @return root node of the proof tree
+   */
+  def apply(root: InSynth.SimpleNode, neededCombinations: Int, maximumTime: Int): SimpleNode = {
     // logging
     if (Rules.isLogging) {
-    logApply.entering(getClass.getName, "apply")
-    logApply.finest("Entering combinator step (root: "+ FormatNode(root, Config.logCombinatorInputProofTreeLevel) + ", combinations: " + neededCombinations)
+	    logApply.entering(getClass.getName, "apply")
+	    logApply.finest("Entering combinator step (root: "+ FormatNode(root, Config.logCombinatorInputProofTreeLevel) + ", combinations: " + neededCombinations)
     }
+    
+    // get time at the beginning of the combination step
+    val startTime = System.currentTimeMillis
         
     // import transformer from InSynth to intermediate declaration
     import DeclarationTransformer.fromInSynthDeclaration
@@ -55,23 +60,15 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
     val rootTree:Tree = new TopTree(neededCombinations)
     // a single declaration of the root Tree is the one corresponding to the root node
     val rootDeclaration = Composite(rootTree, fromInSynthDeclaration(root.getDecls.head), root)
-    
-    /* start the traversal */
-    
+        
     // add the root declaration and an empty set
     val startTuple = (rootDeclaration, Set[InSynth.Node]())
     pq += startTuple
     
-    // DEBUG
-    //var steps = 0
+    /* start the traversal */
     
     // while there is something in the queue
-    while (! pq.isEmpty/* && steps<100*/) {
-      
-//      if (steps >= 99) {
-//        logApply.warning("steps 100 hit")
-//      }
-//      steps += 1
+    while (!pq.isEmpty && (System.currentTimeMillis - startTime < maximumTime)) {
       
       // dequeue a pair
       val (currentDeclaration, visited) = pq.dequeue
@@ -212,24 +209,16 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
         
     // logging
     if (Rules.isLogging) {
-//      if (steps >0) {
-//        logger.severe("pq has items: " + pq.size)
-//        while(!pq.isEmpty) {
-//          val item = pq.dequeue
-//         logger.severe("pq leftover(weight " + item._1.getTraversalWeight + " ):" + FormatNode(item._1.getAssociatedNode, 0)) 
-//        }
-//      }
-      
-    if (rootDeclaration.isPruned) {
-      logger.severe("Root declaration is pruned!")
-    }
-    if (!rootDeclaration.isDone) {
-      logger.severe("Root declaration is not done!")
-    }     
-//    logger.finest("End of apply, reconstruction structures are: " + FormatCombinations(rootDeclaration) )
-    logger.info("Number of combinations found: " + rootDeclaration.getNumberOfCombinations )
-    
-    logApply.exiting(getClass.getName, "apply")
+	    if (rootDeclaration.isPruned) {
+	      logger.severe("Root declaration is pruned!")
+	    }
+	    if (!rootDeclaration.isDone) {
+	      logger.severe("Root declaration is not done!")
+	    }     
+	//    logger.finest("End of apply, reconstruction structures are: " + FormatCombinations(rootDeclaration) )
+	    logger.info("Number of combinations found: " + rootDeclaration.getNumberOfCombinations )
+	    
+	    logApply.exiting(getClass.getName, "apply")
     }
     
     // return transformed pruned tree as a result
@@ -237,9 +226,10 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
     
     // logging
     if (Rules.isLogging) {
-	logger.fine("Returning from apply with result: " + FormatPrNode(result) )
+    	logger.fine("Returning from apply with result: " + FormatPrNode(result) )
     }
     
+    // return the root node of the pruned tree
     result
   }
   

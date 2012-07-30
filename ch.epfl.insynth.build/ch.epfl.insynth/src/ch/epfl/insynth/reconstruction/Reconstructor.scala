@@ -6,19 +6,24 @@ import ch.epfl.insynth.Config
 import ch.epfl.insynth.reconstruction.combinator.Combinator
 import ch.epfl.insynth.reconstruction.intermediate.IntermediateTransformer
 import ch.epfl.insynth.reconstruction.codegen.{ Extractor, CodeGenerator }
-
-// for log printing
 import java.util.logging.Logger
 import ch.epfl.insynth.reconstruction.intermediate.FormatableIntermediate
 import ch.epfl.insynth.reconstruction.combinator.FormatPrNode
+import ch.epfl.insynth.core.Activator
+import ch.epfl.insynth.core.preferences.InSynthConstants
 
 object Reconstructor {
 
   def apply(tree:SimpleNode):List[Output] = {
-    // get needed number of snippets from Config
-    val numberOfCombinations = Config.numberOfSnippets
+    // get needed number of snippets from the store
+    val numberOfCombinations = Activator.getDefault.getPreferenceStore.getInt(
+  		InSynthConstants.OfferedSnippetsPropertyString)
+		
+		// get maximum duration of the combination step
+		val maximumTime = Activator.getDefault.getPreferenceStore.getInt(
+	    InSynthConstants.MaximumTimePropertyString)
     
-    val combinatorTree = Combinator(tree, numberOfCombinations)
+    val combinatorTree = Combinator(tree, numberOfCombinations, maximumTime)
     
     if (Config.isLogging) {
       Config.logReconstructor.info(
