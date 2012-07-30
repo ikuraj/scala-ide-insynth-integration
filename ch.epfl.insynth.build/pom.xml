@@ -215,7 +215,7 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>Indigo</id>
+			<id>eclipse.indigo</id>
 			<name>Eclipse Indigo p2 repository</name>
 			<layout>p2</layout>
 			<url>${repo.eclipse}</url>
@@ -224,7 +224,7 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>ajdt-indigo</id>
+			<id>ajdt.indigo</id>
 			<name>AJDT for Eclipse Indigo p2 repository</name>
 			<layout>p2</layout>
 			<url>${repo.ajdt}</url>
