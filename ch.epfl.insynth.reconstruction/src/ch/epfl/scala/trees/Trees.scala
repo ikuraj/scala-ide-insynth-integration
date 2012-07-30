@@ -13,3 +13,30 @@ case class Const(val name: String) extends ScalaType
 //----------------------------------------- POLYMORPHIC TYPES --------------------------------------------------------//
 
 case class Variable(val name:String) extends ScalaType
+
+case class FormatScalaType(tpe: ScalaType) extends ch.epfl.insynth.print.Formatable {
+  override def toDocument = toDocument(tpe)
+  
+  def toDocument(tpe: ScalaType): scala.text.Document = {
+    import ch.epfl.insynth.print.FormatHelpers._
+    import scala.text.Document._
+    
+    tpe match {
+      case Method(receiver, params, returnType) =>
+        "Method" :: paren(
+            foldDoc(
+              for (list <- params) yield {
+                paren(seqToDoc(list, ",", toDocument(_:ScalaType)))
+              }, " "
+            )
+        )
+      case Function(params, returnType) =>
+        "Function" :: paren(
+            seqToDoc(params, ",", toDocument(_:ScalaType))
+        )   
+      case Const(name) =>
+        name
+      case _ => "Not implemented yet!"
+    }
+  }
+}

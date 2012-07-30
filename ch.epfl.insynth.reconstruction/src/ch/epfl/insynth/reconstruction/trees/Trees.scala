@@ -17,7 +17,7 @@ trait Typable {
  * abstract tree node
  * is capable of returning its type and to format itself
  */
-abstract class Node extends Typable// with FormatableIntermediate
+abstract class Node extends Typable
 
 /**
  * a leaf node, descent down the tree finishes at a subclass of this node 
@@ -77,6 +77,7 @@ class FormatableIntermediate(node: Node) extends Formatable {
     node match {
       case Variable(tpe, name) => paren(name :: ": " :: tpe.toString) 
       case Identifier(tpe, dec) => dec.getSimpleName
+      case NullLeaf => "Null"
       case Application(tpe, params) => {
         val headDoc:Document = params.head.head match {
           case Variable(_, name) => name

@@ -17,13 +17,19 @@ class InSynthPlugin(val global: Global) extends Plugin {
   /** A short description of the plugin, read from the properties file */
   val description = PluginProperties.pluginDescription
   
-  /** @todo A description of the plugin's options */
   override val optionsHelp = Some(
-    "  -P:"+ name +":option     sets some option for this plugin")
+    "  -appStatFile:"+ name +":option     sets a filename for statistics to be written")
 
-  /** @todo Implement parsing of plugin options */
+  /** get file to write statistics */
   override def processOptions(options: List[String], error: String => Unit) {
     super.processOptions(options, error)
+    for (option <- options) {
+      if (option.startsWith("appStatFile:")) {
+        Config.outputFilename = option.substring("appStatFile:".length)
+      } else {
+        error("Option not recognized: " + option)
+      }
+    }
   }
 
   /** The compiler components that will be applied when running

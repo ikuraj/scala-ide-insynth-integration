@@ -4,6 +4,7 @@ import ch.epfl.insynth.reconstruction.CodeGenerator
 import ch.epfl.insynth.combinator.Combinator
 import ch.epfl.insynth.env.SimpleNode
 import ch.epfl.insynth.env.FormatNode
+import ch.epfl.insynth.reconstruction.Extractor
 
 object CodeGenTest {
   
@@ -12,13 +13,23 @@ object CodeGenTest {
   implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
 
   def main(args: Array[String]): Unit = {
-    parametrizedTreeReconstruct(TreeExample.buildTreeWithCurryingFunctions)
-    simpleTreeReconstruct
-    complexTreeReconstruct
-    arrowTreeReconstruct
-    overlapTreeReconstruct
-    absApplicationTreeReconstruct
-    sKombinatorTreeReconstruct
+    val trees =      
+      Array(
+        TreeExample.buildSimpleTree, TreeExample.buildComplexTree,
+        TreeExample.buildTreeAbsApplication,
+        TreeExample.buildTreeArrowType,
+        TreeExample.buildTreeCycles, 
+        TreeExample.buildTreeOverlapParameterTypeWithReturnType,        
+        TreeExample.buildTreeSKombinator, 
+          TreeExample.buildTreeWithCurryingFunctions,
+        TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
+        TreeExample.buildTreeIdentityFunction,
+        TreeExample.buildTreeWithConstructors
+      )
+      
+      
+    for (tree <- trees )
+      parametrizedTreeReconstruct(tree) 
     
 //    val S:(Int=>(Char=>String))=>(Int=>Char)=>Int=>String = 
 //    {
@@ -42,98 +53,11 @@ object CodeGenTest {
     println("intial tree")
     givenTree.println
     println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(givenTree, numberOfCombinations)))
+    for ((tree, weight) <- Extractor(IntermediateTransformer(Combinator(
+        givenTree, numberOfCombinations)), numberOfCombinations))
     {
 	  for (output <- CodeGenerator(tree)) {
-	    println("----------------")
-	    output.println
-	  }
-    }
-  }
-  
-  def simpleTreeReconstruct() = {
-    val simpleTree = TreeExample.buildSimpleTree
-    
-    println("simple tree")    
-    simpleTree.println
-    
-    val transformedTrees = IntermediateTransformer(Combinator(simpleTree, numberOfCombinations))
-    println("after intermediate transform")
-    
-    println("simple tree transformed")    
-    for (tree <- transformedTrees){
-	  for (output <- CodeGenerator(tree)) {
-	    output.println
-	  }
-    }
-  }
-  
-  def complexTreeReconstruct() = {
-    val complexTree = TreeExample.buildComplexTree
-    
-    println("complex tree")
-    complexTree.println
-    
-    val transformedTrees = IntermediateTransformer(Combinator(complexTree, numberOfCombinations))
-    println("after intermediate transform")
-    
-    for (tree <- transformedTrees){
-	  for (output <- CodeGenerator(tree)) {
-	    println("----------------")
-	    output.println
-	  }
-    }
-  }
-  
-  def arrowTreeReconstruct() = {
-    val arrowTree = TreeExample.buildTreeArrowType
-    
-    println("arrow tree")
-    val transformedTrees = IntermediateTransformer(Combinator(arrowTree, numberOfCombinations))
-    println("after intermediate transform")
-    
-    for (tree <- transformedTrees){
-	  for (output <- CodeGenerator(tree)) {
-	    println("----------------")
-	    output.println
-	  }
-    }
-  }
-  
-  def overlapTreeReconstruct() = {
-    println("overlap tree")
-    TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
-    println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, numberOfCombinations)))
-    {
-	  for (output <- CodeGenerator(tree)) {
-	    println("----------------")
-	    output.println
-	  }
-    }
-  }
-  
-  def absApplicationTreeReconstruct() = {
-    println("abs application tree")
-    TreeExample.buildTreeAbsApplication.println
-    println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeAbsApplication, numberOfCombinations)))
-    {
-	  for (output <- CodeGenerator(tree)) {
-	    println("----------------")
-	    output.println
-	  }
-    }
-  }
-  
-  def sKombinatorTreeReconstruct() = {
-    println("s kombinator tree")
-    TreeExample.buildTreeSKombinator.println
-    println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeSKombinator, numberOfCombinations)))
-    {
-	  for (output <- CodeGenerator(tree)) {
-	    println("----------------")
+	    println("----------" + weight + "----------")
 	    output.println
 	  }
     }

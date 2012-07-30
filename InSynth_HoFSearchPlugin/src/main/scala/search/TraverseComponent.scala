@@ -73,10 +73,45 @@ class TraverseComponent(val global: Global) extends PluginComponent {
       (t, level)
     }
   }
-
+  
+    def getApplicationInfo(tpe: Type): Boolean = {
+      
+      def isPolymorphic(tpe: Type): Boolean = tpe match {
+	    case TypeRef(pre: Type, sym: Symbol, args: List[Type]) if (!sym.isMonomorphicType && !args.isEmpty) =>
+	      false
+	    case TypeRef(pre: Type, sym: Symbol, args: List[Type]) if (sym.isTypeParameter) =>
+	      true
+	    case TypeRef(pre: Type, sym: Symbol, args: List[Type]) =>
+	      (false /: args) { (res, arg) => res || isPolymorphic(arg) }
+	    case _ => false
+	  }
+      
+      def getApplicationInfoMethodRec(methodType: Type): Boolean = methodType match {
+        case m:MethodType if (m.isHigherKinded) => true
+        case MethodType(params, resultType) => {
+          if ((false /: params) { (res, param) => res || isPolymorphic(param.tpe) } )
+            true
+          else
+            getApplicationInfoMethodRec(resultType)
+        }
+        case t => getApplicationInfoFunctionRec(t)
+      }
+      
+      def getApplicationInfoFunctionRec(functionType: Type): Boolean = functionType match {
+        case TypeRef(pre: Type, sym: Symbol, args: List[Type]) if(definitions.isFunctionType(functionType)) =>
+          if ((false /: args.init) { (res, param) => res || isPolymorphic(param) } )
+            true
+          else
+            getApplicationInfoFunctionRec(args.last)
+        case t => false
+      }
+      
+      getApplicationInfoMethodRec(tpe)
+    }
+  
   def isPolymorphic(tpe: Type): Boolean = tpe match {
     case TypeRef(pre: Type, sym: Symbol, args: List[Type]) if (!sym.isMonomorphicType && !args.isEmpty) =>
-      true
+      false
     case TypeRef(pre: Type, sym: Symbol, args: List[Type]) if (sym.isTypeParameter) =>
       true
     case _ => false
@@ -115,13 +150,16 @@ class TraverseComponent(val global: Global) extends PluginComponent {
         //        logger.fine("definitions.isFunctionType(fun.symbol.tpe) " + definitions.isFunctionType(fun.symbol.tpe))
         logger.fine("App tree: " + fun + " tree position " + tree.pos)
 
-        val isPolymorphicRes = (false /: args) { (res, arg) => res || isPolymorphic(arg.tpe) }
+        val isPolymorphicRes = (fun.toString.contains("[") /: args) {
+          (res, arg) => res || arg.toString.contains("[")
+        } 
+          //(false /: args) { (res, arg) => res || isPolymorphic(arg.tpe) }
         logger.info("isPolymorphic =" + isPolymorphicRes)
 
         val isCandidate = (false /: args) {
           (result, arg) => result || checkIfFunctionType(arg.tpe)
         }
-        if (isCandidate)
+        if (isCandidate && !isPolymorphicRes)
           appendToFile(Config.outputFilename,
             tree.symbol.name + "...=" + tree.pos.source.path + ":" + tree.pos.line)
       }

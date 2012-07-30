@@ -13,11 +13,14 @@ object Reconstructor {
     val numberOfCombinations = Config.numberOfSnippets
     
     // transform the trees (first two steps of the code generation phase)
-    val transformedTrees = IntermediateTransformer(Combinator(tree, numberOfCombinations))
-       
+    val transformedTree = IntermediateTransformer(Combinator(tree, numberOfCombinations))
+     
     // for each tree, generate the code for it
-    val generatedCode = transformedTrees.toList map {
-      resTree => CodeGenerator(resTree)
+    val extractedTrees = Extractor(transformedTree, numberOfCombinations)
+    
+    // for each tree, generate the code for it
+    val generatedCode = extractedTrees map {
+      resPair => (CodeGenerator(resPair._1).head, resPair._2)
     }
         
     // log all snippets
@@ -28,8 +31,8 @@ object Reconstructor {
 //    )
     
     // collect all generated snippets
-    (generatedCode.flatten.map {      
-      output => Output(output.toString, new Weight(0.0))
+    (generatedCode map {      
+      output => Output(output._1.toString, new Weight(output._2))
     })    
   }
   

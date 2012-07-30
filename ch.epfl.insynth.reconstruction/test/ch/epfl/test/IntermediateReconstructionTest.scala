@@ -6,6 +6,7 @@ import ch.epfl.insynth.env.Node
 import ch.epfl.insynth.env.SimpleNode
 import ch.epfl.insynth.env.FormatNode
 import ch.epfl.insynth.combinator.FormatPrNode
+import ch.epfl.insynth.reconstruction.Extractor
 
 object IntermediateReconstructionTest {
   
@@ -40,89 +41,8 @@ object IntermediateReconstructionTest {
     println("after intermediate transform")
     
     println("simple tree transformed") 
-    assert(transformedTrees.size > 0)
-    for (term <- transformedTrees) {
-	  FormatableIntermediate(term).println
-	  println(term)
-    }    
-  }
-  
-  def simpleTreeTransform() = {
-    val simpleTree = TreeExample.buildSimpleTree
-    
-    println("simple tree")    
-    simpleTree.println
-    
-    val prunedTree = Combinator(simpleTree, 1)
-    println("pruned tree")    
-    prunedTree.println
-    
-    val transformedTrees = IntermediateTransformer(prunedTree)
-    println("after intermediate transform")
-    
-    println("simple tree transformed")    
-    for (term <- transformedTrees){
-	  FormatableIntermediate(term).println
-    }
-  }
-  
-  def complexTreeTransform() = {
-    val complexTree = TreeExample.buildComplexTree
-    
-    println("complex tree")
-    complexTree.println
-    
-    val prunedTree = Combinator(complexTree, 100)
-    println("pruned tree")    
-    prunedTree.println
-    
-    val transformedTrees = IntermediateTransformer(prunedTree)
-    println("after intermediate transform")
-    
-    for (tree <- transformedTrees)
-      FormatableIntermediate(tree).println
-  }
-  
-  def arrowTreeTransform() = {
-    val arrowTree = TreeExample.buildTreeArrowType
-    
-    println("arrow tree")
-    arrowTree.println
-    
-    val prunedTree = Combinator(arrowTree, 100)
-    println("pruned tree")    
-    prunedTree.println    
-    
-    val transformedTrees = IntermediateTransformer(prunedTree)
-    println("after intermediate transform")
-    
-    for (tree <- transformedTrees)
-      FormatableIntermediate(tree).println
-  }
-  
-  def overlapTreeTransform() = {
-    println("overlap tree")
-    TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
-    println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, numberOfCombinations)))
-      FormatableIntermediate(tree).println
-  }
-  
-  def absApplicationTreeTransform() = {
-    println("abs application tree")
-    TreeExample.buildTreeAbsApplication.println
-    println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeAbsApplication, numberOfCombinations)))
-      FormatableIntermediate(tree).println
-  }
-  
-  
-  def sKombinatorTreeTransform() = {
-    println("s kombinator tree")
-    TreeExample.buildTreeSKombinator.println
-    println("after intermediate transform")
-    for (tree <- IntermediateTransformer(Combinator(TreeExample.buildTreeSKombinator, numberOfCombinations)))
-      FormatableIntermediate(tree).println
+	FormatableIntermediate(transformedTrees).println
+	println(transformedTrees)
   }
 
 }

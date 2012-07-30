@@ -12,7 +12,7 @@ import scala.collection.mutable.MutableList
 class TraverseComponent (val global: Global) extends PluginComponent {
   import global._
   import global.definitions._
-    
+      
   lazy val logger = Config.logger
 
   val runsAfter = List[String]("refchecks")

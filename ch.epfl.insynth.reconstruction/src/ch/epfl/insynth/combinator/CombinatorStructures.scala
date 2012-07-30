@@ -10,6 +10,8 @@ import java.util.logging.Level
 import java.util.logging.ConsoleHandler
 import java.util.logging.FileHandler
 import java.util.logging.SimpleFormatter
+import ch.epfl.insynth.Config
+import ch.epfl.insynth.env.FormatNode
 
 // TODO set required combinations in each Tree node after we hit the limit in the top
 // tree
@@ -22,34 +24,11 @@ import java.util.logging.SimpleFormatter
  * dictates some rules about the combination search and declares loggers
  */
 object Rules {
-  // defines loggers
-  val logger = Logger.getLogger("reconstruction.combination")
-  val logStructures = Logger.getLogger("reconstruction.combination.structures")
-  val logApply = Logger.getLogger("reconstruction.combination.apply")
-  
-  val isLogging = true
-  
-  // static code for loggers setup
-  {    
-    for (handler <- Logger.getLogger("reconstruction.combination").getHandlers)
-      Logger.getLogger("reconstruction.combination").removeHandler(handler)
-    for (handler <- Logger.getLogger("reconstruction.combination.apply").getHandlers)
-      Logger.getLogger("reconstruction.combination.apply").removeHandler(handler)
-    for (handler <- Logger.getLogger("reconstruction.combination.structures").getHandlers)
-      Logger.getLogger("reconstruction.combination.structures").removeHandler(handler)
-      
-    Logger.getLogger("reconstruction.combination").setLevel(Level.FINE)
-    Logger.getLogger("reconstruction.combination.apply").setLevel(Level.FINE)
-    Logger.getLogger("reconstruction.combination.structures").setLevel(Level.INFO)
-      
-    val handler = new FileHandler("%h/combinator%u.log");
-    handler.setFormatter(new SimpleFormatter)
-    // PUBLISH this level
-    handler.setLevel(Level.FINEST);
-    Logger.getLogger("reconstruction.combination").addHandler(handler);
-//    Logger.getLogger("reconstruction.combination.apply").addHandler(handler);
-//    Logger.getLogger("reconstruction.combination.structures").addHandler(handler);
-  }
+  // define logging
+  val logger = Config.logger
+  val logStructures = Config.logStructures
+  val logApply = Config.logApply  
+  val isLogging = Config.isLogging  
   
   // if the pruning started
   var doPruning = false
@@ -72,6 +51,9 @@ trait Combinations {
   
   // get weight value with respect to the traversal
   def getTraversalWeight: Double
+  
+  // get weight value of the computed tree
+  def getMinComputedWeight: Double
 }
 
 /**
@@ -136,7 +118,12 @@ extends Combinations
     
   // this method is called when some associated expression is explored
   def childDone(decl: Expression):Unit = {
-    minWeight = Math.min(decl.getTraversalWeight, minWeight)
+    if (Config.isLogging) {
+	  Config.logStructures.entering(this.getClass.getName, "childDone")
+	  Config.logStructures.info("Tree(" + this + ") received decl with weight " +
+        decl.getMinComputedWeight + "and has minWeight " + minWeight)
+    }
+    minWeight = Math.min(getTraversalWeight + decl.getMinComputedWeight, minWeight)
     parent.childDone(this)
   }
   
@@ -197,16 +184,22 @@ extends Combinations
   override def toString =
     "Tree(" + 
     ("" /: decls ) { 
-	  (string, dec) => { string + "," + dec.getAssociatedNode.toString }
+	  (string, dec) => { string + "," + FormatNode(dec.getAssociatedNode, 0) }
   	} + ")"
   	
   // traversal weight corresponds to the one of the parent (composite)	
   override def getTraversalWeight = parent.getTraversalWeight
+  
+  // minimum computed weight for this tree is the minWeight
+  override def getMinComputedWeight = minWeight
   	
   // check if the weight is pruned at this tree
   // a method that can speed up pruning (if weight at the start is greater than minWeight
   // of some parent tree up the hierarchy)
   def checkIfPruned(weight: Double): Boolean = {
+  	if (Config.isLogging && weight > minWeight) {
+  	  Config.logStructures.info("At node(" + this + ") checkIfPruned succeded (" + weight + ">" + minWeight + ")")
+  	}  	
     if (weight > minWeight) true
   	else parent.associatedTree.checkIfPruned(weight)
   }
@@ -252,14 +245,17 @@ extends Expression(associatedTree, associatedNode) {
   }
   
   def childDone(decl: Tree):Unit = {
+    for (child <- doneChildren)
+      assert(child.getMinComputedWeight < Double.MaxValue)
+    
     doneChildren += decl
     // if my weight is larger or equal then prune my sub-tree
     // NOTE after the point of enough combinations, accepts only better nodes
     // NOTE we can get a call to childDone again but minWeight will be the same as
     // previously set getWeight (we need >)
-    if (Rules.doPruning && getTraversalWeight > associatedTree.minWeight && !isPruned) {
+    if (Rules.doPruning && associatedTree.getTraversalWeight + getMinComputedWeight > associatedTree.minWeight && !isPruned) {
       if (Rules.isLogging)	
-    	Rules.logger.info("Pruning Composite (" + FormatNode(associatedNode, true) + ")")
+    	Rules.logger.info("Pruning Composite (" + FormatNode(associatedNode, 0) + ")")
     	
       // mark the node as pruned
 	  setPruned(true)
@@ -285,7 +281,7 @@ extends Expression(associatedTree, associatedNode) {
   override def setPruned(valPruned: Boolean):Unit = {
     // logging
     if (Rules.isLogging && associatedTree.minWeight >= getTraversalWeight && !associatedTree.isPruned) {
-      Rules.logStructures.warning("Pruning (" + FormatNode(associatedNode, true) + ") but it has the min weight at associated tree.")
+      Rules.logStructures.warning("Pruning (" + FormatNode(associatedNode, 0) + ") but it has the min weight at associated tree.")
     }
     super.setPruned(valPruned)
     for (tree <- children; if !tree.isPruned) {
@@ -319,12 +315,14 @@ extends Expression(associatedTree, associatedNode) {
   }
     
   override def getTraversalWeight = {
-    // return weight as sum of geWeight in super class and weights of all children
-//    (super.getWeight /: doneChildren) {
-//      (sum, child) => sum + child.minWeight
-//    }
     super.getTraversalWeight + origDecl.getWeight
   }
+  
+    // return weight as sum of geWeight in super class and weights of all children
+  override def getMinComputedWeight =
+    (origDecl.getWeight /: doneChildren) {
+      (sum, child) => sum + child.minWeight
+    }
   
   override def toString =
     "Composite(" + origDecl.getSimpleName + ":" + getTraversalWeight + ")"
@@ -357,6 +355,8 @@ extends Expression(associatedTree, associatedNode) {
     super.getTraversalWeight + origDecl.getWeight
   }
   
+  override def getMinComputedWeight = origDecl.getWeight
+  
   override def toString =
     "Simple(" + origDecl.getSimpleName + ":" + getTraversalWeight + ")"
 }
@@ -372,7 +372,7 @@ extends Expression(associatedTree, associatedNode) {
     // logging
     if (Rules.isLogging) {
 	    Rules.logStructures.entering(getClass.getName, "toTreeNode")    
-	    Rules.logStructures.fine("toTreeNode started on: " + FormatNode(associatedNode, true))
+	    Rules.logStructures.fine("toTreeNode started on: " + FormatNode(associatedNode, 0))
     }
     AbsNode(associatedTree.tpe)
   }
@@ -385,6 +385,8 @@ extends Expression(associatedTree, associatedNode) {
   override def getTraversalWeight = {
     super.getTraversalWeight + weight
   }
+  
+  override def getMinComputedWeight = weight
 }
 
 case class FormatCombinations(comb: Combinations) extends ch.epfl.insynth.print.Formatable {

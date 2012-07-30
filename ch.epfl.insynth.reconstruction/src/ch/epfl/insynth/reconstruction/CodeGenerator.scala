@@ -91,16 +91,19 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
         import Bool._
         
         // most usual transformation in which the head is a function
-        def firstTermFunctionTransform =
+        def firstTermFunctionTransform = {
+          // set the recursive transformation context
+          val recCtx = if (params.tail.size == 1) SinglePar else Par
           // go through all possible transformations of functions
           (List[Document]() /: transform(params.head.head, App)) {
               (list, appIdentifier) =>
         	  	// get every possible parameter combination
-                (list /: getParamsCombinations(params.tail)) {
+                (list /: getParamsCombinations(params.tail, recCtx)) {
             	  (list2, paramsDoc) => list2 :+
     			    group( doParenApp(appIdentifier, paramsDoc) )		      
                 }
           }
+        }
         
         // match the application definition term
         params.head.head match {
@@ -147,7 +150,10 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	        	case _ => throw new RuntimeException("Declared method but scala type is not")
         	  }
 	          // set if we need parentheses
-	          parenthesesRequired = params.drop(2).size > 1
+	          parenthesesRequired = 
+	            // if we have more than one parameter or this term is a single parameter
+	            // to outer application
+	            params.drop(2).size > 1 || ctx == SinglePar
         	  // go through all combinations of parameters documents
     		  return (List[Document]() /: getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)) {
 	    		(list, paramsDoc) => list :+
@@ -187,7 +193,7 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	        else if (!decl.isMethod) {
 	          assert(!decl.isConstructor)
         	  // just a function
-	          parenthesesRequired = params.tail.size >= 1
+	          parenthesesRequired = params.tail.size >= 1 || ctx == SinglePar
         	  firstTermFunctionTransform
 	        }
 	        else // if (decl.isMethod)
@@ -199,7 +205,7 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	        	  case _ => throw new RuntimeException("Declared method but scala type is not")
 	        	}
 	        	// currying will handle parentheses if needed
-	        	parenthesesRequired = params.drop(2).size > 1
+	        	parenthesesRequired = params.drop(2).size != 1 || ctx == SinglePar
 	        	// if the method needs this keyword
 	        	val needsThis = decl.hasThis
 	        	(List[Document]() /: params(1)) {

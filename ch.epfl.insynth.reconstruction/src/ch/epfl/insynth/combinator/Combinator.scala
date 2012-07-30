@@ -7,6 +7,7 @@ import java.util.logging.Logger
 import java.util.logging.ConsoleHandler
 import ch.epfl.insynth.env.FormatNode
 import java.util.logging.Level
+import ch.epfl.insynth.Config
 
 /**
  * object which application transforms an InSynth representation input
@@ -16,6 +17,7 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
   
   val logger = Rules.logger
   val logApply = Rules.logApply//(logger.getName + ".apply")
+  val logPQAdding = Config.logPQAdding
   
 //  // predefined default number of combinations
 //  val predefinedNeededCombinations = 15
@@ -30,7 +32,7 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
     // logging
     if (Rules.isLogging) {
     logApply.entering(getClass.getName, "apply")
-    //logApply.finest("Entering combinator step (root: "+ FormatNode(root) + ", combinations: " + neededCombinations)
+    logApply.finest("Entering combinator step (root: "+ FormatNode(root, Config.logCombinatorInputProofTreeLevel) + ", combinations: " + neededCombinations)
     }
         
     // import transformer from InSynth to intermediate declaration
@@ -72,18 +74,18 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	            
 	      // if current declaration is pruned or already visited on this path, log
 	      if (currentDeclaration.isPruned) {
-	        logApply.fine("Declaration with " + FormatNode(currentDeclaration.getAssociatedNode, true) + " pruned")
+	        logApply.fine("Declaration with " + FormatNode(currentDeclaration.getAssociatedNode, 0) + " pruned")
 	      }
 	      if (visited.contains(currentDeclaration.getAssociatedNode)) {
-	        logApply.fine("Stumbled upon a cycle (discarding the node: " + FormatNode(currentDeclaration.getAssociatedNode, true) + ")")
+	        logApply.fine("Stumbled upon a cycle (discarding the node: " + FormatNode(currentDeclaration.getAssociatedNode, 0) + ")")
 	      }
 	      
 	      // additional pruning conditions
 	      if (currentDeclaration.getAssociatedTree.isPruned) {
-	        logApply.fine("!Declaration with " + FormatNode(currentDeclaration.getAssociatedNode, true) + " pruned")
+	        logApply.fine("!Declaration " + currentDeclaration + " pruned")
 	      }
 	      if (Rules.doPruning && currentDeclaration.getAssociatedTree.checkIfPruned(currentDeclaration.getTraversalWeight)) {
-	        logApply.fine("!!Declaration with " + FormatNode(currentDeclaration.getAssociatedNode, true) + " pruned")
+	        logApply.fine("!!Declaration " + currentDeclaration + " pruned")
 	      }
 	      
 	      if (Rules.doPruning)
@@ -130,8 +132,14 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	                  for (dec <- node.getDecls;
 	                  // optimization - only consider those nodes that have less weight than
 	                  // all trees up to the tree
-	                  if !(Rules.doPruning && paramTree.checkIfPruned(dec.getWeight.getValue
-                		  + paramTree.getTraversalWeight))
+	                  val notConsider = Rules.doPruning && paramTree.checkIfPruned(dec.getWeight.getValue
+                		  + paramTree.getTraversalWeight);
+            		  // logging
+            		  val dummy =
+            		    if (Config.isLogging && notConsider) {
+            		      logPQAdding.info("Decl " + dec.getSimpleName + " is not considered")
+            		    }
+	                  if !notConsider
             		  ) // for
 	                  {
 	                    	                    
@@ -144,7 +152,7 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	                      
                         // logging
                 		if (Rules.isLogging)
-	                    logApply.finer("Adding simple " + dec.getSimpleName + " to the queue")
+	                    logPQAdding.finer("Adding " + newPair._1 + " to the queue")
                         // add new pair to the queue 
 	                    
                     	pq += newPair
@@ -152,11 +160,17 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
                   // if there are parameters insert composite nodes
 	              } else {
 	                  // for each of its declarations
-	                  for (dec <- node.getDecls 
+	                  for (dec <- node.getDecls;
 	                  // optimization - only consider those nodes that have less weight than
 	                  // all trees up to the tree
-	                  if !(Rules.doPruning && paramTree.checkIfPruned(dec.getWeight.getValue
-                		  + paramTree.getTraversalWeight))
+	                  val notConsider = Rules.doPruning && paramTree.checkIfPruned(dec.getWeight.getValue
+                		  + paramTree.getTraversalWeight);
+            		  // logging
+            		  val dummy =
+            		    if (Config.isLogging && notConsider) {
+            		      logPQAdding.info("Decl " + dec.getSimpleName + " is not considered")
+            		    }
+	                  if !(notConsider)
             		  ) // for 
 	                  {
 	                    // new pair of simple expression and extended path
@@ -168,7 +182,7 @@ object Combinator extends ((InSynth.SimpleNode, Int) => Node) {
 	                      	                      
                         // logging
                 		if (Rules.isLogging)
-	                    logApply.finer("Adding composite " + dec.getSimpleName + " to the queue")
+	                    logPQAdding.finer("Adding " + newPair._1 + " to the queue")
 	                    
                         // add new pair to the queue 
 	                    pq += newPair

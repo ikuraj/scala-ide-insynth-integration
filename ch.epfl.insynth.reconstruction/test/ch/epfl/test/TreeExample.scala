@@ -1429,4 +1429,108 @@ object TreeExample {
 	  query
 	}
 	
+	/**
+	 * Constructs a simple tree which has two methods with same InSynth type but
+	 * different number of parameters (and weights sum)
+	 */
+	def buildSameInSynthDifferentWeight = {
+	  //************************************
+	  // Goals
+	  //	find expression of type: String
+	  //	expression: query(f1(i), f2(i, i))
+	  //************************************
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // def f1(Int): String	  
+	  val f1 = Function(List(typeInt), typeString)
+	  // def f2(Int, Int): String	  
+	  val f2 = Function(List(typeInt, typeInt), typeString)
+	  // query: String → ⊥
+	  val queryType = Function(typeString, typeBottom)
+	  
+	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	  	  
+	  val f1Declaration = new Declaration(
+	      "f1", // full name
+	      transform(f1), // inSynth type
+	      f1 // scala type
+	    )		
+	  f1Declaration.setIsMethod(false)
+	  f1Declaration.setIsThis(false)
+	  
+	  val f2Declaration = new Declaration(
+	      "f2", // full name
+	      transform(f2), // inSynth type
+	      f2 // scala type
+	    )		
+	  f2Declaration.setIsMethod(false)
+	  f2Declaration.setIsThis(false)
+	  
+	  val intValDeclaration = Declaration(
+	      "intVal",
+	      typeInt, typeInt
+      )	 
+      intValDeclaration.setIsLocal(true)	  	  
+	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      transform(queryType),
+	      queryType
+	    )	  
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  	        
+	  val f1Node = new SimpleNode(
+	    f1Declaration,
+	    MutableMap(
+          transform(typeInt) ->
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
+  		    		  intValDeclaration,
+  		    		  MutableMap()  		    		  
+  		          )
+  		      )
+	        )
+	      )
+	    )
+	  
+	  
+	  val f2Node = new SimpleNode(
+	    f2Declaration,
+	    MutableMap(
+          transform(typeInt) ->
+	  	  new ContainerNode(
+	  		  MutableSet(
+	  		      new SimpleNode(
+  		    		  intValDeclaration,
+  		    		  MutableMap()  		    		  
+  		          )
+  		      )
+	        )
+	      )
+	    )
+	  
+	  val query = 
+	    new SimpleNode(
+	  	  queryDeclaration,
+	  	  MutableMap(
+	  	      transform(typeString) ->
+	  	      new ContainerNode(
+	  	          MutableSet(f1Node, f2Node)
+	            )
+	        ) 
+	    )
+	    
+	  query
+	}
+	
 }

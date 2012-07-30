@@ -12,7 +12,7 @@ import java.util.logging.Logger
  * object which transforms the InSynth tree into an intermediate representation
  * tree
  */
-object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
+object IntermediateTransformer extends (SimpleNode => IntermediateNode){
   // will use scala to InSynth type transform
   import InSynth.TypeTransformer.{ transform => typeTransform }
 
@@ -45,7 +45,11 @@ object IntermediateTransformer extends (SimpleNode => Set[IntermediateNode]){
     
     // start the transformation by going from the root node (query node), empty
     // context and trying to find the goal type
-    transform(root, emptyContext, goalType)
+    val transformResult = transform(root, emptyContext, goalType)
+    
+    assert(transformResult.size == 1)
+    
+    transformResult.head
   }
     
   /**
