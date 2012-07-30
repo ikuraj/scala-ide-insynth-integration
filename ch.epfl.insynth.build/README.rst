@@ -1,9 +1,12 @@
-InSynth plugin =in Scala IDE
+InSynth plugin in Scala IDE
 ==============================
 
-This project contains plugins for building _InSynth plugin_ in `Scala IDE`_.
+This project contains plugins for building InSynth plugin in `Scala IDE`_.
 
 *This is a work in progress. Please submit `issues`_ if you encounter problems.*
+
+.. _Scala IDE: http://scala-ide.org
+.. _issues: https://github.com/kaptoxic/scala-ide-insynth-integration/issues?state=open
 
 Building
 --------
@@ -18,12 +21,9 @@ Maven is used to manage the build process.  The project can be built for Scala I
 
   $ mvn clean install -P scala-ide-master-scala-2.9 
 
-.. _Scala IDE: http://scala-ide.org
-.. issues: https://github.com/kaptoxic/scala-ide-insynth-integration/issues?state=open
-
 InSynth user documentation
 ==========================
 
 A short user documentation can be found at the project's `Wiki`_ pages.
 
-.. Wiki: https://github.com/kaptoxic/scala-ide-insynth-integration/wiki
+.. _Wiki: https://github.com/kaptoxic/scala-ide-insynth-integration/wiki
