@@ -1,9 +1,9 @@
 InSynth plugin in Scala IDE
 ==============================
 
-This project contains plugins for building *InSynth* plugin in `Scala IDE`_.
+This project contains plugins for building **InSynth** plugin in `Scala IDE`_.
 
-*This is a work in progress. Please submit `tickets`_ if you encounter problems.*
+*This is a work in progress.* Please submit `tickets`_ if you encounter problems.
 
 .. _Scala IDE: http://scala-ide.org
 .. _tickets: https://github.com/kaptoxic/scala-ide-insynth-integration/issues?state=open
