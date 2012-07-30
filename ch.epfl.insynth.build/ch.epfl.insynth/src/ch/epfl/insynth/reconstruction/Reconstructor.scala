@@ -50,7 +50,7 @@ object Reconstructor {
         
     // log all snippets
     Config.logSolutions.info(
-      generatedCode map { _._1.toString } mkString("\n")
+      "Generated code snippets: " + (generatedCode map { _._1.toString } mkString(","))
     )
     
     // collect all generated snippets
