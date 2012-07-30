@@ -4,6 +4,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Suite
 
 import ch.epfl.insynth.test.completion.InSynthCompletionTests
+import ch.epfl.insynth.test.completion.InSynthPreferencesTests
 
 @RunWith(classOf[Suite])
 @Suite.SuiteClasses(
@@ -11,7 +12,8 @@ import ch.epfl.insynth.test.completion.InSynthCompletionTests
     classOf[InSynthLibraryTestSuite],
     classOf[CodeGenerationTestSuite],
     classOf[InSynthCompletionTests],
-    classOf[BenchmarkTestSuite]
+    classOf[BenchmarkTestSuite],
+    classOf[InSynthPreferencesTests]
   )
 )
 class TestSuite 

@@ -8,6 +8,7 @@ import ch.epfl.insynth.env.FormatNode
 object CombinatorTest {
   
   val numberOfCombinations = 15
+  val maximumTime = 500
   
   implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
   implicit def toPrFormatNode(sn: ch.epfl.insynth.reconstruction.combinator.Node) = FormatPrNode(sn)
@@ -32,42 +33,42 @@ object CombinatorTest {
     println("original tree")
     FormatNode(sn).println
     println("combined tree")
-    FormatPrNode(Combinator(sn, numberOfCombinations)).println
+    FormatPrNode(Combinator(sn, numberOfCombinations, maximumTime)).println
   } 
   
   // XXX cannot still be instantiated according to the proof representation!
   def cycleTreeCombine = {
     println("combined cycle tree")
     val cycleTree = TreeExample.buildTreeCycles
-    Combinator(cycleTree, numberOfCombinations).println
+    Combinator(cycleTree, numberOfCombinations, maximumTime).println
   } 
   
   def simpleTreeCombine() = {
     println("simple tree")
     TreeExample.buildSimpleTree.println
     println("combined simple tree")
-    Combinator(TreeExample.buildSimpleTree, 2).println
+    Combinator(TreeExample.buildSimpleTree, 2, maximumTime).println
   }
   
   def complexTreeCombine() = {
     println("complex tree")
     TreeExample.buildComplexTree.println
     println("combined complex tree")
-    Combinator(TreeExample.buildComplexTree, 2).println
+    Combinator(TreeExample.buildComplexTree, 2, maximumTime).println
   }
   
   def arrowTreeCombine() = {
     println("arrow tree")
     TreeExample.buildTreeArrowType.println
     println("combined arrow tree")
-    Combinator(TreeExample.buildTreeArrowType, 6).println
+    Combinator(TreeExample.buildTreeArrowType, 6, maximumTime).println
   }
   
   def overlapTreeCombine() = {
     println("overlap tree")
     TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
     println("combined overlap tree")
-    Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, 6).println
+    Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, 6, maximumTime).println
   }
   
   
@@ -75,7 +76,7 @@ object CombinatorTest {
     println("s combinator tree")
     TreeExample.buildTreeSKombinator.println
     println("combined tree")
-    Combinator(TreeExample.buildTreeSKombinator, 6).println
+    Combinator(TreeExample.buildTreeSKombinator, 6, maximumTime).println
   }
 
 }

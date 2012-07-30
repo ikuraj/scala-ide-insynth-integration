@@ -32,9 +32,6 @@ class InSynthCompletionTests {
 	
 	import testProjectSetup._
 
-  /**
-   * Test that completion shows only accessible members.
-   */
   @Test
   def testExample1() {
     val oraclePos11 = List("A m", "0")

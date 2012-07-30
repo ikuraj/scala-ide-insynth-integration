@@ -10,6 +10,7 @@ import ch.epfl.insynth.reconstruction.codegen.Extractor
 object ExtractorTest {
   
   val numberOfCombinations = 15
+  val maximumTime = 500
   
   implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
 
@@ -55,7 +56,7 @@ object ExtractorTest {
     givenTree.println
     println("with extractor")
     for ((tree, weight) <- Extractor(IntermediateTransformer(Combinator(
-        givenTree, numberOfCombinations)), numberOfCombinations))
+        givenTree, numberOfCombinations, maximumTime)), numberOfCombinations))
     {
 	  for (output <- CodeGenerator(tree)) {
 	    println("----------" + weight + "----------")
@@ -64,7 +65,7 @@ object ExtractorTest {
     }
     println("without extractor")
     for (output <- CodeGenerator(IntermediateTransformer(Combinator(
-        givenTree, numberOfCombinations)))) {
+        givenTree, numberOfCombinations, maximumTime)))) {
 	    output.println
 	  }
   }

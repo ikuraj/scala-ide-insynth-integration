@@ -11,6 +11,7 @@ import ch.epfl.insynth.env.FormatNode
 object CodeGenTest {
   
   val numberOfCombinations = 15
+  val maximumTime = 500
   
   implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
 
@@ -56,7 +57,7 @@ object CodeGenTest {
     givenTree.println
     println("after intermediate transform")
     for ((tree, weight) <- Extractor(IntermediateTransformer(Combinator(
-        givenTree, numberOfCombinations)), numberOfCombinations))
+        givenTree, numberOfCombinations, maximumTime)), numberOfCombinations))
     {
 	  for (output <- CodeGenerator(tree)) {
 	    println("----------" + weight + "----------")

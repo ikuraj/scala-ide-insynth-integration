@@ -11,6 +11,7 @@ import ch.epfl.insynth.reconstruction.codegen.Extractor
 object IntermediateReconstructionTest {
   
   val numberOfCombinations = 15
+  val maximumTime = 500
   
   implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
   implicit def toPrFormatNode(sn: ch.epfl.insynth.reconstruction.combinator.Node) = FormatPrNode(sn)
@@ -33,7 +34,7 @@ object IntermediateReconstructionTest {
   def parametrizedTreeTransform(node: SimpleNode) = {    
     node.println
     
-    val prunedTree = Combinator(node, numberOfCombinations)
+    val prunedTree = Combinator(node, numberOfCombinations, maximumTime)
     println("pruned tree")    
     prunedTree.println
     
