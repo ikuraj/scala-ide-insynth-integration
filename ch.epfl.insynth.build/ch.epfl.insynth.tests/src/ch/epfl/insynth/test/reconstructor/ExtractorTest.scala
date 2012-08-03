@@ -55,19 +55,19 @@ object ExtractorTest {
     println("intial tree")
     givenTree.println
     println("with extractor")
-    for ((tree, weight) <- Extractor(IntermediateTransformer(Combinator(
-        givenTree, numberOfCombinations, maximumTime)), numberOfCombinations))
-    {
-	  for (output <- CodeGenerator(tree)) {
-	    println("----------" + weight + "----------")
-	    output.println
-	  }
-    }
-    println("without extractor")
-    for (output <- CodeGenerator(IntermediateTransformer(Combinator(
-        givenTree, numberOfCombinations, maximumTime)))) {
-	    output.println
-	  }
+//    for ((tree, weight) <- Extractor(IntermediateTransformer(Combinator(
+//        givenTree, numberOfCombinations, maximumTime)), numberOfCombinations))
+//    {
+//	  for (output <- CodeGenerator(tree)) {
+//	    println("----------" + weight + "----------")
+//	    output.println
+//	  }
+//    }
+//    println("without extractor")
+//    for (output <- CodeGenerator(IntermediateTransformer(Combinator(
+//        givenTree, numberOfCombinations, maximumTime)))) {
+//	    output.println
+//	  }
   }
 
 }

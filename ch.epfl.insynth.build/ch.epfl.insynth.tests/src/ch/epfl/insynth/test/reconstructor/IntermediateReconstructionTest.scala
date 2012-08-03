@@ -34,16 +34,16 @@ object IntermediateReconstructionTest {
   def parametrizedTreeTransform(node: SimpleNode) = {    
     node.println
     
-    val prunedTree = Combinator(node, numberOfCombinations, maximumTime)
-    println("pruned tree")    
-    prunedTree.println
-    
-    val transformedTrees = IntermediateTransformer(prunedTree)
-    println("after intermediate transform")
-    
-    println("simple tree transformed") 
-	FormatableIntermediate(transformedTrees).println
-	println(transformedTrees)
+//    val prunedTree = Combinator(node, numberOfCombinations, maximumTime)
+//    println("pruned tree")    
+//    prunedTree.println
+//    
+//    val transformedTrees = IntermediateTransformer(prunedTree)
+//    println("after intermediate transform")
+//    
+//    println("simple tree transformed") 
+//	FormatableIntermediate(transformedTrees).println
+//	println(transformedTrees)
   }
 
 }

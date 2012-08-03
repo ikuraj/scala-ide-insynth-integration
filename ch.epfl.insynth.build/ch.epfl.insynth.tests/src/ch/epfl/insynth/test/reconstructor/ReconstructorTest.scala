@@ -1,38 +1,79 @@
 package ch.epfl.insynth.test.reconstructor
+
+import java.{ util => ju, lang => jl }
 import ch.epfl.insynth.reconstruction.intermediate.IntermediateTransformer
 import ch.epfl.insynth.reconstruction.codegen.CodeGenerator
 import ch.epfl.insynth.reconstruction.combinator.Combinator
 import ch.epfl.insynth.env.SimpleNode
 import ch.epfl.insynth.reconstruction.Reconstructor
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import org.junit.runners.Parameterized.Parameters
+import org.junit.Test
+import org.junit.BeforeClass
+import org.junit.Assert._
+import ch.epfl.insynth.core.Activator
+import ch.epfl.insynth.core.preferences.InSynthConstants
 
-object ReconstructorTest {
-
-  def main(args: Array[String]): Unit = {
-    val tests =      
-      Array(
-//        TreeExample.buildSimpleTree
-//        , TreeExample.buildComplexTree,
-//        TreeExample.buildTreeAbsApplication,
-//        TreeExample.buildTreeArrowType,
-//        TreeExample.buildTreeCycles, 
-//        TreeExample.buildTreeOverlapParameterTypeWithReturnType,        
-//        TreeExample.buildTreeSKombinator, 
-//          TreeExample.buildTreeWithCurryingFunctions,
-//        TreeExample.buildTreeWithVariousFunctions, TreeExample.buildTreeWithoutThis,
-//        TreeExample.buildTreeIdentityFunction,
-//        TreeExample.buildTreeWithConstructors
-          TreeExample.buildSameInSynthDifferentWeight
-      )
-    
-    for (tree <- tests )
-      parametrizedTreeReconstruct(tree)      
-  }
+@RunWith(value = classOf[Parameterized])
+class ReconstructorTest(givenTree: SimpleNode, expected: List[String]) {
   
-  def parametrizedTreeReconstruct(givenTree: SimpleNode) = {
-    for (output <- Reconstructor(givenTree))
-    {
-	  println(output.snippet)
+  @Test
+  def test() {
+    val reconstructorOutput = Reconstructor(givenTree)
+    for (expectedString <- expected) {
+      assertTrue(
+        (false /: reconstructorOutput) {
+          (result, output) => {
+            val matchExpected = expectedString
+            output.getSnippet match {
+              case `matchExpected` => true
+              case _ => result
+            }
+          }
+        }  
+      )
     }
   }
+
+}
+
+object ReconstructorTest {
+  
+  val numberOfCombinations = 15
+  val maximumTime = 500
+  
+  @BeforeClass
+  def setup() {
+    println("Before class called")
+    
+    // set appropriate preference values
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 15)        
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
+  }
+  
+	@Parameters
+	def parameters: ju.Collection[Array[ScalaObject]] = {
+	  import scala.collection.JavaConversions._
+	  import TreeExample._
+	  
+		val trees = List(
+//      (buildSimpleTree)
+//      buildComplexTree,
+//      buildTreeAbsApplication,
+//      buildTreeArrowType,
+//      buildTreeCycles,
+//      buildTreeOverlapParameterTypeWithReturnType,
+//      buildTreeSKombinator,
+//      buildTreeWithCurryingFunctions,
+//      buildTreeWithVariousFunctions,
+//      buildTreeWithoutThis,
+//      buildTreeIdentityFunction,
+				Array(buildTreeWithConstructors, List("f(new package().intVal, new package )")),
+        Array(buildSameInSynthDifferentWeight, List("f1(intVal)", "f2(intVal, intVal)"))
+    )
+	  
+	  trees
+	}
 
 }
