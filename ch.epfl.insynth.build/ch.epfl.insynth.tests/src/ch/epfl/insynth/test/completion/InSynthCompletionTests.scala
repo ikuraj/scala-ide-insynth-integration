@@ -1,5 +1,13 @@
 package ch.epfl.insynth.test.completion
 
+import scala.collection.JavaConversions
+import scala.collection.JavaConverters
+
+import org.junit.Assert._
+import org.junit.Test
+import org.junit.BeforeClass
+import org.junit.Ignore
+
 import scala.tools.eclipse.testsetup.SDTTestUtils
 import scala.tools.eclipse.javaelements.ScalaCompilationUnit
 import scala.tools.nsc.interactive.Response
@@ -7,25 +15,32 @@ import scala.tools.eclipse.ScalaWordFinder
 import scala.tools.nsc.util.SourceFile
 import scala.tools.eclipse.ScalaPresentationCompiler
 import org.eclipse.jface.text.contentassist.ICompletionProposal
-import org.junit.Assert._
-import org.junit.Test
 import scala.tools.eclipse.testsetup.TestProjectSetup
 import org.eclipse.jdt.core.search.{ SearchEngine, IJavaSearchConstants, IJavaSearchScope, SearchPattern, TypeNameRequestor }
 import org.eclipse.jdt.core.IJavaElement
-import org.junit.Ignore
 import scala.tools.nsc.util.OffsetPosition
 import scala.tools.eclipse.completion.ScalaCompletions
 import scala.tools.eclipse.completion.CompletionProposal
-import ch.epfl.insynth.core.completion.InsynthCompletionProposalComputer
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext
 import org.eclipse.jdt.core.ICompilationUnit
 import org.eclipse.core.runtime.NullProgressMonitor
-import ch.epfl.insynth.core.completion.InnerFinder
-import scala.collection.JavaConversions
-import scala.collection.JavaConverters
 import scala.tools.eclipse.testsetup.TestProjectSetup
 
-object InSynthCompletionTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests")
+import ch.epfl.insynth.core.completion.InsynthCompletionProposalComputer
+import ch.epfl.insynth.core.completion.InnerFinder
+import ch.epfl.insynth.core.Activator
+import ch.epfl.insynth.core.preferences.InSynthConstants
+
+object InSynthCompletionTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests") {
+  
+  @BeforeClass
+  def setup() {    
+    // set appropriate preference values (expect 5 completions)
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 5)        
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
+  }
+  
+}
 
 class InSynthCompletionTests {
 	val testProjectSetup = new CompletionUtility(InSynthCompletionTests)
