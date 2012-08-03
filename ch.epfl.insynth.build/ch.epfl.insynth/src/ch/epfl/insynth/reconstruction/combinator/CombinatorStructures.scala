@@ -278,10 +278,10 @@ extends Expression(associatedTree, associatedNode) {
   
   override def isDone =
     // check if all children are done
-    (children &~ doneChildren).isEmpty// && !isPruned
+    !children.isEmpty && (children &~ doneChildren).isEmpty// && !isPruned
   
   def getNumberOfCombinations: Int =
-    if (!(children &~ doneChildren).isEmpty) 0
+    if (!isDone) 0
     else (1 /: children) { (comb, decl) => comb * decl.getNumberOfCombinations }
     
   override def setPruned(valPruned: Boolean):Unit = {

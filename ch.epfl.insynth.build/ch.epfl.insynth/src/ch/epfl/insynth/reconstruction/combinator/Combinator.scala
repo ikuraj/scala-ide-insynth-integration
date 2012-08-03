@@ -13,7 +13,7 @@ import ch.epfl.insynth.Config
  * object which application transforms an InSynth representation input
  * to the pruned tree representation
  */
-object Combinator extends ((InSynth.SimpleNode, Int, Int) => Node) {
+object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
   
   // general logger for the combinator step
   val logger = Rules.logger
@@ -30,7 +30,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Node) {
    * @param maximumTime maximal number of milliseconds the combinator should take
    * @return root node of the proof tree
    */
-  def apply(root: InSynth.SimpleNode, neededCombinations: Int, maximumTime: Int): SimpleNode = {
+  def apply(root: InSynth.SimpleNode, neededCombinations: Int, maximumTime: Int): Option[SimpleNode] = {
     // logging
     if (Rules.isLogging) {
 	    logApply.entering(getClass.getName, "apply")
@@ -215,22 +215,24 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Node) {
 	    if (!rootDeclaration.isDone) {
 	      logger.severe("Root declaration is not done!")
 	    }     
-	//    logger.finest("End of apply, reconstruction structures are: " + FormatCombinations(rootDeclaration) )
+	    logger.finest("End of apply, reconstruction structures are: " + FormatCombinations(rootDeclaration) )
 	    logger.info("Number of combinations found: " + rootDeclaration.getNumberOfCombinations )
 	    
 	    logApply.exiting(getClass.getName, "apply")
     }
     
-    // return transformed pruned tree as a result
-    val result = rootDeclaration.toTreeNode
-    
-    // logging
-    if (Rules.isLogging) {
-    	logger.fine("Returning from apply with result: " + FormatPrNode(result) )
-    }
-    
-    // return the root node of the pruned tree
-    result
+    if (rootDeclaration.isDone) {      
+	    // return transformed pruned tree as a result
+	    val result = rootDeclaration.toTreeNode
+	    
+	    // logging
+	    if (Rules.isLogging) {
+	    	logger.fine("Returning from apply with result: " + FormatPrNode(result) )
+	    }
+	    
+	    // return the root node of the pruned tree
+	    Some(result)
+    } else None
   }
   
 }

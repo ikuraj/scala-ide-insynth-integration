@@ -14,16 +14,23 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 
 object Reconstructor {
 
-  def apply(tree:SimpleNode):List[Output] = {
+  def apply(tree:SimpleNode): List[Output] = {
     // get needed number of snippets from the store
     val numberOfCombinations = Activator.getDefault.getPreferenceStore.getInt(
   		InSynthConstants.OfferedSnippetsPropertyString)
+  		
+		// return immediately if reconstruction is not needed
+  	if (numberOfCombinations <= 0)
+  	  return List.empty
 		
 		// get maximum duration of the combination step
 		val maximumTime = Activator.getDefault.getPreferenceStore.getInt(
 	    InSynthConstants.MaximumTimePropertyString)
     
-    val combinatorTree = Combinator(tree, numberOfCombinations, maximumTime)
+    val combinatorTree = Combinator(tree, numberOfCombinations, maximumTime) match {
+  	  case Some(result) => result
+  	  case None => return List.empty
+  	}
     
     if (Config.isLogging) {
       Config.logReconstructor.info(

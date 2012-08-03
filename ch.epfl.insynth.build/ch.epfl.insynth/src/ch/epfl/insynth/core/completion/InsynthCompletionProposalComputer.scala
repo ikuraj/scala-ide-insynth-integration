@@ -54,7 +54,7 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => java.util.List[ICompl
         //Getting builder for the first time
         if (InSynthWrapper.builder == null) {
           InSynthWrapper.builder = new InitialEnvironmentBuilder()
-          if (Config.loadPredefs) {
+          if (InSynthWrapper.loadPredefs) {
             InSynthWrapper.predefDecls = InSynthWrapper.insynth.getPredefDecls()
             InSynthWrapper.builder.addDeclarations(InSynthWrapper.predefDecls)
           }
@@ -139,13 +139,15 @@ class InsynthCompletionProposalComputer extends IJavaCompletionProposalComputer 
 }
 
 
-object InSynthWrapper{
+object InSynthWrapper {
   
   var insynth:InSynth = null;
   var compiler:Global = null;
   
   var builder:InitialEnvironmentBuilder = null;
   var predefDecls:List[Declaration] = null;
+  
+  final val loadPredefs = true
   
 }
 
@@ -154,7 +156,7 @@ class PredefBuilderLoader extends Thread {
   override def run(){
     InSynthWrapper.builder.synchronized{
       InSynthWrapper.builder = new InitialEnvironmentBuilder()
-      if (Config.loadPredefs) InSynthWrapper.builder.addDeclarations(InSynthWrapper.predefDecls)
+      if (InSynthWrapper.loadPredefs) InSynthWrapper.builder.addDeclarations(InSynthWrapper.predefDecls)
     }
   }
 }
