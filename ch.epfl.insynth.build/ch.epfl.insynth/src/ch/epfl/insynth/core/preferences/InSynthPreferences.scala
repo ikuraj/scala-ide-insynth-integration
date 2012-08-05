@@ -1,8 +1,5 @@
 package ch.epfl.insynth.core.preferences
 
-import scala.tools.eclipse.logging.Level
-import scala.tools.eclipse.logging.LogManager
-import scala.tools.eclipse.ui.OpenExternalFile
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer
 import org.eclipse.jface.preference.BooleanFieldEditor
 import org.eclipse.jface.preference.ComboFieldEditor
@@ -14,10 +11,10 @@ import org.eclipse.swt.SWT
 import org.eclipse.ui.IWorkbench
 import org.eclipse.ui.IWorkbenchPreferencePage
 import org.eclipse.jface.preference.IntegerFieldEditor
-import InSynthConstants._
-import scala.tools.eclipse.logging.HasLogger
 import org.eclipse.jface.preference.IPreferenceStore
+
 import ch.epfl.insynth.core.Activator
+import InSynthConstants._
 
 class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPreferencePage {
 

@@ -218,16 +218,19 @@ class TopTree(neededCombinations: Int)
 extends Tree(null, BottomType)
 {    
   override def childDone(decl: Expression):Unit = {
-    Rules.logStructures.info("Child done at top tree called.")
+    if (Rules.isLogging)
+    	Rules.logStructures.info("Child done at top tree called.")
     if (neededCombinations <= getNumberOfCombinations) {
-      Rules.logger.info("Yes we found enough combinations(" + getNumberOfCombinations + ", will start pruning.")
+      if (Rules.isLogging)
+      	Rules.logger.info("Yes we found enough combinations(" + getNumberOfCombinations + ", will start pruning.")
+      	
       Rules.doPruning = true
       //Rules.logger.info("Tree looks like: " + FormatCombinations(this))
     }
   }
   
   override def checkIfPruned(weight: Double): Boolean = {
-	false
+		false
   }
   
   override def getTraversalWeight = 0
