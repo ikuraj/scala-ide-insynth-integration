@@ -2,7 +2,6 @@ package ch.epfl.insynth.test
 
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
-
 import ch.epfl.insynth.test.completion.InSynthCompletionTests
 import ch.epfl.insynth.test.completion.InSynthPreferencesTests
 
@@ -13,7 +12,8 @@ import ch.epfl.insynth.test.completion.InSynthPreferencesTests
     classOf[CodeGenerationTestSuite],
     classOf[InSynthCompletionTests],
     classOf[BenchmarkTestSuite],
-    classOf[InSynthPreferencesTests]
+    classOf[InSynthPreferencesTests],
+    classOf[TsdfsdfdsfsdfdsTest]
   )
 )
 class TestSuite 
