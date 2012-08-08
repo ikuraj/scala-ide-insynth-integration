@@ -33,6 +33,7 @@ TODO:
 
 */
 
+
 object InnerFinder extends ((ScalaCompilationUnit, Int) => java.util.List[ICompletionProposal]) with HasLogger {
   def apply(scu: ScalaCompilationUnit, position: Int): java.util.List[ICompletionProposal] = {
     import java.util.Collections.{ emptyList => javaEmptyList }
@@ -61,6 +62,18 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => java.util.List[ICompl
         } // else builder is already prepared
 
         compiler.askReload(scu, getNewContent(position, oldContent))
+                
+        val response = new compiler.Response[compiler.Tree]
+		    compiler.askType(sourceFile, false, response)
+		    val typed = response.get
+		    
+		    val tree = typed.fold(identity, throw _)
+		    
+		    println("ivaaaaan1" + tree.symbol.info)		    
+		    println("ivaaaaan2" + tree.symbol.info)
+		    println("ivaaaaan2" + tree.symbol.info)
+		    println("ivaaaaan3" + tree.symbol.rawInfo)
+		    
 
         var results = List.empty[Output]
         try {
