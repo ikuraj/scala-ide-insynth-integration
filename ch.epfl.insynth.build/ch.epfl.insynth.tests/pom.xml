@@ -28,6 +28,8 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
         <configuration>
+          <showEclipseLog>true</showEclipseLog>
+          <reportsDirectory>reports</reportsDirectory>
           <testSuite>${project.artifactId}</testSuite>
           <testClass>ch.epfl.insynth.test.TestSuite</testClass>
         </configuration>
