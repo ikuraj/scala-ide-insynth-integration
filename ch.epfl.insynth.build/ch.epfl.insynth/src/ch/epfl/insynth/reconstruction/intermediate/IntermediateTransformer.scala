@@ -68,7 +68,7 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
    * @return set of nodes that describe how to generate expression of goalType
    */
   private def transform(node: SimpleNode, oldContext:Context, goalType: Scala.ScalaType): Set[IntermediateNode] = {
-    Config.logReconstructor.entering(
+    if (Config.isLogging) Config.logReconstructor.entering(
       this.getClass().getName(), "transform", node.decls.head.getSimpleName)
         
     var context = oldContext
@@ -189,7 +189,7 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
 	      (map, parameterType) => {	        
 	        // corresponding InSynth type
 	        val parameterTypeInSynth = typeTransform(parameterType)
-	        Config.logReconstructor.info("need to find parameter for " + parameterType +
+	        if (Config.isLogging) Config.logReconstructor.info("need to find parameter for " + parameterType +
               " parameterTypeInSynth: " + parameterTypeInSynth + " or " + FormatType(parameterTypeInSynth))
 	        //println("Parameter list is: " + parameterList + "(node : " + node + ")" )
 	        // get node with the needed type, deeper in down the tree
@@ -304,8 +304,10 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
 		   */
     	  def computeAbstraction(outerContext: Context, goalType: Scala.ScalaType):
 		  (Set[IntermediateNode] => Abstraction, Context) = {
-    	    Logger.getLogger(IntermediateTransformer.getClass.toString).entering(this.getClass().getName(), "computeAbstraction")
-	        Logger.getLogger(IntermediateTransformer.getClass.toString).info("computing abstraction")
+    	    if (Config.isLogging) {
+	    	    Logger.getLogger(IntermediateTransformer.getClass.toString).entering(this.getClass().getName(), "computeAbstraction")
+		        Logger.getLogger(IntermediateTransformer.getClass.toString).info("computing abstraction")
+    	    }
 		    // "last return type" of the goal type
 	    	val neededReturnType = getReturnType(goalType)
 	    	
