@@ -26,6 +26,7 @@ import scala.collection.JavaConverters
 import scala.tools.eclipse.testsetup.TestProjectSetup
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
+import ch.epfl.insynth.reconstruction.Output
 
 //object InSynthPreferencesTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests")
 
@@ -62,7 +63,7 @@ class InSynthPreferencesTests {
 		var numberOfCompletionsFor10ms = 0;
 		
     checkCompletions("examplepkg4/Example4.scala")(List(
-      (proposals: List[ICompletionProposal]) => {
+      (proposals: List[Output]) => {
         numberOfCompletionsFor10ms = proposals.size
       }
     ))
@@ -70,7 +71,7 @@ class InSynthPreferencesTests {
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 100)
     
     checkCompletions("examplepkg4/Example4.scala")(List(
-      (proposals: List[ICompletionProposal]) => {
+      (proposals: List[Output]) => {
         // we expect more completions for more time
         assertTrue(numberOfCompletionsFor10ms < proposals.size)
       }

@@ -62,7 +62,7 @@ object Reconstructor {
     
     // collect all generated snippets
     (generatedCode map {      
-      output => Output(output._1.toString, new Weight(output._2))
+      output => Output(output._1.toString.trim, new Weight(output._2))
     })    
   }
   

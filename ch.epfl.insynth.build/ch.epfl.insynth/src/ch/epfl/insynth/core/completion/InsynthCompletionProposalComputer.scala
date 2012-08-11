@@ -26,6 +26,7 @@ import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.reconstruction.Reconstructor
 import ch.epfl.insynth.core.Activator
 import scala.tools.eclipse.logging.HasLogger
+import ch.epfl.insynth.reconstruction.Output
 
 /* 
 TODO:
@@ -33,9 +34,8 @@ TODO:
 
 */
 
-object InnerFinder extends ((ScalaCompilationUnit, Int) => java.util.List[ICompletionProposal]) with HasLogger {
-  def apply(scu: ScalaCompilationUnit, position: Int): java.util.List[ICompletionProposal] = {
-    import java.util.Collections.{ emptyList => javaEmptyList }
+object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]]) with HasLogger {
+  def apply(scu: ScalaCompilationUnit, position: Int): Option[List[Output]] = {
 
     var oldContent: Array[Char] = scu.getContents
 
@@ -62,35 +62,22 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => java.util.List[ICompl
 
         compiler.askReload(scu, getNewContent(position, oldContent))
 
-        var results = List.empty[Output]
         try {
           InSynthWrapper.builder.synchronized {
             val solution = InSynthWrapper.insynth.getSnippets(sourceFile.position(position), InSynthWrapper.builder)
 
-            results = if (solution != null) Reconstructor(solution.getNodes.head) else Nil
+            if (solution != null)
+              Some(
+                Reconstructor(solution.getNodes.head).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
+        			)
+            else None
           }
         } catch {
           case ex =>
             logger.error("InSynth synthesis failed.", ex)
-            results = Nil
+            None
         }
-
-        val sortedResults = results.sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue).map(x => x.getSnippet) // + "   w = "+x.getWieght.getValue)
-
-        val list1: java.util.List[ICompletionProposal] = new java.util.LinkedList[ICompletionProposal]()
-
-        var i = sortedResults.length
-        sortedResults.foreach(x => {
-          list1.add(new InSynthCompletitionProposal(x, i))
-          i -= 1
-        })
-
-        //Make a new builder
-        val pl = new PredefBuilderLoader()
-        pl.start()
-
-        list1
-    }(javaEmptyList())
+    } ( None )
   }
 
   private def getNewContent(position: Int, oldContent: Array[Char]): Array[Char] = {
@@ -112,15 +99,15 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => java.util.List[ICompl
 }
 
 class InsynthCompletionProposalComputer extends IJavaCompletionProposalComputer {
-  
+
   def sessionStarted() {}
   def sessionEnded() {}
   def getErrorMessage() = null
 
   /** No context information for the moment. */
   def computeContextInformation(context: ContentAssistInvocationContext, monitor: IProgressMonitor) =
-    List[IContextInformation]().asJava  
-    
+    List[IContextInformation]().asJava
+
   /** Return InSynth completion proposals. */
   def computeCompletionProposals(context: ContentAssistInvocationContext, monitor: IProgressMonitor): java.util.List[ICompletionProposal] = {
     import java.util.Collections.{ emptyList => javaEmptyList }
@@ -130,7 +117,23 @@ class InsynthCompletionProposalComputer extends IJavaCompletionProposalComputer 
     context match {
       case jc: JavaContentAssistInvocationContext => jc.getCompilationUnit match {
         case scu: ScalaCompilationUnit =>
-          InnerFinder(scu, position)             
+          import java.util.Collections.{ emptyList => javaEmptyList }
+
+          val sortedResults = InnerFinder(scu, position).getOrElse(return javaEmptyList()).map(x => x.getSnippet)
+                    
+          val list1: java.util.List[ICompletionProposal] = new java.util.LinkedList[ICompletionProposal]()
+
+          var i = sortedResults.length
+          sortedResults.foreach(x => {
+            list1.add(new InSynthCompletitionProposal(x, i))
+            i -= 1
+          })
+
+          //Make a new builder
+          val pl = new PredefBuilderLoader()
+          pl.start()
+
+          list1
         case _ => javaEmptyList()
       }
       case _ => javaEmptyList()

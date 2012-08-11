@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.NullProgressMonitor
 import ch.epfl.insynth.core.completion.InnerFinder
 import scala.collection.JavaConversions
 import scala.collection.JavaConverters
+import ch.epfl.insynth.reconstruction.Output
+import ch.epfl.insynth.reconstruction.Output
 
 class CompletionUtility(projectSetup: TestProjectSetup) {
   import projectSetup._
@@ -31,7 +33,7 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
   import org.eclipse.jface.text.IDocument
   import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext
   
-  private def withCompletions(path2source: String): List[List[ICompletionProposal]] = {
+  private def withCompletions(path2source: String): List[List[Output]] = {
     val unit = compilationUnit(path2source).asInstanceOf[ScalaCompilationUnit]
     
     // first, 'open' the file by telling the compiler to load it
@@ -54,16 +56,16 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       
       val completion = new ScalaCompletions
       
-      (List[List[ICompletionProposal]]() /: (0 until positions.size) ) {
+      (List[List[Output]]() /: (0 until positions.size) ) {
         (list, i) => {
           val pos = positions(i)
 
-		  val position = new scala.tools.nsc.util.OffsetPosition(src, pos)
+      		val position = new scala.tools.nsc.util.OffsetPosition(src, pos)
           var wordRegion = ScalaWordFinder.findWord(content, position.point)
 
-          import scala.collection.JavaConverters._
-        
-          list :+ InnerFinder(unit, pos).asScala.toList
+          val innerFinderResults = InnerFinder(unit, pos).getOrElse( List.empty )
+                    
+          list :+ innerFinderResults
         }
       }
       
@@ -80,7 +82,7 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
     } (  )
   }
   
-  type Checker = List[ICompletionProposal]=>Unit
+  type Checker = List[Output]=>Unit
   
   def checkCompletions(path2source: String)(expectedProperties: List[Checker]*) {
 
@@ -94,8 +96,8 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
   
   case class CheckContains(expectedCompletions: List[String]) extends Checker {
 
-    def apply(completions: List[ICompletionProposal]) = {
-      val calculatedStrings = completions.map { _.getDisplayString.trim }
+    def apply(completions: List[Output]) = {
+      val calculatedStrings = completions.map { _.getSnippet }
       for (expected <- expectedCompletions) {
         val contains = calculatedStrings contains expected
         assertTrue("Expected snippet: " + expected + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
@@ -105,14 +107,14 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
   
   case class CheckNumberOfCompletions(expectedNumber: Int) extends Checker {
 
-    def apply(completions: List[ICompletionProposal]) = {
+    def apply(completions: List[Output]) = {
       assertEquals(expectedNumber, completions.size)
     }
   }  
   
   case class CheckRegexContains(expectedCompletions: List[String]) extends Checker {
-    def apply(completions: List[ICompletionProposal]) = {
-      val calculatedStrings = completions.map { _.getDisplayString.trim }
+    def apply(completions: List[Output]) = {
+      val calculatedStrings = completions.map { _.getSnippet }
       for (expected <- expectedCompletions) {
         val contains = (false /: calculatedStrings) {
           (result, string) => result || (string matches expected)
