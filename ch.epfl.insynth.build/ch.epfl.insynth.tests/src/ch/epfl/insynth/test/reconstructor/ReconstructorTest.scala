@@ -53,7 +53,7 @@ object ReconstructorTest {
   }
   
 	@Parameters
-	def parameters: ju.Collection[Array[ScalaObject]] = {
+	def parameters: ju.Collection[Array[Object]] = {
 	  import scala.collection.JavaConversions._
 	  import TreeExample._
 	  
