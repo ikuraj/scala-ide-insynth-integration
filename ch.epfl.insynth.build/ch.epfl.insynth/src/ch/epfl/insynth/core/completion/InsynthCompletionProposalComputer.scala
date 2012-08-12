@@ -62,6 +62,9 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
 
         compiler.askReload(scu, getNewContent(position, oldContent))
 
+        //Make a new builder
+        val pl = new PredefBuilderLoader()
+        
         try {
           InSynthWrapper.builder.synchronized {
             val solution = InSynthWrapper.insynth.getSnippets(sourceFile.position(position), InSynthWrapper.builder)
@@ -76,6 +79,8 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
           case ex =>
             logger.error("InSynth synthesis failed.", ex)
             None
+        } finally {          
+        	pl.start()
         }
     } ( None )
   }
@@ -128,10 +133,6 @@ class InsynthCompletionProposalComputer extends IJavaCompletionProposalComputer 
             list1.add(new InSynthCompletitionProposal(x, i))
             i -= 1
           })
-
-          //Make a new builder
-          val pl = new PredefBuilderLoader()
-          pl.start()
 
           list1
         case _ => javaEmptyList()

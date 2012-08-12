@@ -53,9 +53,7 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       val content = unit.getContents.mkString
 
       assertTrue("cotent= " + content +  " positions.size=" + positions.size, positions.size > 0)
-      
-      val completion = new ScalaCompletions
-      
+            
       (List[List[Output]]() /: (0 until positions.size) ) {
         (list, i) => {
           val pos = positions(i)
