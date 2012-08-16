@@ -23,6 +23,8 @@ class ReconstructorTest(givenTree: SimpleNode, expected: List[String]) {
     val reconstructorOutput = Reconstructor(givenTree)
     for (expectedString <- expected) {
       assertTrue(
+        "Expected string (" + expectedString + ") could not be found, reconstructor output: "
+      		+ ( reconstructorOutput map { _.getSnippet } mkString ( "," ) ),        
         (false /: reconstructorOutput) {
           (result, output) => {
             val matchExpected = expectedString
@@ -31,7 +33,7 @@ class ReconstructorTest(givenTree: SimpleNode, expected: List[String]) {
               case _ => result
             }
           }
-        }  
+        }
       )
     }
   }
