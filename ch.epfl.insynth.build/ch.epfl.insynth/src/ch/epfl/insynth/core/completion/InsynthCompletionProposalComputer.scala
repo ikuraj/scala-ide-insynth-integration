@@ -35,8 +35,14 @@ TODO:
 */
 
 object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]]) with HasLogger {
+  
+  var predefBuildLoader: PredefBuilderLoader = new PredefBuilderLoader()
+  
   def apply(scu: ScalaCompilationUnit, position: Int): Option[List[Output]] = {
 
+    if (predefBuildLoader.isAlive())
+      predefBuildLoader.join()
+    
     var oldContent: Array[Char] = scu.getContents
 
     scu.withSourceFile {
@@ -63,7 +69,7 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
         compiler.askReload(scu, getNewContent(position, oldContent))
 
         //Make a new builder
-        val pl = new PredefBuilderLoader()
+        predefBuildLoader = new PredefBuilderLoader()
         
         try {
           InSynthWrapper.builder.synchronized {
@@ -80,7 +86,7 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
             logger.error("InSynth synthesis failed.", ex)
             None
         } finally {          
-        	pl.start()
+        	predefBuildLoader.start()
         }
     } ( None )
   }
