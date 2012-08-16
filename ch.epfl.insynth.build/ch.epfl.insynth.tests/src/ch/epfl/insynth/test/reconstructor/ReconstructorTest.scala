@@ -46,9 +46,7 @@ object ReconstructorTest {
   val maximumTime = 500
   
   @BeforeClass
-  def setup() {
-    println("Before class called")
-    
+  def setup() {    
     // set appropriate preference values
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 15)        
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
@@ -71,7 +69,7 @@ object ReconstructorTest {
 //      buildTreeWithVariousFunctions,
 //      buildTreeWithoutThis,
 //      buildTreeIdentityFunction,
-				Array(buildTreeWithConstructors, List("f(new package().intVal, new package )")),
+		Array(buildTreeWithConstructors, List("f(new package().intVal, new package )")),
         Array(buildSameInSynthDifferentWeight, List("f1(intVal)", "f2(intVal, intVal)"))
     )
 	  

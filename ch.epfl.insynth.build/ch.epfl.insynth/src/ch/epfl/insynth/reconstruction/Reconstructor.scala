@@ -29,7 +29,11 @@ object Reconstructor {
     
     val combinatorTree = Combinator(tree, numberOfCombinations, maximumTime) match {
   	  case Some(result) => result
-  	  case None => return List.empty
+  	  case None => { 
+  	    if (Config.isLogging)
+	      Config.logReconstructor.warning("Combinator returned None")
+  	    return List.empty
+  	  }
   	}
     
     if (Config.isLogging) {
