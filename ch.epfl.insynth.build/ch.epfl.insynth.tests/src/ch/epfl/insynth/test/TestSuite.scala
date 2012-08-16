@@ -9,11 +9,11 @@ import ch.epfl.insynth.test.completion.InSynthPreferencesTests
 @RunWith(classOf[Suite])
 @Suite.SuiteClasses(
   Array(
-//    classOf[InSynthLibraryTestSuite],
-    classOf[CodeGenerationTestSuite]//,
-//    classOf[InSynthCompletionTests],
-//    classOf[BenchmarkTestSuite],
-//    classOf[InSynthPreferencesTests]
+    classOf[InSynthLibraryTestSuite],
+    classOf[CodeGenerationTestSuite],
+    classOf[InSynthCompletionTests],
+    classOf[BenchmarkTestSuite],
+    classOf[InSynthPreferencesTests]
   )
 )
 class TestSuite 

@@ -16,7 +16,7 @@ object Config {
   
   val logExtractor = Logger.getLogger("reconstruction.extractor")
   
-  val isLogging = true
+  val isLogging = false
   
   // static code for loggers setup
   {  
