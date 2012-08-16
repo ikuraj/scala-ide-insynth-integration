@@ -19,7 +19,6 @@ import scala.tools.nsc.util.Position
 import java.io.OutputStreamWriter
 import ch.epfl.insynth.InSynth
 import ch.epfl.insynth.util.TreePrinter
-import ch.epfl.insynth.Config
 import ch.epfl.insynth.env.InitialEnvironmentBuilder
 import ch.epfl.insynth.env.Declaration
 import ch.epfl.insynth.reconstruction.Output
@@ -35,7 +34,7 @@ TODO:
 */
 
 object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]]) with HasLogger {
-  
+    
   var predefBuildLoader: PredefBuilderLoader = new PredefBuilderLoader()
   
   def apply(scu: ScalaCompilationUnit, position: Int): Option[List[Output]] = {
@@ -47,6 +46,8 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
 
     scu.withSourceFile {
       (sourceFile, compiler) =>
+        
+        logger.info("InSynth working on source file: " + sourceFile.path)
 
         if (compiler != InSynthWrapper.compiler) {
           InSynthWrapper.compiler = compiler

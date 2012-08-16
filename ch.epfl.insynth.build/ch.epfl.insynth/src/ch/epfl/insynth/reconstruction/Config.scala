@@ -1,4 +1,4 @@
-package ch.epfl.insynth
+package ch.epfl.insynth.reconstruction
 
 import java.util.logging._
 

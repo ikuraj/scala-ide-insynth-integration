@@ -1,7 +1,8 @@
 package ch.epfl.insynth.reconstruction.codegen
+
 import ch.epfl.insynth.reconstruction.intermediate._
 import ch.epfl.insynth.print._
-import ch.epfl.insynth.Config
+import ch.epfl.insynth.reconstruction.Config
 
 /**
  * class that extract the needed amount of snippets from the intermediate representation

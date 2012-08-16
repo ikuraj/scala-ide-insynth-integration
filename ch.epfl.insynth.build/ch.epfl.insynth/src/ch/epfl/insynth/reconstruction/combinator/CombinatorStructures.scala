@@ -10,7 +10,7 @@ import java.util.logging.Level
 import java.util.logging.ConsoleHandler
 import java.util.logging.FileHandler
 import java.util.logging.SimpleFormatter
-import ch.epfl.insynth.Config
+import ch.epfl.insynth.reconstruction.Config
 import ch.epfl.insynth.env.FormatNode
 
 // TODO set required combinations in each Tree node after we hit the limit in the top

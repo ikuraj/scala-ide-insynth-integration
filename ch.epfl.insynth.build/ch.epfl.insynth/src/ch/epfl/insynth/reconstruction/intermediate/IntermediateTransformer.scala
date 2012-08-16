@@ -9,7 +9,7 @@ import ch.epfl.insynth.{ env => InSynthEnv }
 import ch.epfl.insynth.{trees => InSynth}
 import ch.epfl.scala.{trees => Scala}
 import scala.annotation.tailrec
-import ch.epfl.insynth.Config
+import ch.epfl.insynth.reconstruction.Config
 
 // logging
 import ch.epfl.scala.trees.FormatScalaType

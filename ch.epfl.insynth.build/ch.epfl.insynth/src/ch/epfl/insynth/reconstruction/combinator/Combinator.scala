@@ -7,7 +7,7 @@ import java.util.logging.Logger
 import java.util.logging.ConsoleHandler
 import ch.epfl.insynth.env.FormatNode
 import java.util.logging.Level
-import ch.epfl.insynth.Config
+import ch.epfl.insynth.reconstruction.Config
 
 /**
  * object which application transforms an InSynth representation input
