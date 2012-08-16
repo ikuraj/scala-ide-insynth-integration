@@ -14,6 +14,7 @@ import org.junit.BeforeClass
 import org.junit.Assert._
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
+import ch.epfl.insynth.core.completion.InnerFinder
 
 @RunWith(value = classOf[Parameterized])
 class ReconstructorTest(givenTree: SimpleNode, expected: List[String]) {
@@ -50,6 +51,10 @@ object ReconstructorTest {
     // set appropriate preference values
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 15)        
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
+		
+		// wait for builder thread to finish (we want to start next tests without interfering)
+		if (InnerFinder.predefBuildLoader.isAlive())
+			InnerFinder.predefBuildLoader.join();
   }
   
 	@Parameters
