@@ -76,11 +76,16 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
           InSynthWrapper.builder.synchronized {
             val solution = InSynthWrapper.insynth.getSnippets(sourceFile.position(position), InSynthWrapper.builder)
 
-            if (solution != null)
+            if (solution != null) {
+            	logger.info("InSynth solution found, proceeding with reconstructor.")
               Some(
                 Reconstructor(solution.getNodes.head).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
         			)
-            else None
+            }
+            else {
+            	logger.warn("InSynth solution not found")
+              None
+            }
           }
         } catch {
           case ex =>
