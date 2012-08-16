@@ -57,7 +57,13 @@ object Reconstructor {
         
     // log all snippets
     Config.logSolutions.info(
-      "Generated code snippets: " + (generatedCode map { _._1.toString } mkString(","))
+      "Generated code snippets: " + 
+  		{
+        if (generatedCode.size > 15)
+        	(generatedCode take 15 map { _._1.toString } mkString(", ")) + "... and " + (generatedCode.size - 15) + " more"
+  		  else
+        	(generatedCode map { _._1.toString } mkString(", "))
+  		}    		    
     )
     
     // collect all generated snippets

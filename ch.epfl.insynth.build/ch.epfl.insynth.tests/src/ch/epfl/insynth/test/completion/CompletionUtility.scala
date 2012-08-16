@@ -52,7 +52,7 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       val positions = SDTTestUtils.positionsOf(contents, " /*!*/")
       val content = unit.getContents.mkString
 
-      assertTrue("cotent= " + content +  " positions.size=" + positions.size, positions.size > 0)
+      assertTrue("positions.size=" + positions.size, positions.size > 0)
             
       (List[List[Output]]() /: (0 until positions.size) ) {
         (list, i) => {

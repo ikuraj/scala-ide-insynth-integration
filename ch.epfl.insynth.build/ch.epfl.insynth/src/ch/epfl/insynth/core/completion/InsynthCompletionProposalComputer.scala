@@ -96,8 +96,8 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
     System.arraycopy(mark, 0, newContent, cont1.length, mark.length)
     System.arraycopy(cont2, 0, newContent, cont1.length + mark.length, cont2.length)
 
-    println("New content:")
-    newContent.foreach { print }
+//    println("New content:")
+//    newContent.foreach { print }
     //println()
     newContent
   }
