@@ -50,7 +50,7 @@ object ReconstructorTest {
   def setup() {    
     // set appropriate preference values
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 15)        
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 1000)
 		
 		// wait for builder thread to finish (we want to start next tests without interfering)
 		if (InnerFinder.predefBuildLoader.isAlive())
