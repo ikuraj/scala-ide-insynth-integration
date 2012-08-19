@@ -58,7 +58,7 @@ object ReconstructorTest {
   }
   
 	@Parameters
-	def parameters: ju.Collection[Array[Object]] = {
+	def parameters: ju.Collection[Array[ScalaObject]] = {
 	  import scala.collection.JavaConversions._
 	  import TreeExample._
 	  
@@ -74,7 +74,7 @@ object ReconstructorTest {
 //      buildTreeWithVariousFunctions,
 //      buildTreeWithoutThis,
 //      buildTreeIdentityFunction,
-		Array(buildTreeWithConstructors, List("f(new package().intVal, new package )")),
+				Array(buildTreeWithConstructors, List("f(new package().intVal, new package )")),
         Array(buildSameInSynthDifferentWeight, List("f1(intVal)", "f2(intVal, intVal)"))
     )
 	  
