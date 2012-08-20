@@ -37,7 +37,7 @@ object LogManager extends HasLogger {
 	 * method to be used as a listener
 	 * @param event
 	 */
-	def updatedLogging(event: PropertyChangeEvent): Unit = {
+	private def updatedLogging(event: PropertyChangeEvent): Unit = {
 	  // import preferences constants
 	  import InSynthConstants._
 	  
@@ -45,19 +45,8 @@ object LogManager extends HasLogger {
     if (event.getProperty == DoSeparateLoggingPropertyString) {
 		  // get new value as boolean
 	    val enable = event.getNewValue.asInstanceOf[Boolean]
-	    
-	    if (enable) {
-	      // set logger handler
-	    	Config.setLoggerHandler(inSynthHandler);
-				// log to Scala IDE log
-				eclipseLog.info("InSynth library logger enabled.");
-	    }
-	    else {
-	      // remove logger handler
-	    	Config.removeLoggerHandler(inSynthHandler);
-	    	// log to Scala IDE log
-				eclipseLog.info("InSynth library logger disabled.");
-	    }
+	    // set logging accordingly
+	    setLogging(enable)
     }
 	}
 	
@@ -65,15 +54,32 @@ object LogManager extends HasLogger {
    * configure InSynth logging facility
    */
   def configure = {    
-		//temporary until listener starts to work
-		//enableInSynthLogging();
-    
     // import listener transformations
     import SWTUtils.fnToPropertyChangeListener
     // get plugin store
     val store = Activator.getDefault.getPreferenceStore
     // add property change listener
     store.addPropertyChangeListener(updatedLogging _)
+    
+	  // import preferences constants
+	  import InSynthConstants._
+	  // check current setting and set logging
+    setLogging(store.getBoolean(DoSeparateLoggingPropertyString))
   }
+  
+  /** method for setting logging (on/off) */
+  def setLogging(enable: Boolean) = 
+		if (enable) {
+      // set logger handler
+    	Config.setLoggerHandler(inSynthHandler);
+			// log to Scala IDE log
+			eclipseLog.info("InSynth library logger enabled.");
+    }
+    else {
+      // remove logger handler
+    	Config.removeLoggerHandler(inSynthHandler);
+    	// log to Scala IDE log
+			eclipseLog.info("InSynth library logger disabled.");
+    }
   
 }
