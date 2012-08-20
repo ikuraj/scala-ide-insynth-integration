@@ -45,8 +45,8 @@ public class Activator extends AbstractUIPlugin {
 		  java.io.File.separator + "insynth-library.log";
 		//System.out.println("inSynthLibraryLoggerFilePath: " + inSynthLibraryLoggerFilePath);
 		
-		// create a file handler with appropriate path
-		inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, true);
+		// create a file handler with appropriate path (no appending)
+		inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, false);
 		// set to log all levels
 		inSynthHandler.setLevel(Level.ALL);
 		// set simple text formatter
