@@ -20,7 +20,7 @@ import scala.tools.eclipse.util.SWTUtils
 object LogManager extends HasLogger {
     
 	// sets logger to the InSynth library
-	val inSynthLibraryLoggerFilePath = Activator.getDefault().getStateLocation().toOSString() +
+	val inSynthLibraryLoggerFilePath = Activator.getDefault.getStateLocation.toOSString +
 	  java.io.File.separator + "insynth-library.log";
 	// log to Scala IDE log
 	eclipseLog.info("InSynth library logger configured to file path: " + inSynthLibraryLoggerFilePath);
