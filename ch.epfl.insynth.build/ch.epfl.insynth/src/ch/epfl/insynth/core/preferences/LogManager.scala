@@ -1,0 +1,79 @@
+package ch.epfl.insynth.core.preferences
+
+// InSynth
+import ch.epfl.insynth.core.Activator
+import ch.epfl.insynth.Config
+// java logging
+import java.util.logging.Handler
+import java.util.logging.FileHandler
+import java.util.logging.Level
+import java.util.logging.SimpleFormatter
+// eclipse
+import org.eclipse.jface.util.PropertyChangeEvent
+// Scala IDE
+import scala.tools.eclipse.logging.HasLogger
+import scala.tools.eclipse.util.SWTUtils
+
+/**
+ * manager for InSynth-specific (library) event logging
+ */
+object LogManager extends HasLogger {
+    
+	// sets logger to the InSynth library
+	val inSynthLibraryLoggerFilePath = Activator.getDefault().getStateLocation().toOSString() +
+	  java.io.File.separator + "insynth-library.log";
+	// log to Scala IDE log
+	eclipseLog.info("InSynth library logger configured to file path: " + inSynthLibraryLoggerFilePath);
+	
+	// create a file handler with appropriate path (no appending)
+	val inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, false);
+	// set to log all levels
+	inSynthHandler.setLevel(Level.ALL);
+	// set simple text formatter
+	inSynthHandler.setFormatter(new SimpleFormatter);
+	
+	
+	/**
+	 * method to be used as a listener
+	 * @param event
+	 */
+	def updatedLogging(event: PropertyChangeEvent): Unit = {
+	  // import preferences constants
+	  import InSynthConstants._
+	  
+	  // check property of the event
+    if (event.getProperty == DoSeparateLoggingPropertyString) {
+		  // get new value as boolean
+	    val enable = event.getNewValue.asInstanceOf[Boolean]
+	    
+	    if (enable) {
+	      // set logger handler
+	    	Config.setLoggerHandler(inSynthHandler);
+				// log to Scala IDE log
+				eclipseLog.info("InSynth library logger enabled.");
+	    }
+	    else {
+	      // remove logger handler
+	    	Config.removeLoggerHandler(inSynthHandler);
+	    	// log to Scala IDE log
+				eclipseLog.info("InSynth library logger disabled.");
+	    }
+    }
+	}
+	
+  /**
+   * configure InSynth logging facility
+   */
+  def configure = {    
+		//temporary until listener starts to work
+		//enableInSynthLogging();
+    
+    // import listener transformations
+    import SWTUtils.fnToPropertyChangeListener
+    // get plugin store
+    val store = Activator.getDefault.getPreferenceStore
+    // add property change listener
+    store.addPropertyChangeListener(updatedLogging _)
+  }
+  
+}

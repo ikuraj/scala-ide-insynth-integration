@@ -29,7 +29,7 @@ class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPrefer
     addField(new IntegerFieldEditor(OfferedSnippetsPropertyString, "Number of snippets", getFieldEditorParent))
     addField(new IntegerFieldEditor(MaximumTimePropertyString, "Maximum computation time (ms)", getFieldEditorParent))
     val doLoggingFieldEditor = new BooleanFieldEditor(DoSeparateLoggingPropertyString, "Log InSynth-specific events to a separate log", getFieldEditorParent)
-    doLoggingFieldEditor.setPropertyChangeListener(DoLoggingChangeListener)
+    //doLoggingFieldEditor.setPropertyChangeListener(DoLoggingChangeListener)
     addField(doLoggingFieldEditor)
   }
 
@@ -41,17 +41,6 @@ class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPrefer
 
   def init(workbench: IWorkbench) {}
     
-}
-
-object DoLoggingChangeListener extends IPropertyChangeListener with HasLogger {
-  override def propertyChange(event: PropertyChangeEvent) {
-    eclipseLog.error("asdasdsadasdasd changeListener")
-    event.getNewValue() match {
-      case Boolean.TRUE => Activator.getDefault.enableInSynthLogging
-      case Boolean.FALSE => Activator.getDefault.disableInSynthLogging
-      case _ => eclipseLog.error("fail")
-    }
-  }
 }
 
 class InSynthPreferencePageInitializer extends AbstractPreferenceInitializer {
