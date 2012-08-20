@@ -208,6 +208,20 @@ object TreeExample {
 	      fullNameClassA + ".m6", // full name
 	      m6, m6
       )		
+	  m1Declaration.setIsMethod(true)
+	  m2Declaration.setIsMethod(true)
+	  m3Declaration.setIsMethod(true)
+	  m4Declaration.setIsMethod(true)
+	  m5Declaration.setIsMethod(true)
+	  m6Declaration.setIsMethod(true)
+	  
+	  m1Declaration.setHasThis(false)
+	  m2Declaration.setHasThis(false)
+	  m3Declaration.setHasThis(false)
+	  m4Declaration.setHasThis(false)
+	  m5Declaration.setHasThis(false)
+	  m6Declaration.setHasThis(false)
+	  objectADeclaration.setIsThis(true)
 	  
 	  // special query declaration
 	  val queryDeclaration = new Declaration(
@@ -354,7 +368,7 @@ object TreeExample {
 	      Function(List(typeInt, typeInt), typeChar) // return type
 		)	
 	  // def m2(a: Int, b:Int): Char
-	  val m2 = Method(objectA, List(typeInt, typeInt), typeChar)
+	  val m2 = Method(objectA, List(List(typeInt, typeInt)), typeChar)
 	  // def m3(): Char
 	  val m3 = Method(objectA, List(), typeChar)
 	  // query: String → ⊥
@@ -394,6 +408,10 @@ object TreeExample {
 	      fullNameClassA + ".m3", // full name
 	      m3, m3
       )	  
+            
+	  m1Declaration.setIsMethod(true)
+	  m2Declaration.setIsMethod(true)
+	  m3Declaration.setIsMethod(true)
 	  
 	  // special query declaration
 	  val queryDeclaration = Declaration(
