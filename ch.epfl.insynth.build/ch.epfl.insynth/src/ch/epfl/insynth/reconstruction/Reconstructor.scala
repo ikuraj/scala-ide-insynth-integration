@@ -1,20 +1,23 @@
 package ch.epfl.insynth.reconstruction
 
-import ch.epfl.insynth.env.SimpleNode
-import ch.epfl.insynth.env.Weight
-import ch.epfl.insynth.Config
-import ch.epfl.insynth.reconstruction.combinator.Combinator
-import ch.epfl.insynth.reconstruction.intermediate.IntermediateTransformer
+// InSynth library
+import ch.epfl.insynth.env.{ SimpleNode, Weight }
+
+// InSynth reconstructor
+import ch.epfl.insynth.reconstruction.combinator.{ Combinator, FormatPrNode }
+import ch.epfl.insynth.reconstruction.intermediate.{ IntermediateTransformer, FormatableIntermediate }
 import ch.epfl.insynth.reconstruction.codegen.{ Extractor, CodeGenerator }
-import java.util.logging.Logger
-import ch.epfl.insynth.reconstruction.intermediate.FormatableIntermediate
-import ch.epfl.insynth.reconstruction.combinator.FormatPrNode
+
+// InSynth core
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 
-object Reconstructor {
+/**
+ * Object for reconstruction of proof trees into output(s)
+ */
+object Reconstructor extends (SimpleNode => List[Output]) {
 
-  def apply(tree:SimpleNode): List[Output] = {
+  def apply(tree: SimpleNode): List[Output] = {
     // get needed number of snippets from the store
     val numberOfCombinations = Activator.getDefault.getPreferenceStore.getInt(
   		InSynthConstants.OfferedSnippetsPropertyString)
@@ -27,15 +30,19 @@ object Reconstructor {
 		val maximumTime = Activator.getDefault.getPreferenceStore.getInt(
 	    InSynthConstants.MaximumTimePropertyString)
     
+    // construct the combinator tree
     val combinatorTree = Combinator(tree, numberOfCombinations, maximumTime) match {
+  	  // check result, if some return it, otherwise return an empty list
   	  case Some(result) => result
-  	  case None => { 
+  	  case None => {
+  	    // logging
   	    if (Config.isLogging)
-	      Config.logReconstructor.warning("Combinator returned None")
+  	    	Config.logReconstructor.warning("Combinator returned None")
   	    return List.empty
   	  }
   	}
     
+    // logging
     if (Config.isLogging) {
       Config.logReconstructor.info(
         "after combinator " + FormatPrNode(combinatorTree)
@@ -45,6 +52,7 @@ object Reconstructor {
     // transform the trees (first two steps of the code generation phase)
     val transformedTree = IntermediateTransformer(combinatorTree)
      
+    // logging
     if (Config.isLogging) {
       Config.logReconstructor.info(
         "after intermediate " + FormatableIntermediate(transformedTree)
@@ -78,6 +86,9 @@ object Reconstructor {
   
 }
 
+/**
+ * Encapsulation of the result output from the reconstruction phase, non UI dependent
+ */
 case class Output(snippet:String, weight:Weight){
   def getSnippet = snippet
   def getWieght = weight
