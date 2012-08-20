@@ -12,9 +12,12 @@ import org.eclipse.ui.IWorkbench
 import org.eclipse.ui.IWorkbenchPreferencePage
 import org.eclipse.jface.preference.IntegerFieldEditor
 import org.eclipse.jface.preference.IPreferenceStore
-
 import ch.epfl.insynth.core.Activator
 import InSynthConstants._
+import org.eclipse.jface.util.IPropertyChangeListener
+import org.eclipse.jface.util.PropertyChangeEvent
+import java.lang.Boolean
+import scala.tools.eclipse.logging.HasLogger
 
 class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPreferencePage {
 
@@ -25,6 +28,9 @@ class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPrefer
   override def createFieldEditors() {
     addField(new IntegerFieldEditor(OfferedSnippetsPropertyString, "Number of snippets", getFieldEditorParent))
     addField(new IntegerFieldEditor(MaximumTimePropertyString, "Maximum computation time (ms)", getFieldEditorParent))
+    val doLoggingFieldEditor = new BooleanFieldEditor(DoSeparateLoggingPropertyString, "Log InSynth-specific events to a separate log", getFieldEditorParent)
+    doLoggingFieldEditor.setPropertyChangeListener(DoLoggingChangeListener)
+    addField(doLoggingFieldEditor)
   }
 
   override def createContents(parent: Composite): Control = {
@@ -37,6 +43,17 @@ class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPrefer
     
 }
 
+object DoLoggingChangeListener extends IPropertyChangeListener with HasLogger {
+  override def propertyChange(event: PropertyChangeEvent) {
+    eclipseLog.error("asdasdsadasdasd changeListener")
+    event.getNewValue() match {
+      case Boolean.TRUE => Activator.getDefault.enableInSynthLogging
+      case Boolean.FALSE => Activator.getDefault.disableInSynthLogging
+      case _ => eclipseLog.error("fail")
+    }
+  }
+}
+
 class InSynthPreferencePageInitializer extends AbstractPreferenceInitializer {
     
   override def initializeDefaultPreferences() {    
@@ -46,5 +63,6 @@ class InSynthPreferencePageInitializer extends AbstractPreferenceInitializer {
 
     store.setDefault(OfferedSnippetsPropertyString, NumberOfOfferedSnippets)
     store.setDefault(MaximumTimePropertyString, MaximumTime)
+    store.setDefault(DoSeparateLoggingPropertyString, DoSeparateLogging)
   }
 }

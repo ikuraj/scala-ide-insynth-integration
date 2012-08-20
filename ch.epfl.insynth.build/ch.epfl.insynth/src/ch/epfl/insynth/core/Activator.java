@@ -21,6 +21,9 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
+	// handler for InSynth-specific (library) event logging
+	private FileHandler inSynthHandler;
+	
 	/**
 	 * The constructor
 	 */
@@ -33,16 +36,38 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		
+		// set shared instance
 		plugin = this;
 
 		// sets logger to the InSynth library
 		String inSynthLibraryLoggerFilePath = getStateLocation().toOSString() +
 		  java.io.File.separator + "insynth-library.log";
 		//System.out.println("inSynthLibraryLoggerFilePath: " + inSynthLibraryLoggerFilePath);
-		FileHandler inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, true);
+		
+		// create a file handler with appropriate path
+		inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, true);
+		// set to log all levels
 		inSynthHandler.setLevel(Level.ALL);
+		// set simple text formatter
 		inSynthHandler.setFormatter(new SimpleFormatter());
+		
+		//temporary until listener starts to work
+		Config.setLoggerHandler(inSynthHandler);		
+	}
+	
+	/**
+	 * enable InSynth library (plugin-separate) logging
+	 */
+	public void enableInSynthLogging() {
 		Config.setLoggerHandler(inSynthHandler);
+	}
+
+	/**
+	 * disable InSynth library (plugin-separate) logging
+	 */
+	public void disableInSynthLogging() {
+		Config.removeLoggerHandler(inSynthHandler);
 	}
 
 	/*
