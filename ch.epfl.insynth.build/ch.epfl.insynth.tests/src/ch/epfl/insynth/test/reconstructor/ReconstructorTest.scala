@@ -71,11 +71,11 @@ object ReconstructorTest {
   }
   
 	@Parameters
-	def parameters: ju.Collection[Array[ScalaObject]] = {
+	def parameters: ju.Collection[Array[Object]] = {
 	  import scala.collection.JavaConversions._
 	  import TreeExample._
 	  
-		val trees = List(
+		val trees: List[Array[Object]] = List(
       Array(buildSimpleTree, List("A.m4()")),
       Array(buildComplexTree, List("m1\\((\\S+) => m6\\(\\), m4\\(\\)\\)", "m1\\((\\S+) => m2\\(\\1\\), m4\\(\\)\\)",
         "m1\\((\\S+) => m3\\(m5\\(\\1\\)\\), m4\\(\\)\\)")),
