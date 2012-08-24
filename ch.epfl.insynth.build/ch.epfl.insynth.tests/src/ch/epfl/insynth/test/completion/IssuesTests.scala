@@ -48,7 +48,7 @@ class IssuesTests {
 	import testProjectSetup._
 
   @Test
-  def testExample1() {
+  def testGitHubIssueNo4() {
 	  // TODO re-check when alternative syntax generation is implemented (we want just println) 
     val oraclePos8 = List("Predef println")    
     val checkersPos8 = List(CheckContains(oraclePos8))
