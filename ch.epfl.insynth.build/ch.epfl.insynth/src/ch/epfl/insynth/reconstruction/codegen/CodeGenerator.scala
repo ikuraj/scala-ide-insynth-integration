@@ -154,7 +154,7 @@ object CodeGenerator extends (Node => List[CodeGenOutput]) {
 	          parenthesesRequired = 
 	            // if we have more than one parameter or this term is a single parameter
 	            // to outer application
-	            params.drop(2).size != 1 || ctx == SinglePar
+	            params.drop(2).size > 1 || ctx == SinglePar
         	  // go through all combinations of parameters documents
     		  return (List[Document]() /: getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)) {
 	    		(list, paramsDoc) => list :+

@@ -50,7 +50,7 @@ class TypesHandlingTests {
   @Test
   def testExample1() {
 	  // instantiated type constructor
-    val oraclePos14 = List("A.m1()")    
+    val oraclePos14 = List("A m1")    
     val checkersPos14 = List(CheckContains(oraclePos14))
     
     // generic types
