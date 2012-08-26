@@ -33,11 +33,8 @@ object IssuesTests extends TestProjectSetup("issues", bundleName = "ch.epfl.insy
   
   @BeforeClass
   def setup() {    
-    // set appropriate preference values (expect 5 completions)
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 5)        
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 10)        
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.DoSeparateLoggingPropertyString, true)
-		//Config.proofTreeLevelToLog = 3
   }
   
 }
@@ -57,6 +54,16 @@ class IssuesTests {
     val checkersPos10 = List(CheckDoesNotContain(oraclePos10))
     
     checkCompletions("github/IssueNo4.scala")(checkersPos8, checkersPos10)
+  }
+	
+  @Test
+  def testGitHubIssueNo3() {
+    
+    val oraclePos11 = List("C apply 0")  
+    val checkersPos11 = List(CheckContains(oraclePos11))
+    val checkersPos16 = List(CheckContains(oraclePos11))
+    
+    checkCompletions("github/IssueNo3.scala")(checkersPos11, checkersPos16)
   }
 
 }
