@@ -7,7 +7,8 @@ import javax.swing.JTextArea;
 class Main {
   def main(argv:Array[String]) {
     // Create a text area with some initial text
-    var textarea:JTextArea = new JTextArea("Initial Text") //r=3
+    //var textarea:JTextArea = new JTextArea("Initial Text") //r=3
+    var textarea:JTextArea =  /*!*/ //r=3
 
     var rows = 20;
     var cols = 30;

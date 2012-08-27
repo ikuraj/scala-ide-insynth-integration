@@ -16,7 +16,8 @@ class MainClass {
       while (true) {
         var buffer = new Array[Byte](BUFSIZE)
 
-        var dp:DatagramPacket = new DatagramPacket(buffer, buffer.length) //r>5
+        //var dp:DatagramPacket = new DatagramPacket(buffer, buffer.length) //r>5
+        var dp:DatagramPacket =  /*!*/ //r>5
 
         ds.receive(dp);
 

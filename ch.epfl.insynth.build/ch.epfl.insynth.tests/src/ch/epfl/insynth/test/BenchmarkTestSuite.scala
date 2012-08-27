@@ -6,6 +6,7 @@ import org.junit.BeforeClass
 
 import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionTests
 import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedTests
+import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedLessCertainTests
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 
@@ -13,7 +14,8 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 @Suite.SuiteClasses(
   Array(
     classOf[InSynthBenchmarkCompletionTests],
-    classOf[InSynthBenchmarkCompletionParametrizedTests]
+    classOf[InSynthBenchmarkCompletionParametrizedTests],
+    classOf[InSynthBenchmarkCompletionParametrizedLessCertainTests]
   )
 )
 class BenchmarkTestSuite 

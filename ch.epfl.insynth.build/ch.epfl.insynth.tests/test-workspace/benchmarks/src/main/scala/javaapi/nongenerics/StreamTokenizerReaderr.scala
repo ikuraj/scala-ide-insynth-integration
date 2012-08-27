@@ -10,7 +10,8 @@ import java.io.StreamTokenizer;
 class Main {
 
   def main(args:Array[String]) {
-    var tf:StreamTokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in))) //r=3
+    //var tf:StreamTokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in))) //r=3
+    var tf:StreamTokenizer =  /*!*/ //r=3
     var i:Int = tf.nextToken() 
     while (i != StreamTokenizer.TT_EOF) {
       i match {

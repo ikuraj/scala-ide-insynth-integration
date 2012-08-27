@@ -14,7 +14,8 @@ class Main {
     var aWindow:JFrame = new JFrame("This is a Grid Layout");
     aWindow.setBounds(30, 30, 300, 300);
     aWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    var grid:GridLayout = new GridLayout(3, 4, 30, 20) //r>5
+    //var grid:GridLayout = new GridLayout(3, 4, 30, 20) //r>5
+    var grid:GridLayout =  /*!*/ //r>5
     var content:Container = aWindow.getContentPane();
     content.setLayout(grid);
     var button:JButton = null;

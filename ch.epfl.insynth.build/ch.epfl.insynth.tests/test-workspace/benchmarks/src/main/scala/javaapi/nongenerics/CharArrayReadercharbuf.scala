@@ -14,7 +14,8 @@ class Main {
       outStream.write(s.charAt(i));
     System.out.println("outstream: " + outStream);
     System.out.println("size: " + outStream.size());
-    var inStream:CharArrayReader = new CharArrayReader(outStream.toCharArray()) //r=1
+    //var inStream:CharArrayReader = new CharArrayReader(outStream.toCharArray()) //r=1
+    var inStream:CharArrayReader =  /*!*/ //r=1
 
     var ch:Int = 0;
     var string = ""
