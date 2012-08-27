@@ -23,13 +23,7 @@ import ch.epfl.insynth.env.FormatNode
 /**
  * dictates some rules about the combination search and declares loggers
  */
-object Rules {
-  // define logging
-  val logger = Config.logger
-  val logStructures = Config.logStructures
-  val logApply = Config.logApply  
-  val isLogging = Config.isLogging  
-  
+object Rules {  
   // if the pruning started
   var doPruning = false
 }
@@ -106,8 +100,8 @@ extends Combinations
   // add declaration to this tree (when it is explored)
   def addDeclaration(dec: Expression) {
     // logging
-    if (Rules.isLogging && isPruned) {
-      Rules.logStructures.warning("Adding declaration " + dec + " to pruned tree " + this)
+    if (Config.isLogging && isPruned) {
+      Config.logStructures.warning("Adding declaration " + dec + " to pruned tree " + this)
     }
     decls += dec
   }
@@ -141,27 +135,27 @@ extends Combinations
       dec.setPruned(valPruned)
     }
     // logging
-    if (Rules.isLogging && !isDone && parent.isDone) {
-      Rules.logStructures.warning("Pruning (" + FormatType(tpe) + ") but its parent is done.")
+    if (Config.isLogging && !isDone && parent.isDone) {
+      Config.logStructures.warning("Pruning (" + FormatType(tpe) + ") but its parent is done.")
     }
   }
   	
   def toTreeNode = {
     // logging
-    if (Rules.isLogging) {
-	    Rules.logStructures.entering(getClass.getName, "toTreeNode")
-	    Rules.logStructures.fine("toTreeNode started on Tree: " + FormatType(tpe) )
+    if (Config.isLogging) {
+	    Config.logStructures.entering(getClass.getName, "toTreeNode")
+	    Config.logStructures.fine("toTreeNode started on Tree: " + FormatType(tpe) )
     }
     
     // transform only those expressions that are done
     val declsToTransform = decls filter { _.isDone }
     
     // logging
-    if (Rules.isLogging) {
-      Rules.logStructures.info("has doneDeclarations " + declsToTransform.size)
+    if (Config.isLogging) {
+      Config.logStructures.info("has doneDeclarations " + declsToTransform.size)
     }
-    if (Rules.isLogging && declsToTransform.isEmpty) {
-      Rules.logger.warning("Tree (" + FormatType(tpe) + "): toTree has none done expressions "
+    if (Config.isLogging && declsToTransform.isEmpty) {
+      Config.logStructures.warning("Tree (" + FormatType(tpe) + "): toTree has none done expressions "
 	    + "(declsToTransform: " + ("" /: declsToTransform){ (s, t) => s + ", "  + FormatNode(t.getAssociatedNode) } + ")")
     }
     
@@ -176,8 +170,8 @@ extends Combinations
     }
     
     // logging
-    if (Rules.isLogging && nodeSet.isEmpty) {
-      Rules.logger.warning("Tree (" + FormatType(tpe) + "): toTree transformed nodes set empty")
+    if (Config.isLogging && nodeSet.isEmpty) {
+      Config.logStructures.warning("Tree (" + FormatType(tpe) + "): toTree transformed nodes set empty")
     }
     
     // set of transformed nodes should not be empty
@@ -218,11 +212,11 @@ class TopTree(neededCombinations: Int)
 extends Tree(null, BottomType)
 {    
   override def childDone(decl: Expression):Unit = {
-    if (Rules.isLogging)
-    	Rules.logStructures.info("Child done at top tree called.")
+    if (Config.isLogging)
+    	Config.logStructures.info("Child done at top tree called.")
     if (neededCombinations <= getNumberOfCombinations) {
-      if (Rules.isLogging)
-      	Rules.logger.info("Yes we found enough combinations(" + getNumberOfCombinations + ", will start pruning.")
+      if (Config.isLogging)
+      	Config.logStructures.info("Yes we found enough combinations(" + getNumberOfCombinations + ", will start pruning.")
       	
       Rules.doPruning = true
       //Rules.logger.info("Tree looks like: " + FormatCombinations(this))
@@ -247,8 +241,8 @@ extends Expression(associatedTree, associatedNode) {
   var doneChildren: Set[Tree] = Set()
   
   def addChild(decl: Tree) = {
-    if (Rules.isLogging)
-    Rules.logger.fine("Added child " + decl + " to composite " + origDecl.getSimpleName)
+    if (Config.isLogging)
+    Config.logStructures.fine("Added child " + decl + " to composite " + origDecl.getSimpleName)
     
     children += decl 
   }
@@ -263,8 +257,8 @@ extends Expression(associatedTree, associatedNode) {
     // NOTE we can get a call to childDone again but minWeight will be the same as
     // previously set getWeight (we need >)
     if (Rules.doPruning && associatedTree.getTraversalWeight + getMinComputedWeight > associatedTree.minWeight && !isPruned) {
-      if (Rules.isLogging)	
-    	Rules.logger.info("Pruning Composite (" + FormatNode(associatedNode, 0) + ")")
+      if (Config.isLogging)	
+    	Config.logStructures.info("Pruning Composite (" + FormatNode(associatedNode, 0) + ")")
     	
       // mark the node as pruned
 	  setPruned(true)
@@ -289,8 +283,8 @@ extends Expression(associatedTree, associatedNode) {
     
   override def setPruned(valPruned: Boolean):Unit = {
     // logging
-    if (Rules.isLogging && associatedTree.minWeight >= getTraversalWeight && !associatedTree.isPruned) {
-      Rules.logStructures.warning("Pruning (" + FormatNode(associatedNode, 0) + ") but it has the min weight at associated tree.")
+    if (Config.isLogging && associatedTree.minWeight >= getTraversalWeight && !associatedTree.isPruned) {
+      Config.logStructures.warning("Pruning (" + FormatNode(associatedNode, 0) + ") but it has the min weight at associated tree.")
     }
     super.setPruned(valPruned)
     for (tree <- children; if !tree.isPruned) {
@@ -300,14 +294,14 @@ extends Expression(associatedTree, associatedNode) {
   
   override def toTreeNode = {
     // logging
-    if (Rules.isLogging) {
-		Rules.logStructures.entering(getClass.getName, "toTreeNode")
-		Rules.logStructures.fine("toTreeNode started on Composite: " + origDecl.getSimpleName)
+    if (Config.isLogging) {
+		Config.logStructures.entering(getClass.getName, "toTreeNode")
+		Config.logStructures.fine("toTreeNode started on Composite: " + origDecl.getSimpleName)
 		if (!(children &~ doneChildren).isEmpty) {
-		  Rules.logger.warning("Composite " + origDecl.getSimpleName + " toTree has not all children done "
+		  Config.logStructures.warning("Composite " + origDecl.getSimpleName + " toTree has not all children done "
 		    + "(children: " + ("" /: children){ (s, t) => s + ", "  + FormatType(t.tpe) } 
 		  	+ ", doneChildren: " + ("" /: doneChildren){ (s, t) => s + ", "  + FormatType(t.tpe) } + ")")
-		  Rules.logger.warning("The toTreeNode failed composite has " + getNumberOfCombinations + " combinations.")
+		  Config.logStructures.warning("The toTreeNode failed composite has " + getNumberOfCombinations + " combinations.")
 		}
     }
     // this assert is needed since transform should not be called if node is not done
@@ -349,9 +343,9 @@ extends Expression(associatedTree, associatedNode) {
   
   override def toTreeNode = {
     // logging
-    if (Rules.isLogging) {
-	    Rules.logStructures.entering(getClass.getName, "toTreeNode")
-	    Rules.logStructures.fine("toTreeNode started on: " + origDecl.getSimpleName)
+    if (Config.isLogging) {
+	    Config.logStructures.entering(getClass.getName, "toTreeNode")
+	    Config.logStructures.fine("toTreeNode started on: " + origDecl.getSimpleName)
     }
     SimpleNode(
       List(origDecl), associatedTree.tpe, Map[Type, ContainerNode]()
@@ -379,9 +373,9 @@ extends Expression(associatedTree, associatedNode) {
   
   override def toTreeNode = {
     // logging
-    if (Rules.isLogging) {
-	    Rules.logStructures.entering(getClass.getName, "toTreeNode")    
-	    Rules.logStructures.fine("toTreeNode started on: " + FormatNode(associatedNode, 0))
+    if (Config.isLogging) {
+	    Config.logStructures.entering(getClass.getName, "toTreeNode")    
+	    Config.logStructures.fine("toTreeNode started on: " + FormatNode(associatedNode, 0))
     }
     AbsNode(associatedTree.tpe)
   }

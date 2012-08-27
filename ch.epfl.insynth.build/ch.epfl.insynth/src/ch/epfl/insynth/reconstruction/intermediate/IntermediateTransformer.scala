@@ -28,6 +28,8 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
   type Context = List[(String, Scala.ScalaType)]
   val emptyContext = List()
   
+  // define logger for intermediate transform step
+  val logger = Config.logIntermediate
       
   // NOTE can be solved with a functional solution (stream of variables, not so pretty) 
   class VariableGenerator {
@@ -68,7 +70,8 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
    * @return set of nodes that describe how to generate expression of goalType
    */
   private def transform(node: SimpleNode, oldContext:Context, goalType: Scala.ScalaType): Set[IntermediateNode] = {
-    if (Config.isLogging) Config.logReconstructor.entering(
+    // logging
+    if (Config.isLogging) logger.entering(
       this.getClass().getName(), "transform", node.decls.head.getSimpleName)
         
     var context = oldContext
@@ -117,7 +120,7 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
         // without recursive calls
         case Scala.Function(params, `goalReturnType`) => {
           if (Config.isLogging) {
-            Config.logReconstructor.info("generating application for function with parameters: " +
+            logger.info("generating application for function with parameters: " +
               (params map { t => FormatScalaType(t).toString }) )
           }
           val mapOfSetsOfParameterTypes = getMapTypesToParameters(params)
@@ -129,7 +132,7 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
         	  }
     	  	} 
           if (Config.isLogging) {
-            Config.logReconstructor.info("paramsSetList: " +
+            logger.info("paramsSetList: " +
               (paramsSetList) )
           }
           Application(
@@ -141,7 +144,7 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
         // a recursive call
         case Scala.Function(params, innerFun:Scala.Function) =>
           if (Config.isLogging) {
-            Config.logReconstructor.info("generating application for function with parameters: " +
+            logger.info("generating application for function with parameters: " +
               (params map { t => FormatScalaType(t).toString }) )
           }
           val mapOfSetsOfParameterTypes = getMapTypesToParameters(params)
@@ -153,7 +156,7 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
         	  }
     	  	} 
           if (Config.isLogging) {
-            Config.logReconstructor.info("paramsSetList: " +
+            logger.info("paramsSetList: " +
               (paramsSetList) )
           }
           generateApplicationAccordingToFunction(
@@ -175,10 +178,10 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
 		// go through all needed parameters and generate appropriate nodes
 		// NOTE we eliminate duplicates in order to avoid redundant computation	
 		if (Config.isLogging) {
-		  Config.logReconstructor.info("paramsList: " + 
+		  logger.info("paramsList: " + 
 		    (parameterList map { t:Scala.ScalaType => if (t!=null) FormatScalaType(t).toString else "null" }).mkString(",")
 	      )
-		  Config.logReconstructor.info("paramsList filter: " + 
+		  logger.info("paramsList filter: " + 
 		    ((parameterList filter { _!=null } distinct) map { t:Scala.ScalaType => if (t!=null) FormatScalaType(t).toString else "null" }).mkString(",")
 	      )
 		}
@@ -189,7 +192,7 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
 	      (map, parameterType) => {	        
 	        // corresponding InSynth type
 	        val parameterTypeInSynth = typeTransform(parameterType)
-	        if (Config.isLogging) Config.logReconstructor.info("need to find parameter for " + parameterType +
+	        if (Config.isLogging) logger.info("need to find parameter for " + parameterType +
               " parameterTypeInSynth: " + parameterTypeInSynth + " or " + FormatType(parameterTypeInSynth))
 	        //println("Parameter list is: " + parameterList + "(node : " + node + ")" )
 	        // get node with the needed type, deeper in down the tree
@@ -305,8 +308,8 @@ object IntermediateTransformer extends (SimpleNode => IntermediateNode){
     	  def computeAbstraction(outerContext: Context, goalType: Scala.ScalaType):
 		  (Set[IntermediateNode] => Abstraction, Context) = {
     	    if (Config.isLogging) {
-	    	    Logger.getLogger(IntermediateTransformer.getClass.toString).entering(this.getClass().getName(), "computeAbstraction")
-		        Logger.getLogger(IntermediateTransformer.getClass.toString).info("computing abstraction")
+	    	    logger.entering(this.getClass().getName(), "computeAbstraction")
+		        logger.fine("computing abstraction")
     	    }
 		    // "last return type" of the goal type
 	    	val neededReturnType = getReturnType(goalType)
