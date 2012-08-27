@@ -13,8 +13,7 @@ class Example1 {
     // val val1:Array[Int] = m1() - this should be generated
     val val1:Array[Int] =  /*!*/
 
-    // this one should not be generated, since generic types are involved
-    // val val2:Array[Int] = m2[Int]() - this cannot be generated
-    val val2:Array[Int] =  /*!*/
+    // this one is not valid, should not be generated, since generic types are involved
+    val val2:Array[T] =  /*!*/
   }  
 }

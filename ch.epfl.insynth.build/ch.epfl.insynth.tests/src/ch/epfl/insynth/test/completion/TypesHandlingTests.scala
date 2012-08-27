@@ -33,11 +33,8 @@ object TypesHandlingTests extends TestProjectSetup("features", bundleName = "ch.
   
   @BeforeClass
   def setup() {    
-    // set appropriate preference values (expect 5 completions)
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 5)        
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 10)        
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.DoSeparateLoggingPropertyString, true)
-		//Config.proofTreeLevelToLog = 3
   }
   
 }
@@ -50,13 +47,13 @@ class TypesHandlingTests {
   @Test
   def testExample1() {
 	  // instantiated type constructor
-    val oraclePos14 = List("A m1")    
-    val checkersPos14 = List(CheckContains(oraclePos14))
-    
-    // generic types
-    val checkersPos18 = List(CheckNumberOfCompletions(0))
-    
-    checkCompletions("generics/Example1.scala")(checkersPos14, checkersPos18)
+	  // should contain this
+    val oraclePos14contains = List("A m1")
+    // but not this solution
+    val oraclePos14doesnotcontain = List("m2")    
+    val checkersPos14 = List(CheckContains(oraclePos14contains), CheckContainsSubstring(oraclePos14doesnotcontain, false))
+        
+    checkCompletions("generics/Example1.scala")(checkersPos14)
   }
 
 }
