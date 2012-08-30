@@ -10,7 +10,7 @@ import ch.epfl.insynth.test.completion.InSynthPreferencesTests
   Array(
     classOf[InSynthLibraryTestSuite],
     classOf[CodeGenerationTestSuite],
-    classOf[InSynthCompletionTestSuite],
+    classOf[CompletionTestSuite],
     classOf[BenchmarkTestSuite],
     classOf[InSynthPreferencesTests]
   )

@@ -16,9 +16,9 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
     classOf[InSynthCompletionClassicCodeTests]
   )
 )
-class InSynthCompletionTestSuite 
+class CompletionTestSuite 
 
-object InSynthCompletionTestSuite {
+object CompletionTestSuite {
   @BeforeClass
   def setup() {    
     // set appropriate preference values
