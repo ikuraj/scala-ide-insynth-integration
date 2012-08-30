@@ -26,6 +26,9 @@ import ch.epfl.insynth.reconstruction.Reconstructor
 import ch.epfl.insynth.core.Activator
 import scala.tools.eclipse.logging.HasLogger
 import ch.epfl.insynth.reconstruction.Output
+import ch.epfl.insynth.core.preferences.InSynthConstants
+import ch.epfl.insynth.reconstruction.codegen.CleanCodeGenerator
+import ch.epfl.insynth.reconstruction.codegen.ClassicStyleCodeGenerator
 
 /* 
 TODO:
@@ -78,8 +81,19 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
 
             if (solution != null) {
             	logger.info("InSynth solution found, proceeding with reconstructor.")
+            	
+            	// import InSynth constants for convenience
+            	import InSynthConstants._
+            	// choose a code generator object according to the code style property
+            	val codeGenerator = Activator.getDefault.getPreferenceStore.getString(
+        				CodeStyleParenthesesPropertyString
+      				) match {
+            	  case `CodeStyleParenthesesClean` => new CleanCodeGenerator
+            	  case `CodeStyleParenthesesClassic` => new ClassicStyleCodeGenerator
+            	}
+            	
               Some(
-                Reconstructor(solution.getNodes.head).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
+                Reconstructor(solution.getNodes.head, codeGenerator).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
         			)
             }
             else {
