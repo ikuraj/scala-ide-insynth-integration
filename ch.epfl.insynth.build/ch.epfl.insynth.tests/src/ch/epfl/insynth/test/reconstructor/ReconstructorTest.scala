@@ -15,6 +15,7 @@ import org.junit.Assert._
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.core.completion.InnerFinder
+import ch.epfl.insynth.reconstruction.codegen.CleanCodeGenerator
 
 @RunWith(value = classOf[Parameterized])
 class ReconstructorTest(givenTree: SimpleNode, expectedList: List[String]) {
@@ -22,7 +23,7 @@ class ReconstructorTest(givenTree: SimpleNode, expectedList: List[String]) {
   @Test
   def test() {
     // get the reconstruction result
-    val reconstructorOutput = Reconstructor(givenTree)
+    val reconstructorOutput = Reconstructor(givenTree, new CleanCodeGenerator)
     
     assertEquals("Number of completions did not match. ", expectedList.size, reconstructorOutput.size)
     

@@ -5,6 +5,7 @@ import org.junit.Test
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.reconstruction.Reconstructor
+import ch.epfl.insynth.reconstruction.codegen.CleanCodeGenerator
 
 class FeaturesTest {
   
@@ -16,7 +17,7 @@ class FeaturesTest {
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 15)        
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
   
-		val reconstructorOutput = Reconstructor(node)
+		val reconstructorOutput = Reconstructor(node, new CleanCodeGenerator)
 		
 		// query node has 1.0d weight
 		for ((expectedString, expectedWeight) <- List(("f1(intVal)", 3.0d), ("f2(intVal, intVal)", 4.0d))) {
@@ -37,7 +38,7 @@ class FeaturesTest {
     
 		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 1)
 		
-		val reconstructorOutput1Solution = Reconstructor(node)
+		val reconstructorOutput1Solution = Reconstructor(node, new CleanCodeGenerator)
 		assertTrue(!reconstructorOutput1Solution.isEmpty)
 		assertEquals("f1(intVal)", reconstructorOutput1Solution.head.getSnippet)
 		
