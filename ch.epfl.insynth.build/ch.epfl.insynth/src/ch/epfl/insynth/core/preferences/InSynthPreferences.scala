@@ -18,6 +18,7 @@ import org.eclipse.jface.util.IPropertyChangeListener
 import org.eclipse.jface.util.PropertyChangeEvent
 import java.lang.Boolean
 import scala.tools.eclipse.logging.HasLogger
+import org.eclipse.jface.preference.RadioGroupFieldEditor
 
 class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPreferencePage {
 
@@ -28,9 +29,24 @@ class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPrefer
   override def createFieldEditors() {
     addField(new IntegerFieldEditor(OfferedSnippetsPropertyString, "Number of snippets", getFieldEditorParent))
     addField(new IntegerFieldEditor(MaximumTimePropertyString, "Maximum computation time (ms)", getFieldEditorParent))
+    
     val doLoggingFieldEditor = new BooleanFieldEditor(DoSeparateLoggingPropertyString, "Log InSynth-specific events to a separate log", getFieldEditorParent)
     //doLoggingFieldEditor.setPropertyChangeListener(DoLoggingChangeListener)
     addField(doLoggingFieldEditor)
+    
+    // add radio buttons to choose code style
+    val codeStyleFieldEditor = new RadioGroupFieldEditor(
+  		CodeStyleParenthesesPropertyString, "Snippets code style for parentheses output", 2,
+      Array[Array[String]](
+      		Array[String]( "Clean style", CodeStyleParenthesesClean ),
+      		Array[String]( "Classic style", CodeStyleParenthesesClassic )
+      ),
+      getFieldEditorParent()
+    )
+    // TODO why this thing does not work?
+//    val labelControl = codeStyleFieldEditor.getLabelControl( getFieldEditorParent() )
+//    labelControl.setToolTipText("Choose style of generated Scala code");
+    addField(codeStyleFieldEditor)
   }
 
   override def createContents(parent: Composite): Control = {
@@ -53,5 +69,6 @@ class InSynthPreferencePageInitializer extends AbstractPreferenceInitializer {
     store.setDefault(OfferedSnippetsPropertyString, NumberOfOfferedSnippets)
     store.setDefault(MaximumTimePropertyString, MaximumTime)
     store.setDefault(DoSeparateLoggingPropertyString, DoSeparateLogging)
+    store.setDefault(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClean)
   }
 }
