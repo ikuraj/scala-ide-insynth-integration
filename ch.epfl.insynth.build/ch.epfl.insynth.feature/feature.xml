@@ -61,6 +61,10 @@ SUCH DAMAGE.
       <discovery label="GitHub hosted build project for InSynth" url="https://github.com/kaptoxic/scala-ide-insynth-integration/tree/master/ch.epfl.insynth.build"/>
    </url>
 
+   <requires>
+      <import feature="org.scala-ide.sdt.feature"/>
+   </requires>
+
    <plugin
          id="ch.epfl.insynth"
          download-size="0"
