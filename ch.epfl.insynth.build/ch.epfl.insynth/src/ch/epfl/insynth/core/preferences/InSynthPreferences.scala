@@ -70,5 +70,6 @@ class InSynthPreferencePageInitializer extends AbstractPreferenceInitializer {
     store.setDefault(MaximumTimePropertyString, MaximumTime)
     store.setDefault(DoSeparateLoggingPropertyString, DoSeparateLogging)
     store.setDefault(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClean)
+    store.setDefault(CodeStyleApplyOmittingPropertyString, CodeStyleApplyOmittingPropertyDefault)
   }
 }

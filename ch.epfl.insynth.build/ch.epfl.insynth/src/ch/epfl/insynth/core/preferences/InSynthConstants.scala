@@ -6,7 +6,8 @@ object InSynthConstants {
   final val OfferedSnippetsPropertyString = Prefix + "snippets"  
   final val MaximumTimePropertyString = Prefix + "maximumTime"  
   final val DoSeparateLoggingPropertyString = Prefix + "doInSynthLogging"
-  final val CodeStyleParenthesesPropertyString = Prefix + "codeStyleParentheses"   
+  final val CodeStyleParenthesesPropertyString = Prefix + "codeStyleParentheses" 
+  final val CodeStyleApplyOmittingPropertyString = Prefix + "codeStyleApply"    
     
   final val CodeStyleParenthesesClean = "clean"
   final val CodeStyleParenthesesClassic = "classic"
@@ -15,5 +16,6 @@ object InSynthConstants {
   final val MaximumTime = 500
   final val DoSeparateLogging = false
   final val CodeStyleParenthesesDefault = CodeStyleParenthesesClean
+  final val CodeStyleApplyOmittingPropertyDefault = false
 
 }

@@ -27,8 +27,7 @@ import ch.epfl.insynth.core.Activator
 import scala.tools.eclipse.logging.HasLogger
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.core.preferences.InSynthConstants
-import ch.epfl.insynth.reconstruction.codegen.CleanCodeGenerator
-import ch.epfl.insynth.reconstruction.codegen.ClassicStyleCodeGenerator
+import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator, ClassicStyleCodeGenerator, ApplyTransfromer }
 
 /* 
 TODO:
@@ -84,14 +83,19 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
             	
             	// import InSynth constants for convenience
             	import InSynthConstants._
+            	// apply transformer?
+            	val applyTransformerFlag = Activator.getDefault.getPreferenceStore.getBoolean(
+          	    CodeStyleApplyOmittingPropertyString)
             	// choose a code generator object according to the code style property
             	val codeGenerator = Activator.getDefault.getPreferenceStore.getString(
         				CodeStyleParenthesesPropertyString
       				) match {
+            	  case `CodeStyleParenthesesClean` if applyTransformerFlag => new CleanCodeGenerator with ApplyTransfromer
+            	  case `CodeStyleParenthesesClassic` if applyTransformerFlag => new ClassicStyleCodeGenerator with ApplyTransfromer
             	  case `CodeStyleParenthesesClean` => new CleanCodeGenerator
             	  case `CodeStyleParenthesesClassic` => new ClassicStyleCodeGenerator
             	}
-            	
+            	            	
               Some(
                 Reconstructor(solution.getNodes.head, codeGenerator).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
         			)
