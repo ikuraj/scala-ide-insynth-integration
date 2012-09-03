@@ -5,12 +5,14 @@ import org.junit.runners.Suite
 
 import ch.epfl.insynth.test.reconstructor.ReconstructorTest
 import ch.epfl.insynth.test.reconstructor.FeaturesTest
+import ch.epfl.insynth.test.reconstructor.CodeGenerationTests
 
 @RunWith(classOf[Suite])
 @Suite.SuiteClasses(
   Array(
     classOf[ReconstructorTest],
-    classOf[FeaturesTest]
+    classOf[FeaturesTest],
+    classOf[CodeGenerationTests]
   )
 )
 class CodeGenerationTestSuite 
