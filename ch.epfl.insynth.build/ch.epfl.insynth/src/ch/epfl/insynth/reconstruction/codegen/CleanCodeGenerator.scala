@@ -185,7 +185,8 @@ class CleanCodeGenerator extends CodeGenerator {
             } else if (!decl.isMethod) {
               assert(!decl.isConstructor)
               // just a function
-              parenthesesRequired = params.tail.size >= 1 || ctx == SinglePar
+              //parenthesesRequired = params.tail.size >= 1 || ctx == SinglePar
+              parenthesesRequired = true
               firstTermFunctionTransform
             } else // if (decl.isMethod)
             {
