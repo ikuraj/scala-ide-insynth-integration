@@ -8,6 +8,7 @@ object InSynthConstants {
   final val DoSeparateLoggingPropertyString = Prefix + "doInSynthLogging"
   final val CodeStyleParenthesesPropertyString = Prefix + "codeStyleParentheses" 
   final val CodeStyleApplyOmittingPropertyString = Prefix + "codeStyleApply"    
+  final val CodeStyleSimpleApplicationNameTransformPropertyString = Prefix + "codeStyleSimpleApplicationNameTransform"    
     
   final val CodeStyleParenthesesClean = "clean"
   final val CodeStyleParenthesesClassic = "classic"
@@ -17,5 +18,6 @@ object InSynthConstants {
   final val DoSeparateLogging = false
   final val CodeStyleParenthesesDefault = CodeStyleParenthesesClean
   final val CodeStyleApplyOmittingPropertyDefault = false
+  final val CodeStyleSimpleApplicationNameTransformPropertyDefault = false
 
 }
