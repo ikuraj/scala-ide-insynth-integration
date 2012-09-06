@@ -45,6 +45,32 @@ class IssuesTests {
 	import testProjectSetup._
 
   @Test
+  def testGitHubIssueNo2() {
+    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleParenthesesPropertyString,
+        InSynthConstants.CodeStyleParenthesesClassic)
+        
+    {
+	    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleSimpleApplicationNameTransformPropertyString,
+	        false)
+	        
+	    val oraclePos8 = List("this.$hash$hash()")    
+	    val checkersPos8 = List(CheckContains(oraclePos8))
+	    
+	    checkCompletions("github/IssueNo2.scala")(checkersPos8)
+    }
+     
+    {
+	    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleSimpleApplicationNameTransformPropertyString,
+	        true)
+	        
+	    val oraclePos8 = List("this.##()")    
+	    val checkersPos8 = List(CheckContains(oraclePos8))
+	        
+	    checkCompletions("github/IssueNo2.scala")(checkersPos8)
+    }
+  }
+	
+  @Test
   def testGitHubIssueNo4() {
 	  // TODO re-check when alternative syntax generation is implemented (we want just println) 
     val oraclePos8_classicStyle = List("Predef.println()")    
