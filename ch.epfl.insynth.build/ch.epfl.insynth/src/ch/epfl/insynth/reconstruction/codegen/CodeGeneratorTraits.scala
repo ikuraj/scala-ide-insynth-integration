@@ -62,3 +62,30 @@ trait ApplyTransfromer extends CodeGenerator {
   }
   
 }
+
+/**
+ * this trait deals with transforming method/function names
+ */
+trait SimpleApplicationNamesTransfromer extends CodeGenerator {
+  // import methods for easier document manipulation
+  import FormatHelpers._
+  import Document._
+  import TransformContext._
+  
+  /**
+   * main method (recursive) for transforming a intermediate (sub)tree
+   * @param tree root node of the (sub)tree to transform 
+   * @return list of documents containing all combinations of available expression for
+   * the given (sub)tree
+   */
+  abstract override def transform(tree: Node, ctx: TransformContext = Expr): List[Document] = {
+        
+    tree match {      
+      // identifier from the scope
+      case Identifier(tpe, dec) if ctx == App =>
+        List( NameTransformer(dec.getSimpleName) )
+      case _ => super.transform(tree, ctx)
+    } // tree match
+  }
+  
+}
