@@ -29,6 +29,8 @@ import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import org.junit.AfterClass
 
+// tests for the project folder InSynth in the test-workspace, 5 snippets limits
+
 object InSynthCompletionClassicCodeTests {
   
   @BeforeClass
@@ -38,6 +40,7 @@ object InSynthCompletionClassicCodeTests {
     		
 		// we want classic code style
 		preferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClassic)
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 5)  
   }
   
   @AfterClass

@@ -29,6 +29,9 @@ import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
 import org.junit.runner.RunWith
 import java.util.ArrayList
+import org.junit.BeforeClass
+import ch.epfl.insynth.core.Activator
+import ch.epfl.insynth.core.preferences.InSynthConstants
 
 @RunWith(value = classOf[Parameterized])
 class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnippet: String) {
@@ -48,6 +51,13 @@ class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnip
 }
 
 object InSynthBenchmarkCompletionParametrizedTests {
+    
+  @BeforeClass
+  def setup() {    
+		// tests are made according to the clean code style
+		Activator.getDefault.getPreferenceStore.
+			setValue(InSynthConstants.CodeStyleParenthesesPropertyString, InSynthConstants.CodeStyleParenthesesClean)
+  }
   
 	@Parameters
 	def parameters: ju.Collection[Array[jl.String]] = {
