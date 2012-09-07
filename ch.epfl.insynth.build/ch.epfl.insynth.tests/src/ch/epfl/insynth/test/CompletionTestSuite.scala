@@ -8,6 +8,7 @@ import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 
 import ch.epfl.insynth.test.completion.InSynthCompletionTests
+import ch.epfl.insynth.test.completion.InSynthCompletionClassicCodeTests
 import ch.epfl.insynth.test.completion.TypesHandlingTests
 import ch.epfl.insynth.test.completion.IssuesTests
 
@@ -16,6 +17,7 @@ import ch.epfl.insynth.test.completion.IssuesTests
   Array(
     classOf[InSynthCompletionTests],
     classOf[TypesHandlingTests],
+    classOf[InSynthCompletionClassicCodeTests],
     classOf[IssuesTests]
   )
 )

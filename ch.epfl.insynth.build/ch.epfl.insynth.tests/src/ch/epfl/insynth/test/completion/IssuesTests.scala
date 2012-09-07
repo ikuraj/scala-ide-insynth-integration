@@ -45,17 +45,31 @@ class IssuesTests {
 	import testProjectSetup._
 
   @Test
-  def testGitHubIssueNo4() {
-	  // TODO re-check when alternative syntax generation is implemented (we want just println) 
-    val oraclePos8 = List("Predef println")    
-    val checkersPos8 = List(CheckContains(oraclePos8))
-    
-    val oraclePos10 = List("new X().meth()")  
-    val checkersPos10 = List(CheckDoesNotContain(oraclePos10))
-    
-    checkCompletions("github/IssueNo4.scala")(checkersPos8, checkersPos10)
+  def testGitHubIssueNo2() {
+    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleParenthesesPropertyString,
+        InSynthConstants.CodeStyleParenthesesClassic)
+        
+    {
+	    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleSimpleApplicationNameTransformPropertyString,
+	        false)
+	        
+	    val oraclePos8 = List("this.$hash$hash()")    
+	    val checkersPos8 = List(CheckContains(oraclePos8))
+	    
+	    checkCompletions("github/IssueNo2.scala")(checkersPos8)
+    }
+     
+    {
+	    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleSimpleApplicationNameTransformPropertyString,
+	        true)
+	        
+	    val oraclePos8 = List("this.##()")    
+	    val checkersPos8 = List(CheckContains(oraclePos8))
+	        
+	    checkCompletions("github/IssueNo2.scala")(checkersPos8)
+    }
   }
-	
+
   @Test
   def testGitHubIssueNo3() {
     
@@ -64,6 +78,37 @@ class IssuesTests {
     val checkersPos16 = List(CheckContains(oraclePos11))
     
     checkCompletions("github/IssueNo3.scala")(checkersPos11, checkersPos16)
+  }
+	
+  @Test
+  def testGitHubIssueNo4() {
+	  // TODO re-check when alternative syntax generation is implemented (we want just println) 
+    val oraclePos8_classicStyle = List("Predef.println()")    
+    val checkersPos8 = List(CheckContains(oraclePos8_classicStyle))
+    
+    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleParenthesesPropertyString,
+        InSynthConstants.CodeStyleParenthesesClassic)
+    
+    checkCompletions("github/IssueNo4.scala")(checkersPos8, List.empty)
+  }
+	
+  @Test
+  def testGitHubIssueNo6() {
+	  // TODO re-check when alternative syntax generation is implemented (we want just println) 
+    val oraclePos8 = List("Array(0)")    
+    val checkersPos8 = List(CheckContains(oraclePos8))
+    
+    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleApplyOmittingPropertyString, true)
+    
+    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleParenthesesPropertyString,
+        InSynthConstants.CodeStyleParenthesesClean)          
+    
+    checkCompletions("github/IssueNo6.scala")(checkersPos8, List.empty)
+              
+    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleParenthesesPropertyString,
+        InSynthConstants.CodeStyleParenthesesClassic)
+        
+    checkCompletions("github/IssueNo6.scala")(checkersPos8, List.empty)
   }
 
 }
