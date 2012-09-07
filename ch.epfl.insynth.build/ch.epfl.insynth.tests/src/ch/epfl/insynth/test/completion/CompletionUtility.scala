@@ -101,6 +101,34 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
         assertTrue("Expected snippet: " + expected + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
       }
     }
+  }
+    
+  case class CheckDoesNotContain(expectedCompletions: List[String]) extends Checker {
+
+    def apply(completions: List[Output]) = {
+      val calculatedStrings = completions.map { _.getSnippet }
+      for (expected <- expectedCompletions) {
+        val contains = calculatedStrings contains expected
+        assertFalse("Expected snippet should not be found: " + expected + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
+      }
+    }
+  }  
+    
+  case class CheckContainsSubstring(expectedSubstrings: List[String], shouldContain: Boolean) extends Checker {
+
+    def apply(completions: List[Output]) = {
+      val calculatedStrings = completions.map { _.getSnippet }
+      for (expectedSubstring <- expectedSubstrings) {
+        val contains = (false /: calculatedStrings) { 
+          case (true, _) => true
+          case (false, calculated) => calculated contains expectedSubstring
+        }
+        if (shouldContain)
+        	assertTrue("Expected snippets should contain: " + expectedSubstring + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
+      	else 
+        	assertFalse("Expected snippets should not contain: " + expectedSubstring + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
+      }
+    }
   }  
   
   case class CheckNumberOfCompletions(expectedNumber: Int) extends Checker {

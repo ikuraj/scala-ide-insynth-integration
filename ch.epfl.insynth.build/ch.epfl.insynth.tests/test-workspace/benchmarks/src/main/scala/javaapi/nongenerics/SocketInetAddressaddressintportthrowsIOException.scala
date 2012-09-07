@@ -7,7 +7,8 @@ import java.net.Socket;
 
 class Main {
   def main(args:Array[String]){
-    var addr:InetAddress = InetAddress.getByName("java.sun.com"); // r=2
+    //var addr:InetAddress = InetAddress.getByName("java.sun.com"); // r=2
+    var addr:InetAddress =  /*!*/ // r=2
     var port:Int = 80;
 
     var socket:Socket = new Socket(addr, port);

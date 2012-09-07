@@ -26,6 +26,7 @@ import ch.epfl.insynth.reconstruction.Reconstructor
 import ch.epfl.insynth.core.Activator
 import scala.tools.eclipse.logging.HasLogger
 import ch.epfl.insynth.reconstruction.Output
+import ch.epfl.insynth.Config
 
 /* 
 TODO:
@@ -47,6 +48,7 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
     scu.withSourceFile {
       (sourceFile, compiler) =>
         
+        Config.inSynthLogger.info("InSynth working on source file: " + sourceFile.path)
         logger.info("InSynth working on source file: " + sourceFile.path)
 
         if (compiler != InSynthWrapper.compiler) {

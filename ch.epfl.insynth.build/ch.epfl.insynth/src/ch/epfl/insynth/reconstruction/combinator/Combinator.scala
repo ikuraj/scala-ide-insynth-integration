@@ -16,9 +16,9 @@ import ch.epfl.insynth.reconstruction.Config
 object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
   
   // general logger for the combinator step
-  val logger = Rules.logger
+  val logger = Config.loggerCombinator
   // logging actions inside the application
-  val logApply = Rules.logApply//(logger.getName + ".apply")
+  val logApply = Config.logApply//(logger.getName + ".apply")
   // logging interactions with the priority queue
   val logPQAdding = Config.logPQAdding
       
@@ -32,7 +32,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
    */
   def apply(root: InSynth.SimpleNode, neededCombinations: Int, maximumTime: Int): Option[SimpleNode] = {
     // logging
-    if (Rules.isLogging) {
+    if (Config.isLogging) {
 	    logApply.entering(getClass.getName, "apply")
 	    logApply.finest("Entering combinator step (root: "+ FormatNode(root, Config.logCombinatorInputProofTreeLevel) + ", combinations: " + neededCombinations)
     }
@@ -74,7 +74,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
       val (currentDeclaration, visited) = pq.dequeue
               
       // logging
-      if (Rules.isLogging) {
+      if (Config.isLogging) {
 	      logApply.finer("Current declaration processed " + currentDeclaration)
 	            
 	      // if current declaration is pruned or already visited on this path, log
@@ -108,7 +108,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
 	      currentDeclaration.getAssociatedTree addDeclaration(currentDeclaration)
 	      
           // logging
-	      if (Rules.isLogging)
+	      if (Config.isLogging)
           logApply.finer("Adding expression " + currentDeclaration.toString + " to its tree")
 	      
 	      // check the type of the current declaration
@@ -156,7 +156,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
                 		  )
 	                      
                         // logging
-                		if (Rules.isLogging)
+                		if (Config.isLogging)
 	                    logPQAdding.finer("Adding " + newPair._1 + " to the queue")
                         // add new pair to the queue 
 	                    
@@ -186,7 +186,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
                 		  )
 	                      	                      
                         // logging
-                		if (Rules.isLogging)
+                		if (Config.isLogging)
 	                    logPQAdding.finer("Adding " + newPair._1 + " to the queue")
 	                    
                         // add new pair to the queue 
@@ -208,7 +208,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
     }
         
     // logging
-    if (Rules.isLogging) {
+    if (Config.isLogging) {
 	    if (rootDeclaration.isPruned) {
 	      logger.severe("Root declaration is pruned!")
 	    }
@@ -226,7 +226,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
 	    val result = rootDeclaration.toTreeNode
 	    
 	    // logging
-	    if (Rules.isLogging) {
+	    if (Config.isLogging) {
 	    	logger.fine("Returning from apply with result: " + FormatPrNode(result) )
 	    }
 	    

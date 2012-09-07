@@ -30,6 +30,13 @@ object Reconstructor extends (SimpleNode => List[Output]) {
 		val maximumTime = Activator.getDefault.getPreferenceStore.getInt(
 	    InSynthConstants.MaximumTimePropertyString)
     
+    // logging
+    if (Config.isLogging) {
+      Config.logReconstructor.info(
+        "going into combinator phase with (numberOfCombinations, maximumTime): " + (numberOfCombinations, maximumTime)
+      )    
+    }
+	    
     // construct the combinator tree
     val combinatorTree = Combinator(tree, numberOfCombinations, maximumTime) match {
   	  // check result, if some return it, otherwise return an empty list
@@ -44,7 +51,8 @@ object Reconstructor extends (SimpleNode => List[Output]) {
     
     // logging
     if (Config.isLogging) {
-      Config.logReconstructor.info(
+      Config.logReconstructor.info("combinator phase done")    
+      Config.logReconstructor.fine(
         "after combinator " + FormatPrNode(combinatorTree)
       )    
     }
@@ -54,7 +62,8 @@ object Reconstructor extends (SimpleNode => List[Output]) {
      
     // logging
     if (Config.isLogging) {
-      Config.logReconstructor.info(
+      Config.logReconstructor.info("intermediate transform phase done")    
+      Config.logReconstructor.fine(
         "after intermediate " + FormatableIntermediate(transformedTree)
       )    
     }
@@ -62,11 +71,20 @@ object Reconstructor extends (SimpleNode => List[Output]) {
     // for each tree, generate the code for it
     val extractedTrees = Extractor(transformedTree, numberOfCombinations)
     
+    // logging
+    if (Config.isLogging) {
+      Config.logReconstructor.info("extractor phase done")    
+    }
+    
     // for each tree, generate the code for it
     val generatedCode = extractedTrees map {
       resPair => (CodeGenerator(resPair._1).head, resPair._2)
     }
         
+    // logging
+    if (Config.isLogging) {
+      Config.logReconstructor.info("solutions are generated")    
+    }
     // log all snippets
     Config.logSolutions.info(
       "Generated code snippets: " + 

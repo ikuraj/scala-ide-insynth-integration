@@ -10,7 +10,8 @@ class Main {
     var tmp:String = "abcdefghijklmnopqrstuvwxyz";
     var b:Array[Byte] = tmp.getBytes();
     var input1:ByteArrayInputStream = new ByteArrayInputStream(b)
-    var input2:ByteArrayInputStream = new ByteArrayInputStream(b,0,3) //r=3
+    //var input2:ByteArrayInputStream = new ByteArrayInputStream(b,0,3) //r=3
+    var input2:ByteArrayInputStream =  /*!*/ //r=3
   }
 }
 

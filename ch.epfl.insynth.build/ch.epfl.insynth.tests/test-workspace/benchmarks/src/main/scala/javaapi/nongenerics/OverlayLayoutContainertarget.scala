@@ -22,7 +22,8 @@ class Main {
         false
       }
     }
-    var overlay:LayoutManager = new OverlayLayout(panel); //r=2
+    //var overlay:LayoutManager = new OverlayLayout(panel); //r=2
+    var overlay:LayoutManager =  /*!*/ //r=2
     panel.setLayout(overlay);
 
     var button:JButton = new JButton("Small");

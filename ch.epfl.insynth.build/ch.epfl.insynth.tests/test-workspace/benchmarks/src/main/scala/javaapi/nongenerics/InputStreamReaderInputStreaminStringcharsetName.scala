@@ -17,7 +17,8 @@ object MainClass {
     try {
       var fis:FileInputStream  = new FileInputStream(new File(input))
 
-      var in:BufferedReader = new BufferedReader(new InputStreamReader(fis, "SJIS")) //r>5
+      //var in:BufferedReader = new BufferedReader(new InputStreamReader(fis, "SJIS")) //r>5
+      var in:BufferedReader =  /*!*/ //r>5
 
       var fos:FileOutputStream = new FileOutputStream(new File(output))
 

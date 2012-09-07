@@ -71,39 +71,58 @@ case class Abstraction(tpe: Type, vars: List[Variable], subTrees: Set[Node]) ext
  * how are intermediate nodes formated into pretty print documents
  */
 object FormatableIntermediate {
-  def apply(node: Node) = new FormatableIntermediate(node)
+  def apply(node: Node) = new FormatableIntermediate(node, 1)
+  def apply(node: Node, level: Int) = new FormatableIntermediate(node, level: Int)
 }
 
-class FormatableIntermediate(node: Node) extends Formatable {
-  def toDocument = toDocument(node)
+class FormatableIntermediate(node: Node, _level: Int) extends Formatable {
+  override def toDocument = toDocument(node, _level)
   
-  def toDocument(node: Node): Document = {
+  def toDocument(node: Node, level: Int): Document = {
     import FormatHelpers._
-
+    
     node match {
-      case Variable(tpe, name) => paren(name :: ": " :: tpe.toString) 
-      case Identifier(tpe, dec) => dec.getSimpleName :: "(" :: FormatType(dec.getType).toDocument :: ")"
+      case Variable(tpe, name) => "Var" :: paren(name :: ": " :: tpe.toString) 
+      case Identifier(tpe, dec) => "Id" :: "(" :: dec.getSimpleName :: ":" :: FormatType(dec.getType).toDocument :: ")"
       case NullLeaf => "Null"
-      case Application(tpe, params) => {
-        val headDoc:Document = params.head.head match {
+      case Application(tpe, params) if level==0 => {
+        val headDoc: Document = params.head.head match {
           case Variable(_, name) => name
-          case n => toDocument(n)
-        } 
-        headDoc :/:
-        paren(seqToDoc(params.tail, ",", 
-		  {s: Set[Node] => 
-          	s.toList match {
-          	  case List(el) => (toDocument(el))
-          	  case s:List[Node] => nestedBrackets(seqToDoc(s, "|", { f:Node => nestedParen(toDocument(f)) }))
-          	}
-		  }
-        ))
+          case n => "..."
+        }
+        "App{[" :: (params map { _.size } mkString ",") :: "]" :: headDoc :/:
+          paren(seqToDoc(params.tail, ",",
+            { s: Set[Node] =>
+              s.toList match {
+                case List(v:Variable) => toDocument(v, 0)
+                case List(id:Identifier) => toDocument(id, 0)
+                case List(el) => strToDoc("...")
+                case s: List[Node] => strToDoc("...")
+              }
+            })) :: "}"
       }
+      case Application(tpe, params) => {
+        val headDoc: Document = params.head.head match {
+          case Variable(_, name) => name
+          case n => toDocument(n, level-1)
+        }
+        "App{[" :: (params map { _.size } mkString ",") :: "]" :: headDoc :/:
+          paren(seqToDoc(params.tail, ",",
+            { s: Set[Node] =>
+              s.toList match {
+                case List(el) => (toDocument(el, level-1))
+                case s: List[Node] => nestedBrackets(seqToDoc(s, "|", { f: Node => nestedParen(toDocument(f, level-1)) }))
+              }
+            })) :: "}"
+      }
+      case Abstraction(tpe, vars, subtrees) if level==0 =>
+        "Abs" :: paren(
+          paren(seqToDoc(vars, ",", { d: Variable => toDocument(d, 0) })) :/: "=> ..."
+        )
       case Abstraction(tpe, vars, subtrees) =>
-        paren(
-          paren(seqToDoc(vars, ",", {d: Variable => toDocument(d)})) :/: "=>" :/:
-    	  nestedBrackets(toDocument(subtrees.head))
-		)
+        "Abs" :: paren(
+          paren(seqToDoc(vars, ",", { d: Variable => toDocument(d, level-1) })) :/: "=>" :/:
+            nestedBrackets(toDocument(subtrees.head, level-1)))
     }
   }
 }

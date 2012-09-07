@@ -10,7 +10,8 @@ import java.io.IOException;
 class Main {
   def main(args:Array[String]){
     try {
-       var in3:DataInputStream = new DataInputStream(new ByteArrayInputStream("a dbcde".getBytes())); //r>5
+       //var in3:DataInputStream = new DataInputStream(new ByteArrayInputStream("a dbcde".getBytes())); //r>5
+       var in3:DataInputStream =  /*!*/ //r>5
        while(true)
 	System.out.print(in3.readByte().toChar);
     } catch {

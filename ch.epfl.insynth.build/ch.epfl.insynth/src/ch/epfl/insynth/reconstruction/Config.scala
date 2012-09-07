@@ -1,41 +1,51 @@
 package ch.epfl.insynth.reconstruction
 
 import java.util.logging._
+import ch.epfl.insynth.core.preferences.LogManager
 
 object Config {  
-  val logCombinatorInputProofTreeLevel = 6
-    
-  // logging for code generation phase    
-  // defines loggers
-  val logger = Logger.getLogger("reconstruction.combination")
+  // flag which marks whether logging is enabled  
+  val isLogging = true
+  // default weight for leave nodes (used in extraction phase)
+  val weightForLeaves = 1.5d
+  
+  // logging for code generation phase
+  val logReconstructor = Logger.getLogger("reconstruction.reconstructor")
+  // log of found solutions
+  val logSolutions = Logger.getLogger("reconstruction.solutions")
+  
+  // combinator loggers
+  val loggerCombinator = Logger.getLogger("reconstruction.combination")  
   val logStructures = Logger.getLogger("reconstruction.combination.structures")
   val logApply = Logger.getLogger("reconstruction.combination.apply")  
   val logPQAdding = Logger.getLogger("reconstruction.combination.apply.pqadding")
-  val logReconstructor = Logger.getLogger("reconstruction.reconstructor")
-  val logSolutions = Logger.getLogger("reconstruction.solutions")
-  
+  // log of input proof tree level
+  val logCombinatorInputProofTreeLevel = 6  
+  // extractor logging
   val logExtractor = Logger.getLogger("reconstruction.extractor")
+  // intermediate transformer logging
+  val logIntermediate = Logger.getLogger("reconstruction.intermediate")
   
-  val isLogging = false
+  // static code for loggers setup  
+  val array = Array(loggerCombinator, logStructures, logApply,
+    logExtractor, logPQAdding, logIntermediate, logReconstructor, logSolutions)
   
-  // static code for loggers setup
-  {  
-    val array = Array(logger, logStructures, logApply,
-      logExtractor, logPQAdding, logReconstructor, logSolutions)
+  // root logger of the reconstruction phase should not use parent handlers
+  Logger.getLogger("reconstruction").setUseParentHandlers(false)
     
-    // remove all handlers
-//    for (logger <- array) {
-//	    for (handler <- logger.getHandlers)
-//	      logger.removeHandler(handler)
-//    }
-      logger.setLevel(Level.FINEST)
-      logStructures.setLevel(Level.FINEST)
-      logApply.setLevel(Level.FINEST)
-      logPQAdding.setLevel(Level.FINEST)
-      
-      logger.getHandlers map { _.setLevel(Level.FINEST) }
-    	logger.getParent.getHandlers map { _.setLevel(Level.FINEST) }
-//      
+  // set level for all loggers
+  for (logger <- array) {
+  	logger.setLevel(Level.INFO)      
+  }
+  // add InSynth handler to loggers
+  logReconstructor.addHandler(LogManager.inSynthHandler)
+  
+  logExtractor.setLevel(Level.ALL)
+  logExtractor.addHandler(LogManager.inSynthHandler)
+  
+//  loggerCombinator.setLevel(Level.INFO)
+//  loggerCombinator.addHandler(LogManager.inSynthHandler)
+   
 //    Logger.getLogger("reconstruction.combination").setLevel(Level.FINEST)
 //    Logger.getLogger("reconstruction.combination.apply").setLevel(Level.FINEST)
 //    Logger.getLogger("reconstruction.combination.structures").setLevel(Level.FINEST)
@@ -62,5 +72,5 @@ object Config {
     //logSolutions.addHandler(handlerSol)
 //    Logger.getLogger("reconstruction.combination.apply").addHandler(handler);
 //    Logger.getLogger("reconstruction.combination.structures").addHandler(handler);
-  }
+  
 }
