@@ -228,9 +228,11 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
                   (listOfBodies, transformedBody) =>
                     listOfBodies :+ (
                       // transform argument variables
-                      parenthesesRequired ? 
+                      (
+                    		parenthesesRequired ? 
                       		paren(seqToDoc(vars, ",", { v: Variable => transform(v, Arg).head })) |
                       		seqToDoc(vars, ",", { v: Variable => transform(v, Arg).head })
+                  		)
                       :/: "=>" :/:
                       // transform the body
                       transformedBody)
