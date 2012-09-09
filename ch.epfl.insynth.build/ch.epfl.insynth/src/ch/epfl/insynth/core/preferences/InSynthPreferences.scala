@@ -21,25 +21,27 @@ import scala.tools.eclipse.logging.HasLogger
 import org.eclipse.jface.preference.RadioGroupFieldEditor
 
 class InSynthPreferences extends FieldEditorPreferencePage with IWorkbenchPreferencePage {
-
+  
+  // import externalized messages
+  import InSynthMessages._
+  
   setPreferenceStore(Activator.getDefault.getPreferenceStore)
-
-  setDescription("Setting for the InSynth plugin.")
+  setDescription(InSynthPreferences_Description)
   
   override def createFieldEditors() {
-    addField(new IntegerFieldEditor(OfferedSnippetsPropertyString, "Number of snippets", getFieldEditorParent))
-    addField(new IntegerFieldEditor(MaximumTimePropertyString, "Maximum computation time (ms)", getFieldEditorParent))
+    addField(new IntegerFieldEditor(OfferedSnippetsPropertyString, InSynthPreferences_OfferedSnippetsLabelText, getFieldEditorParent))
+    addField(new IntegerFieldEditor(MaximumTimePropertyString, InSynthPreferences_MaximumTimeLabelText, getFieldEditorParent))
     
-    val doLoggingFieldEditor = new BooleanFieldEditor(DoSeparateLoggingPropertyString, "Log InSynth-specific events to a separate log", getFieldEditorParent)
+    val doLoggingFieldEditor = new BooleanFieldEditor(DoSeparateLoggingPropertyString, InSynthPreferences_DoSeparateLoggingLabelText, getFieldEditorParent)
     //doLoggingFieldEditor.setPropertyChangeListener(DoLoggingChangeListener)
     addField(doLoggingFieldEditor)
     
     // add radio buttons to choose code style
     val codeStyleFieldEditor = new RadioGroupFieldEditor(
-  		CodeStyleParenthesesPropertyString, "Snippets code style for parentheses output", 2,
+  		CodeStyleParenthesesPropertyString, InSynthPreferences_CodeStyleParenthesesLabelText, 2,
       Array[Array[String]](
-      		Array[String]( "Clean style", CodeStyleParenthesesClean ),
-      		Array[String]( "Classic style", CodeStyleParenthesesClassic )
+      		Array[String]( InSynthPreferences_CodeStyleParentheses_ClassicStyle_LabelText, CodeStyleParenthesesClassic ),
+      		Array[String]( InSynthPreferences_CodeStyleParentheses_CleanStyle_LabelText, CodeStyleParenthesesClean )
       ),
       getFieldEditorParent()
     )
