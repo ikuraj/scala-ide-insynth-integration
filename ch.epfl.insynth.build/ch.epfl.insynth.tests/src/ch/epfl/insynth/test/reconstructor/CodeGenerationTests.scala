@@ -17,6 +17,9 @@ import org.junit.runners.Parameterized.Parameters
 import ch.epfl.insynth.trees.BottomType
 import ch.epfl.insynth.reconstruction.codegen.SimpleApplicationNamesTransfromer
 import ch.epfl.insynth.reconstruction.codegen.NameTransformer
+import ch.epfl.insynth.print.Formatable
+import ch.epfl.insynth.print.FormatHelpers
+import scala.text.Document
 
 class CodeGenerationTests {
   
@@ -201,6 +204,37 @@ class CodeGenerationTests {
       testMethodCase(key, mapped)
       testFunctionCase(key, mapped)
     }
+    
+  }
+  
+  @Test
+  def testFormatable {
+    
+  	import FormatHelpers._
+  	import Document._
+    
+    object Formatable1 extends Formatable {
+      override def toDocument = empty :: "a" :: empty :: "a" :: empty
+    }
+  	
+  	assertEquals("aa", Formatable1.toString)
+  	
+    object Formatable2 extends Formatable {
+      override def toDocument = empty :: "a" :/: empty :/: "a" :: empty
+    }
+  	
+  	// number of spaces depends on the number of :/: not empty
+  	assertEquals("a  a", Formatable2.toString)
+  	
+  	assertEquals(
+	    "a, b, c",
+	    Formatable(foldDoc(List[Document](empty, "a", "b", empty, "c", empty, empty), ", ")).toString
+    )
+    
+  	assertEquals(
+	    "a,b,c",
+	    Formatable(foldDoc(List[Document](empty, "a", "b", empty, "c", empty, empty), ",")).toString
+    )
     
   }
 }

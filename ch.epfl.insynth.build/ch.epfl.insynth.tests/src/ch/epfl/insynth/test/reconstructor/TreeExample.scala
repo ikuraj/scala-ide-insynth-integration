@@ -75,6 +75,7 @@ object TreeExample {
 	      m4 // scala type
 	    )		
 	  m4Declaration.setIsMethod(true)
+	  m4Declaration.setHasParentheses(true)
 	  
 	  // special query declaration
 	  val queryDeclaration = new Declaration(
@@ -130,7 +131,7 @@ object TreeExample {
 	//***************************************************
 	// Goals
 	//	find expression of type: Boolean
-	//	expression: query(m1(this, m2(this)), m4(this))
+	//	expression: query(m1(this, m2(this), m4(this)))
 	//	code:
 	// 	class A {
 	//  	def m1(f: Int=>String, c:Char): Boolean
@@ -214,6 +215,13 @@ object TreeExample {
 	  m4Declaration.setIsMethod(true)
 	  m5Declaration.setIsMethod(true)
 	  m6Declaration.setIsMethod(true)
+	  	  
+	  m1Declaration.setHasParentheses(true)
+	  m2Declaration.setHasParentheses(true)
+	  m3Declaration.setHasParentheses(true)
+	  m4Declaration.setHasParentheses(true)
+	  m5Declaration.setHasParentheses(true)
+	  m6Declaration.setHasParentheses(true)
 	  
 	  m1Declaration.setHasThis(false)
 	  m2Declaration.setHasThis(false)
@@ -412,6 +420,10 @@ object TreeExample {
 	  m1Declaration.setIsMethod(true)
 	  m2Declaration.setIsMethod(true)
 	  m3Declaration.setIsMethod(true)
+	  	  
+	  m1Declaration.setHasParentheses(true)
+	  m2Declaration.setHasParentheses(true)
+	  m3Declaration.setHasParentheses(true)
 	  
 	  // special query declaration
 	  val queryDeclaration = Declaration(
@@ -544,7 +556,7 @@ object TreeExample {
 	      Function(List(typeInt, typeInt), typeChar) // return type
 		)	
 	  // def m2(a: Int, b:Int): Char
-	  val m2 = Method(objectA, List(typeInt, typeInt), typeChar)
+	  val m2 = Method(objectA, List(List(typeInt, typeInt)), typeChar)
 	  // def m3(): Char
 	  val m3 = Method(objectA, List(), typeChar)
 	  // query: String → ⊥
@@ -584,6 +596,14 @@ object TreeExample {
 	      fullNameClassA + ".m3", // full name
 	      m3, m3
       )	  
+            
+	  m1Declaration.setIsMethod(true)
+	  m2Declaration.setIsMethod(true)
+	  m3Declaration.setIsMethod(true)
+	  	  
+	  m1Declaration.setHasParentheses(true)
+	  m2Declaration.setHasParentheses(true)
+	  m3Declaration.setHasParentheses(true)
 	  
 	  // special query declaration
 	  val queryDeclaration = Declaration(
@@ -630,6 +650,18 @@ object TreeExample {
 	              MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode))
           )
       )
+	  
+      // goal:(Int→Char), type:((Int,A)→Char)
+	  // expression: (Int, Int) → m2(this, _, _)	  
+	  val m2Node = new SimpleNode(
+	      m2Declaration,
+	      MutableMap(
+	        transform(typeInt) -> 
+        	  new ContainerNode(MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode)),
+	        transform(objectA) ->
+        	  new ContainerNode(MutableSet(thisNode))
+          )
+      )     
       
       // goal:(Int→Char), type:(Int→Char)
 	  // expression: d.fullName ("outside")	  
@@ -650,19 +682,7 @@ object TreeExample {
 	          new ContainerNode(MutableSet(thisNode))
           )
       )
-      
-      // goal:(Int→Char), type:((Int,A)→Char)
-	  // expression: (Int, Int) → m2(this, _, _)	  
-	  val m2Node = new SimpleNode(
-	      m2Declaration,
-	      MutableMap(
-	        transform(typeInt) -> 
-        	  new ContainerNode(MutableSet(new SimpleNode(leafIntDeclaration, MutableMap.empty), intValNode)),
-	        transform(objectA) ->
-        	  new ContainerNode(MutableSet(thisNode))
-          )
-      )     
-	  
+      	  
       // goal:⊥, type:(Int→Char)→⊥	    
       // expression: query	(		
       //	(Int,Int) -> m1(this)(_,_) | (Int,Int) -> m1(this)(intVal, intVal)
@@ -875,10 +895,11 @@ object TreeExample {
 	  // Declarations
 	  //************************************
 	  val objectADeclaration = new Declaration(
-	      "this", // full name
+	      "obj", // full name
 	      transform(objectA), // inSynth type
 	      objectA // scala type
 	    )
+	  //objectADeclaration.setIsThis(true)
 	  // needs a constructor
 	  
 	  val mDeclaration = new Declaration(
@@ -887,10 +908,11 @@ object TreeExample {
 	      m // scala type
 	    )		
 	  mDeclaration.setIsMethod(true)
-	  mDeclaration.setIsThis(false)
+	  mDeclaration.setHasParentheses(true)
+	  mDeclaration.setHasThis(false)
 	  
 	  val constructBDeclaration = new Declaration(
-	      "some.package.B", constructB, constructB
+	      "some.package.B.cst", constructB, constructB
       )
 	  constructBDeclaration.setIsConstructor(true)
 	  	  
@@ -898,8 +920,7 @@ object TreeExample {
 	      "A.intVal",
 	      intField, intField
       )	 
-      intValDeclaration.setIsField(true)
-	  mDeclaration.setIsThis(true)
+    intValDeclaration.setIsField(true)
 	  
 	  // special query declaration
 	  val queryDeclaration = new Declaration(
@@ -1001,6 +1022,7 @@ object TreeExample {
 	      m // scala type
 	    )		
 	  mDeclaration.setIsMethod(true)
+	  mDeclaration.setHasParentheses(true)
 	  	  	  
 	  val intValDeclaration = Declaration(
 	      "intVal",
@@ -1064,7 +1086,7 @@ object TreeExample {
 	def buildTreeCycles = {
 	  //************************************
 	  // Goals
-	  //	find expression of type: String
+	  //	find expression of type: Int
 	  //	expression: query(intVal | f(intVal) | f(f(intVal)) | ... )
 	  //************************************
 	  	  
@@ -1193,6 +1215,7 @@ object TreeExample {
 	  m1Declaration.setIsMethod(true)
 	  m1Declaration.setIsThis(false)
 	  m1Declaration.setHasThis(false)
+	  m1Declaration.setHasParentheses(true)
 	  
 	  val m2Declaration = new Declaration(
 	      "some.package.A.m2", // full name
@@ -1200,21 +1223,22 @@ object TreeExample {
 	      m2 // scala type
 	    )		
 	  m2Declaration.setIsMethod(true)
-	  m2Declaration.setHasThis(false)
+	  m2Declaration.setHasThis(true)
+	  m2Declaration.setHasParentheses(true)
 	  	  	  
 	  val intFieldDeclaration = Declaration(
 	      "A.f1",
 	      intField, intField
       )	 
-      intFieldDeclaration.setIsField(true)
-      intFieldDeclaration.setHasThis(true)
+    intFieldDeclaration.setIsField(true)
+    intFieldDeclaration.setHasThis(true)
       
 	  val floatFieldDeclaration = Declaration(
 	      "A.f2",
 	      floatField, floatField
       )	 
-      floatFieldDeclaration.setIsField(true)
-      floatFieldDeclaration.setHasThis(false)
+    floatFieldDeclaration.setIsField(true)
+    floatFieldDeclaration.setHasThis(false)
 	  
 	  // special query declaration
 	  val queryDeclaration = new Declaration(
@@ -1346,106 +1370,90 @@ object TreeExample {
 	  query
 	}
 
-	/**
-	 * Constructs a simple tree which has constructor with no parameters in two contexts
-	 * should output parentheses only in one case
-	 */
-	def buildTreeWithConstructors = {
-	  //************************************
-	  // Goals
-	  //	find expression of type: String
-	  //	expression: query(f(new A().f, new A))
-	  //************************************
-	  
-	  //************************************
-	  // Scala types
-	  //************************************
-	  // class A { ... }
-	  val objectA = Const("A")		
-	  // constructor A()
-	  val constructA = Method(null, List(), objectA)
-	  // def f(Int, A): String	  
-	  val f = Function(List(typeInt, objectA), typeString)
-	  // int field
-	  val intField = Method(objectA, List(), typeInt)
-	  // query: String → ⊥
-	  val queryType = Function(typeString, typeBottom)
-	  
-	  
-	  //************************************
-	  // Declarations
-	  //************************************
-	  	  
-	  val fDeclaration = new Declaration(
-	      "some.package.A.f", // full name
-	      transform(f), // inSynth type
-	      f // scala type
-	    )		
-	  fDeclaration.setIsMethod(false)
-	  fDeclaration.setIsThis(false)
-	  
-	  val constructADeclaration = new Declaration(
-	      "some.package.A", constructA, constructA
+  /**
+   * Constructs a simple tree which has constructor with no parameters in two contexts
+   * should output parentheses only in one case
+   */
+  def buildTreeWithConstructors = {
+    //************************************
+    // Goals
+    //	find expression of type: String
+    //	expression: query(f(new A().f, new A))
+    //************************************
+
+    //************************************
+    // Scala types
+    //************************************
+    // class A { ... }
+    val objectA = Const("A")
+    // constructor A()
+    val constructA = Method(null, List(), objectA)
+    // def f(Int, A): String	  
+    val f = Function(List(typeInt, objectA), typeString)
+    // int field
+    val intField = Method(objectA, List(), typeInt)
+    // query: String → ⊥
+    val queryType = Function(typeString, typeBottom)
+
+    //************************************
+    // Declarations
+    //************************************
+
+    val fDeclaration = new Declaration(
+      "some.package.A.f", // full name
+      transform(f), // inSynth type
+      f // scala type
       )
-	  constructADeclaration.setIsConstructor(true)
-	  	  
-	  val intValDeclaration = Declaration(
-	      "A.intVal",
-	      intField, intField
-      )	 
-      intValDeclaration.setIsField(true)
-	  intValDeclaration.setIsThis(false)
-	  
-	  // special query declaration
-	  val queryDeclaration = new Declaration(
-	      "special.name.for.query",
-	      transform(queryType),
-	      queryType
-	    )	  
-	  
-	  //************************************
-	  // InSynth proof trees
-	  //************************************
-	  	              
-	  val constructANode = new SimpleNode( 
-	      constructADeclaration,
-	      MutableMap()
-      )
-      
-	  val getStringNode = new SimpleNode(
-	    fDeclaration,
-	    MutableMap(
-          transform(objectA) ->
-	  	  new ContainerNode(
-	  		  MutableSet(
-	  		      constructANode
-  		      )
-	        ),
-          transform(typeInt) ->
-	  	  new ContainerNode(
-	  		  MutableSet(
-	  		      new SimpleNode(
-  		    		  intValDeclaration,
-  		    		  MutableMap( transform(objectA) -> new ContainerNode(MutableSet( constructANode )))  		    		  
-  		          )
-  		      )
-	        )
-	      )
-	    )
-	  
-	  val query = 
-	    new SimpleNode(
-	  	  queryDeclaration,
-	  	  MutableMap(
-	  	      transform(typeString) ->
-	  	      new ContainerNode(
-	  	          MutableSet(getStringNode)
-	            )
-	        ) 
-	    )
-	    
-	  query
-	}
+    fDeclaration.setIsMethod(false)
+    fDeclaration.setIsThis(false)
+
+    val constructADeclaration = new Declaration(
+      "some.package.A.cst", constructA, constructA)
+    constructADeclaration.setIsConstructor(true)
+
+    val intValDeclaration = Declaration(
+      "A.intVal",
+      intField, intField)
+    intValDeclaration.setIsField(true)
+    intValDeclaration.setIsThis(false)
+
+    // special query declaration
+    val queryDeclaration = new Declaration(
+      "special.name.for.query",
+      transform(queryType),
+      queryType)
+
+    //************************************
+    // InSynth proof trees
+    //************************************
+
+    val constructANode = new SimpleNode(
+      constructADeclaration,
+      MutableMap())
+
+    val getStringNode = new SimpleNode(
+      fDeclaration,
+      MutableMap(
+        transform(objectA) ->
+          new ContainerNode(
+            MutableSet(constructANode)),
+        transform(typeInt) ->
+          new ContainerNode(
+            MutableSet(
+              new SimpleNode(
+                intValDeclaration,
+                MutableMap(transform(objectA) -> new ContainerNode(MutableSet(constructANode))))))))
+
+    val query =
+      new SimpleNode(
+        queryDeclaration,
+        MutableMap(
+          transform(typeString) ->
+            new ContainerNode(
+              MutableSet(getStringNode))))
+
+    query
+  }
 	
 	/**
 	 * Constructs a simple tree which has two methods with same InSynth type but
