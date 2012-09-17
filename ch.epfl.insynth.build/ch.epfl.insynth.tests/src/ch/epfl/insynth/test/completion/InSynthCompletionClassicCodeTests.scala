@@ -71,7 +71,7 @@ class InSynthCompletionClassicCodeTests {
   
   @Test
   def testExample2() {
-    val oraclePos14 = List("new A().a()", "new A().m(b)")
+    val oraclePos14 = List("new A().a", "new A().m(b)")
     
     val exampleCompletions = List(CheckContains(oraclePos14))
     
@@ -87,6 +87,15 @@ class InSynthCompletionClassicCodeTests {
     val exampleCompletions = List(CheckRegexContains(oraclePos12regex), CheckContains(oraclePos12strings))
     
     checkCompletions("examplepkg3/Example3.scala")(exampleCompletions)
+  }
+  
+  @Test
+  def interesting1 {
+    val oraclePos7 = List( "(\\S+) => f\\(\\1\\)\\(\\1\\)" )
+    
+    val exampleCompletions = List( CheckRegexContains(oraclePos7) )
+    
+    checkCompletions("interesting1/Interesting1.scala")(exampleCompletions)
   }
 
 }

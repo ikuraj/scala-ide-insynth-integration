@@ -1,6 +1,6 @@
 package examplepkg3
 
-class A{
+class A {
   def m1(f:Long => Int):String = ""
   def m2(a:Long):Int = 0
 }

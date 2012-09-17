@@ -24,6 +24,7 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
   import FormatHelpers._
   import Document._
   import TransformContext._
+  import DocumentHelper._
   
   /**
    * main method (recursive) for transforming a intermediate (sub)tree
@@ -113,13 +114,20 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
           	case Scala.Method(_, params, _) => params
           	case _ => throw new RuntimeException("Declared method but scala type is not")
           	}
+          	
+          	// set if we need parentheses
+          	val parenthesesRequired = decl.hasParentheses
 
           	// go through all combinations of parameters documents
           	return (List[Document]() /: getParamsCombinations(params.drop(2), paramsInfo, true)) {
           		(list, paramsDoc) => list :+
           				// TODO when to generate dot and when not??
           				//group(decl.getObjectName :: "." :: doParen(appIdentifier, paramsDoc))
-          				group(doParenRecApp(decl.getObjectName, appIdentifier, paramsDoc))
+          				group(
+        				    parenthesesRequired ?
+        				    (decl.getObjectName :: "." :: appIdentifier :: paren(paramsDoc)) |
+        				    decl.getObjectName :: "." :: appIdentifier        				    
+      				    )
           	}	
           }
 
@@ -170,6 +178,9 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
                 case Scala.Method(_, params, _) => params
                 case _ => throw new RuntimeException("Declared method but scala type is not")
               }
+              
+	          	// set if we need parentheses
+	          	val parenthesesRequired = decl.hasParentheses
 
               // if the method needs this keyword
               val needsThis = decl.hasThis
@@ -195,7 +206,11 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
                             // and add them to the list
                             (listDocsTransformedParameters, paramsDoc) =>
                               listDocsTransformedParameters :+
-                                group(doParenRecApp(receiverDoc, appIdentifier, paramsDoc))
+                                group(
+                              			parenthesesRequired ?
+                                    (receiverDoc ?:: "." :: appIdentifier :: paren(paramsDoc)) |
+                                    receiverDoc ?:: "." :: appIdentifier
+                                )
                           }
                         }
                     }
@@ -224,13 +239,13 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
             {
               listOfAbstractions ++
                 // for all transformations of bodies
-                (List[Document]() /: transform(body)) {
+                (List[Document]() /: transform(body, Expr)) {
                   (listOfBodies, transformedBody) =>
                     listOfBodies :+ (
                       // transform argument variables
                       (
                     		parenthesesRequired ? 
-                      		paren(seqToDoc(vars, ",", { v: Variable => transform(v, Arg).head })) |
+                      		paren(seqToDoc(vars, ", ", { v: Variable => transform(v, Arg).head })) |
                       		seqToDoc(vars, ",", { v: Variable => transform(v, Arg).head })
                   		)
                       :/: "=>" :/:
@@ -248,21 +263,8 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
           abstractionResults
     } // tree match
   }
-   
+  
   // helper method for application, output parentheses always
   def doParenApp(appId: Document, params: Document) = appId :: paren(params)
-  
-	// helper method
-  def doParenRecApp(receiverDoc: Document, appId: Document, params: Document) = {
-    // to match the empty document
-    val emptyMatch = empty
     
-    receiverDoc match {
-      case `emptyMatch` =>
-        appId :: paren(params) 
-      case _:Document =>
-        receiverDoc :: "." :: appId :: paren(params)
-    }
-  }
-  
 }

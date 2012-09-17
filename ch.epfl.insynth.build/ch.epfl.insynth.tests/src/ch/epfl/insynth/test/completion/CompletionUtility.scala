@@ -25,6 +25,8 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConverters
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.reconstruction.Output
+import ch.epfl.insynth.core.Activator
+import ch.epfl.insynth.core.preferences.InSynthConstants
 
 class CompletionUtility(projectSetup: TestProjectSetup) {
   import projectSetup._
@@ -32,7 +34,7 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
   import org.eclipse.core.runtime.IProgressMonitor
   import org.eclipse.jface.text.IDocument
   import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext
-  
+  	
   private def withCompletions(path2source: String): List[List[Output]] = {
     val unit = compilationUnit(path2source).asInstanceOf[ScalaCompilationUnit]
     
@@ -90,6 +92,22 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
         ) {
       expected(calculatedList)
     }
+  }
+  
+  def checkCompletionsDual(path2source: String)(expectedDualProperties: (List[Checker], List[Checker])*) {
+
+    import InSynthConstants._
+	  // store plugin preferences
+		val preferenceStore = Activator.getDefault.getPreferenceStore
+    
+    val (expectedPropertiesClean, expectedPropertiesClassic) = expectedDualProperties unzip
+    
+    // test clean style
+    preferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClean)
+    checkCompletions(path2source)(expectedPropertiesClean: _*)
+    // test classic style
+    preferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClassic)
+    checkCompletions(path2source)(expectedPropertiesClassic: _*)
   }
   
   case class CheckContains(expectedCompletions: List[String]) extends Checker {

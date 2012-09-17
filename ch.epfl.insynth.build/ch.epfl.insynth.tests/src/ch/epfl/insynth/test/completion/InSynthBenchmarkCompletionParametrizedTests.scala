@@ -93,7 +93,7 @@ object InSynthBenchmarkCompletionParametrizedTests {
 	  list add Array( "StringReaderStrings" , "new StringReader(\"?\")" )
 	  list add Array( "TimerintvalueActionListeneract" , "new Timer(0, actionListener)" )
 	  list add Array( "TransferHandlerStringproperty" , "new TransferHandler(s)" )
-	  list add Array( "URLStringspecthrowsMalformedURLException" , "new URL(\"?\").openConnection()" )
+	  list add Array( "URLStringspecthrowsMalformedURLException" , "new URL(\"?\") openConnection" )
 	  list
 	}
 

@@ -8,6 +8,7 @@ import ch.epfl.insynth.reconstruction.combinator.{ NormalDeclaration, AbsDeclara
 
 import scala.text.Document
 import scala.text.Document.empty
+import scala.text.DocNil
 
 /** companion object for more convenient application */
 object CleanCodeGenerator {
@@ -24,6 +25,7 @@ class CleanCodeGenerator extends CodeGenerator {
   import FormatHelpers._
   import Document._
   import TransformContext._
+  import DocumentHelper._
   
   /**
    * main method (recursive) for transforming a intermediate (sub)tree
@@ -34,32 +36,29 @@ class CleanCodeGenerator extends CodeGenerator {
   override def transform(tree: Node, ctx: TransformContext = Expr): List[Document] = {
     
     // a local variable to set if parentheses are needed
-    var parenthesesRequired = true    
+    var parenthesesRequired = true
+
     // do parentheses for parameters if needed
-    def doParenApp(appId: Document, params: Document) = {
-      if (parenthesesRequired) 
-        (appId :: paren(params)) 
-	  else
-	    (appId :/: params) 
-    }        
+    def doParenApp(appId: Document, params: Document) =
+      params match {
+        case _ if parenthesesRequired => (appId :: paren(params))
+        case DocNil if !parenthesesRequired => appId
+        case _ => (appId :/: params)
+      }
+
     def doParenRecApp(receiverDoc: Document, appId: Document, params: Document) = {
-      // to match the empty document
-      val emptyMatch = empty
       receiverDoc match {
-        //case scala.text.DocNil =>
-        case `emptyMatch` =>
-//	      if (parenthesesRequired) 
-          	// if receiver is empty then we always need this form
-	        appId :: paren(params)
-//		  else
-//		    appId :/: params        
-        case _:Document =>
-	      if (parenthesesRequired) 
-	        (receiverDoc :: "." :: appId :: paren(params)) 
-		  else
-		    (receiverDoc :/: appId :/: params)
+        case DocNil =>
+          // if receiver is empty then we always need this form
+          doParenApp(appId, params)
+        case _: Document =>
+          if (parenthesesRequired)
+            (receiverDoc :: "." :: appId :: paren(params))
+          else
+            (receiverDoc :/: appId :/?: params)
       }
     }        
+    
     def doParen(d: Document) = if (parenthesesRequired) paren(d) else d
 
     tree match {
@@ -131,20 +130,28 @@ class CleanCodeGenerator extends CodeGenerator {
                     group("new" :/: doParenApp(appIdentifier, paramsDoc))
               }
             }
+            
             // method is on some object
             if (decl.belongsToObject) {
               assert(params(1).size == 1)
               assert(params(1).head == NullLeaf)
+              
               // get info about parameters
               val paramsInfo = decl.scalaType match {
                 case Scala.Method(_, params, _) => params
                 case _ => throw new RuntimeException("Declared method but scala type is not")
               }
+              
               // set if we need parentheses
               parenthesesRequired =
-                // if we have more than one parameter or this term is a single parameter
-                // to outer application
-                params.drop(2).size > 1 || ctx == SinglePar
+	              {
+	                // if we have more than one parameter or this term is a single parameter
+	                // to outer application
+	                (params.drop(2).size > 1 || ctx == SinglePar) &&
+	                // and hasParentheses must be false
+	                decl.hasParentheses
+	              }
+              
               // go through all combinations of parameters documents
               return (List[Document]() /: getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)) {
                 (list, paramsDoc) =>
@@ -169,26 +176,30 @@ class CleanCodeGenerator extends CodeGenerator {
                         receiver match {
                           case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
                             List(empty)
-                          case _ => transform(receiver, App) map { (_: Document) :: "." }
+                          case _ => transform(receiver, App)
                         }
-                      else transform(receiver, App) map { (_: Document) :: "." }
+                      else transform(receiver, App)
                     }
                     // go through all the receiver objects and add to the list
                     (listDocsReceivers /: documentsForThis) {
                       (listDocsTransformedReceiver, receiverDoc) =>
                         {
-                          listDocsTransformedReceiver :+ group(receiverDoc :: appIdentifier)
+                          listDocsTransformedReceiver :+ group(receiverDoc :?/: appIdentifier)
                         }
                     }
                   }
               }
-            } else if (!decl.isMethod) {
+            } 
+            
+            else if (!decl.isMethod) {
               assert(!decl.isConstructor)
               // just a function
               //parenthesesRequired = params.tail.size >= 1 || ctx == SinglePar
               parenthesesRequired = true
               firstTermFunctionTransform
-            } else // if (decl.isMethod)
+            } 
+            
+            else // if (decl.isMethod)
             {
               // TODO solve parentheses here (with currying)
               // get info about parameters
@@ -196,10 +207,16 @@ class CleanCodeGenerator extends CodeGenerator {
                 case Scala.Method(_, params, _) => params
                 case _ => throw new RuntimeException("Declared method but scala type is not")
               }
+              
               // currying will handle parentheses if needed
-              parenthesesRequired = params.drop(2).size != 1 || ctx == SinglePar || ctx == App
+              parenthesesRequired = 
+                (params.drop(2).size > 1 || ctx == SinglePar || ctx == App) &&
+                // and hasParentheses must be false
+                decl.hasParentheses
+              
               // if the method needs this keyword
               val needsThis = decl.hasThis
+              
               (List[Document]() /: params(1)) {
                 (listDocsReceivers, receiver) =>
                   {
@@ -208,11 +225,13 @@ class CleanCodeGenerator extends CodeGenerator {
                       if (!needsThis)
                         receiver match {
                           case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
+                            parenthesesRequired = params.drop(2).size >= 1
                             List(empty)
                           case _ => transform(receiver, App) // map { (_:Document) :: "." }			            
                         }
                       else transform(receiver, App) // map { (_:Document) :: "." }
                     }
+                    
                     // go through all the receiver objects and add to the list
                     (listDocsReceivers /: documentsForThis) {
                       (listDocsTransformedReceiver, receiverDoc) =>
@@ -246,11 +265,11 @@ class CleanCodeGenerator extends CodeGenerator {
             {
               listOfAbstractions ++
                 // for all transformations of bodies
-                (List[Document]() /: transform(body)) {
+                (List[Document]() /: transform(body, Expr)) {
                   (listOfBodies, transformedBody) =>
                     listOfBodies :+ (
                       // transform argument variables
-                      doParen(seqToDoc(vars, ",", { v: Variable => transform(v, Arg).head }))
+                      doParen(seqToDoc(vars, ", ", { v: Variable => transform(v, Arg).head }))
                       :/: "=>" :/:
                       // transform the body
                       transformedBody)

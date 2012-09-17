@@ -59,4 +59,42 @@ class OtherIssuesTests {
 	    checkCompletions("other/ParenthesesIssue.scala")(checkersPos5)
     }
   }
+	
+  @Test
+  def test2 {
+    
+    preferenceStore.setValue(OfferedSnippetsPropertyString, 15)
+    
+    preferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClean)
+        
+    {	        
+	    val oraclePos25 = List("a mayHaveParen", "a noParen")    
+	    val checkersPos25 = List(CheckContains(oraclePos25))
+	    
+	    val oraclePos27 = List("mayHaveParenFunLocal", "noParenLocal")
+	    val checkersPos27 = List(/*CheckContains(oraclePos27)*/)
+	    
+	    val oraclePos29 = List("mayHaveParenThis", "noParenThis")    
+	    val checkersPos29 = List(CheckContains(oraclePos29))
+	    
+	    checkCompletions("other/ParenthesesDefinitionIssue.scala")(checkersPos25, checkersPos27, checkersPos29)
+    }
+    
+    preferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClassic)
+    
+    {	        
+	    val oraclePos25 = List("a.mayHaveParen()", "a.noParen")    
+	    val checkersPos25 = List(CheckContains(oraclePos25))
+	    
+	    val oraclePos27 = List("mayHaveParenFunLocal()", "noParenLocal")
+	    val checkersPos27 = List(/*CheckContains(oraclePos27)*/)
+	    
+	    val oraclePos29 = List("mayHaveParenThis()", "noParenThis")    
+	    val checkersPos29 = List(CheckContains(oraclePos29))
+	    
+	    checkCompletions("other/ParenthesesDefinitionIssue.scala")(checkersPos25, checkersPos27, checkersPos29)
+	    
+	    checkCompletions("other/ParenthesesDefinitionIssue.scala")(checkersPos25)
+    }
+  }
 }

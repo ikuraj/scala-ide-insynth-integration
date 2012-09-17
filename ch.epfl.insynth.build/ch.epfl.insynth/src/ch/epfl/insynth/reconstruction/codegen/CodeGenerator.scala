@@ -18,6 +18,8 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
   // import methods for easier document manipulation
   import FormatHelpers._
   import Document._
+  // convenience ?: operator
+  import Bool._
 
   /**
    * takes the tree and calls the recursive function and maps documents to Output elements
@@ -89,7 +91,7 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
     def getParamsCombinationsRec(listOfPicked: List[Document], params: List[Set[Node]]):List[Document] = {
       params match {
         case List() =>
-          List(foldDoc(listOfPicked.tail, ","))
+          List(foldDoc(listOfPicked.tail, ", "))
         case set :: list =>
           (List[Document]() /: transform(set.toList, ctx)) {
             (listSoFar, el) => {
@@ -104,12 +106,16 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
   
   /**
    * generates all documents which represent all combinations of parameters according
-   * to the given parameter list and paramsInfo (for curring)
+   * to the given parameter list and paramsInfo (for currying)
    * @param params parameter list for transform
    * @param paramsInfo parameter list information
    * @return list of documents with all parameter combinations
    */
   protected def getParamsCombinations(params: List[Set[Node]], paramsInfo: List[List[Scala.ScalaType]], parenthesesRequired: Boolean):List[Document] = {
+    
+    // convenient solution for currying
+    val backToBackParentheses: Document = ")("
+    
     def getParamsCombinationsRec(
         params: List[Set[Node]],
         paramsInfo: List[List[Scala.ScalaType]]):List[Document] = 
@@ -127,9 +133,7 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
             (list, currentDocument) =>
               // add the combination with current parentheses documents
               list ++ currentListDocuments map {
-                paren(_:Document) ::
-                // if rest of the list is just one element it will be returned with no parentheses
-                { if (restOfTheList.size == 1) currentDocument else paren(currentDocument) }
+                (_:Document) :: backToBackParentheses :: currentDocument
               }
           }
         }
@@ -139,10 +143,33 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
     
     // if there is only one parameter and parentheses will not be outputed we have
     // to transform (potential) abstractions with braces
-    if (params.size == 1 && !parenthesesRequired)
-      getParamsCombinations(params, SinglePar)
-    else
-	  getParamsCombinationsRec(params, paramsInfo)
+    val context:TransformContext = (params.size > 1 && !parenthesesRequired) ?	SinglePar | Expr
+    	
+    // is curried?
+    if (paramsInfo.size > 1)
+    	getParamsCombinationsRec(params, paramsInfo)
+  	else 
+      getParamsCombinations(params, context)
+  }
+    
+  // declare an implicit helper
+  // ?:: concatenates the documents only if first one is not `empty` otherwise result is `empty`
+  sealed case class DocumentHelper(innerDoc: Document) {
+    def ?::(argDoc: Document) = addOrEmpty(argDoc, innerDoc)
+    def ?::(argDoc: String) = addOrEmpty(argDoc, innerDoc)
+    def :/?:(argDoc: Document): Document = innerDoc match {
+      case scala.text.DocNil => argDoc
+      case _ => argDoc :/: innerDoc
+    }
+    def :?/:(argDoc: Document): Document = argDoc match {
+      case scala.text.DocNil => innerDoc
+      case _ => argDoc :/: innerDoc
+    }
+  }	
+  
+  object DocumentHelper {    
+	  implicit def DocumentHelperCast(d: Document) = DocumentHelper(d)
+	  implicit def DocumentHelperCast(s: String) = DocumentHelper(s)
   }
   
   // ternary operator support
@@ -153,7 +180,7 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
   }
 	
   object Bool {
-    implicit def BooleanBool(b: Boolean) = Bool(b)
+    implicit def BooleanBool(b: Boolean): Bool = Bool(b)
   }
   
 }

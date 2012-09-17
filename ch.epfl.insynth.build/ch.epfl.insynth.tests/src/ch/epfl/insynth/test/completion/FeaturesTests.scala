@@ -29,7 +29,7 @@ import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.Config
 
-object TypesHandlingTests extends TestProjectSetup("features", bundleName = "ch.epfl.insynth.tests") {
+object FeaturesTests extends TestProjectSetup("features", bundleName = "ch.epfl.insynth.tests") {
   
   @BeforeClass
   def setup() {    
@@ -39,13 +39,17 @@ object TypesHandlingTests extends TestProjectSetup("features", bundleName = "ch.
   
 }
 
-class TypesHandlingTests {
-	val testProjectSetup = new CompletionUtility(TypesHandlingTests)
+class FeaturesTests {
+	val testProjectSetup = new CompletionUtility(FeaturesTests)
 	
 	import testProjectSetup._
 
-  @Test
-  def testExample1() {
+  @Test//("Type handling test")
+  def testTypeHandling {
+	  // assure clean style
+    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleParenthesesPropertyString,
+      InSynthConstants.CodeStyleParenthesesClean)
+      
 	  // instantiated type constructor
 	  // should contain this
     val oraclePos14contains = List("A m1")
@@ -54,6 +58,17 @@ class TypesHandlingTests {
     val checkersPos14 = List(CheckContains(oraclePos14contains), CheckContainsSubstring(oraclePos14doesnotcontain, false))
         
     checkCompletions("generics/Example1.scala")(checkersPos14)
+  }
+	
+  @Test//("Clean code generation test")
+  def testCleanCodeGen {
+    Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.CodeStyleParenthesesPropertyString,
+      InSynthConstants.CodeStyleParenthesesClean)
+    
+    val oraclePos14contains = List("new B().getInstanceOfA() getLong")
+    val checkersPos14 = List(CheckContains(oraclePos14contains))
+        
+    checkCompletions("cleancodegen/Example1.scala")(checkersPos14)
   }
 
 }
