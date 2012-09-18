@@ -5,7 +5,7 @@
   <parent>
     <groupId>ch.epfl</groupId>
     <artifactId>ch.epfl.insynth.build</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>ch.epfl.insynth</artifactId>
@@ -15,7 +15,7 @@
     <dependency>
       <groupId>ch.epfl</groupId>
       <artifactId>ch.epfl.insynth.library</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
 

@@ -2,7 +2,7 @@
 <feature
       id="ch.epfl.insynth.feature"
       label="InSynth Feature"
-      version="0.0.1.qualifier"
+      version="1.0.0"
       provider-name="scala-ide.org">
 
    <description url="https://github.com/kaptoxic/scala-ide-insynth-integration/wiki">
@@ -69,7 +69,7 @@ SUCH DAMAGE.
          id="ch.epfl.insynth"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.0"
          unpack="false"/>
 
 </feature>

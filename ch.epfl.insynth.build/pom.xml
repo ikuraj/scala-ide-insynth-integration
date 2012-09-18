@@ -8,7 +8,7 @@
 	</prerequisites>
 	<groupId>ch.epfl</groupId>
 	<artifactId>ch.epfl.insynth.build</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>Build project for the InSynth plugin</name>
 	<packaging>pom</packaging>
 
@@ -265,7 +265,7 @@
 							<file>ch.epfl.insynth.library/${insynth.library.name}</file>
 							<groupId>ch.epfl</groupId>
 							<artifactId>ch.epfl.insynth.library</artifactId>
-							<version>0.0.1-SNAPSHOT</version>
+							<version>1.0.0</version>
 							<packaging>jar</packaging>
 						</configuration>
 					</execution>
