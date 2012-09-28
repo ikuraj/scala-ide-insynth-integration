@@ -27,15 +27,20 @@ import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
+import java.io.FileWriter
+import java.io.PrintWriter
 
 class CompletionUtility(projectSetup: TestProjectSetup) {
   import projectSetup._
+
+  val mark = " /*!*/"
 
   import org.eclipse.core.runtime.IProgressMonitor
   import org.eclipse.jface.text.IDocument
   import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext
   	
-  private def withCompletions(path2source: String): List[List[Output]] = {
+  def withCompletions(path2source: String)(inserts: List[String], index: Int)
+  	(filename: String)= {
     val unit = compilationUnit(path2source).asInstanceOf[ScalaCompilationUnit]
     
     // first, 'open' the file by telling the compiler to load it
@@ -51,121 +56,72 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       val contents = unit.getContents
       // mind that the space in the marker is very important (the presentation compiler 
       // seems to get lost when the position where completion is asked 
-      val positions = SDTTestUtils.positionsOf(contents, " /*!*/")
+      val positions = SDTTestUtils.positionsOf(contents, mark)
       val content = unit.getContents.mkString
 
       assertTrue("positions.size=" + positions.size, positions.size > 0)
-            
-      (List[List[Output]]() /: (0 until positions.size) ) {
-        (list, i) => {
-          val pos = positions(i)
+           
+      val pos = positions(index)
 
-      		val position = new scala.tools.nsc.util.OffsetPosition(src, pos)
-          var wordRegion = ScalaWordFinder.findWord(content, position.point)
-
-          val innerFinderResults = InnerFinder(unit, pos).getOrElse( List.empty )
-                    
-          list :+ innerFinderResults
-        }
-      }
+      val innerFinderResults = InnerFinder(unit, pos).getOrElse( List.empty )
       
-//      for (i <- 0 until positions.size) {
-//        val pos = positions(i)
-//
-//        val position = new scala.tools.nsc.util.OffsetPosition(src, pos)
-//        var wordRegion = ScalaWordFinder.findWord(content, position.point)
-//
-//        import scala.collection.JavaConverters._
-//        
-//        body(i, position, InnerFinder(unit, pos).asScala.toList : List[ICompletionProposal])
-//      }
+      var copyPosition = 0
+      var copyToPosition = 0
+      
+      for ((result, ind) <- innerFinderResults zip (0 until innerFinderResults.size)) {
+		    val newContent = Array.ofDim[Char](content.length +
+		        ( (0 /: inserts) { (sum, insert) => sum + insert.length } + result.getSnippet.length 
+		        - positions.length * mark.length )
+	        )
+		        
+		    for ((position, insert) <- positions zip inserts) {
+        	System.arraycopy(content, copyPosition, newContent, copyToPosition, position - copyPosition)
+        	copyPosition += position - copyPosition
+        	copyToPosition += position - copyPosition
+		      position match {
+		        case `pos` => 
+		        	System.arraycopy(insert.toCharArray, 0, newContent, copyToPosition, insert.length)
+		        	copyPosition += mark.length
+		        	copyToPosition += insert.length
+		        case _ =>
+		        	System.arraycopy(result.getSnippet.toCharArray, 0, newContent, copyToPosition, result.getSnippet.length)
+		        	copyPosition += mark.length
+		        	copyToPosition += result.getSnippet.length
+		      }
+		    }    
+      	System.arraycopy(content, copyPosition, newContent, copyToPosition, newContent.length - copyToPosition)
+      	      
+	      import Utility._
+	      
+	      println(newContent)
+	      
+	      writeToFile(filename format ind, newContent)
+      }      
     } (  )
   }
-  
-  type Checker = List[Output]=>Unit
-  
-  def checkCompletions(path2source: String)(expectedProperties: List[Checker]*) {
 
-    for ( 
-        (calculatedList, expectedList) <- (withCompletions(path2source) zip expectedProperties);
-		expected <- expectedList
-        ) {
-      expected(calculatedList)
-    }
-  }
-  
-  def checkCompletionsDual(path2source: String)(expectedDualProperties: (List[Checker], List[Checker])*) {
+  object Utility {
 
-    import InSynthConstants._
-	  // store plugin preferences
-		val preferenceStore = Activator.getDefault.getPreferenceStore
-    
-    val (expectedPropertiesClean, expectedPropertiesClassic) = expectedDualProperties unzip
-    
-    // test clean style
-    preferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClean)
-    checkCompletions(path2source)(expectedPropertiesClean: _*)
-    // test classic style
-    preferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClassic)
-    checkCompletions(path2source)(expectedPropertiesClassic: _*)
-  }
-  
-  case class CheckContains(expectedCompletions: List[String]) extends Checker {
+    def using[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
+      try { f(param) } finally { param.close() }
 
-    def apply(completions: List[Output]) = {
-      val calculatedStrings = completions.map { _.getSnippet }
-      for (expected <- expectedCompletions) {
-        val contains = calculatedStrings contains expected
-        assertTrue("Expected snippet: " + expected + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
+    def writeToFile(fileName: String, data: Array[Char]) =
+      using(new FileWriter(fileName)) {
+        fileWriter => fileWriter.write(data)
       }
-    }
-  }
     
-  case class CheckDoesNotContain(expectedCompletions: List[String]) extends Checker {
-
-    def apply(completions: List[Output]) = {
-      val calculatedStrings = completions.map { _.getSnippet }
-      for (expected <- expectedCompletions) {
-        val contains = calculatedStrings contains expected
-        assertFalse("Expected snippet should not be found: " + expected + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
+    def writeToFile(fileName: String, data: String) =
+      using(new FileWriter(fileName)) {
+        fileWriter => fileWriter.write(data)
       }
-    }
-  }  
-    
-  case class CheckContainsSubstring(expectedSubstrings: List[String], shouldContain: Boolean) extends Checker {
 
-    def apply(completions: List[Output]) = {
-      val calculatedStrings = completions.map { _.getSnippet }
-      for (expectedSubstring <- expectedSubstrings) {
-        val contains = (false /: calculatedStrings) { 
-          case (true, _) => true
-          case (false, calculated) => calculated contains expectedSubstring
-        }
-        if (shouldContain)
-        	assertTrue("Expected snippets should contain: " + expectedSubstring + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
-      	else 
-        	assertFalse("Expected snippets should not contain: " + expectedSubstring + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
+    def appendToFile(fileName: String, textData: String) =
+      using(new FileWriter(fileName, true)) {
+        fileWriter =>
+          using(new PrintWriter(fileWriter)) {
+            printWriter => printWriter.println(textData)
+          }
       }
-    }
-  }  
-  
-  case class CheckNumberOfCompletions(expectedNumber: Int) extends Checker {
 
-    def apply(completions: List[Output]) = {
-      assertEquals(expectedNumber, completions.size)
-    }
-  }  
-  
-  case class CheckRegexContains(expectedCompletions: List[String]) extends Checker {
-    def apply(completions: List[Output]) = {
-      val calculatedStrings = completions.map { _.getSnippet }
-      for (expected <- expectedCompletions) {
-        val contains = (false /: calculatedStrings) {
-          (result, string) => result || (string matches expected)
-        }
-        assertTrue("Expected regex of the snippet: " + expected + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
-      }
-    }
   }
-
 }
