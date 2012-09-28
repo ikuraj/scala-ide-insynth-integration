@@ -91,7 +91,7 @@ object RedBlackTree {
   def balance(c: Color, a: Tree, x: Int, b: Tree): Tree = {
     Node(c,a,x,b) match {
       case Node(Black(),Node(Red(),Node(Red(),a,xV,b),yV,c),zV,d) => {
-        val nodeToReturn: Node = /*!*/        
+        val nodeToReturn: Node =  /*!*/        
         nodeToReturn
       }
       case Node(Black(),Node(Red(),a,xV,Node(Red(),b,yV,c)),zV,d) => 
