@@ -40,7 +40,7 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
   import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext
   	
   def withCompletions(path2source: String)(inserts: List[String], index: Int)
-  	(filename: String)= {
+  	(filename: String): Int = {
     val unit = compilationUnit(path2source).asInstanceOf[ScalaCompilationUnit]
     
     // first, 'open' the file by telling the compiler to load it
@@ -57,27 +57,45 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       // mind that the space in the marker is very important (the presentation compiler 
       // seems to get lost when the position where completion is asked 
       val positions = SDTTestUtils.positionsOf(contents, mark)
-      val content = unit.getContents.mkString
+      val contentString = unit.getContents.mkString
 
       assertTrue("positions.size=" + positions.size, positions.size > 0)
            
       val pos = positions(index)
 
       val innerFinderResults = InnerFinder(unit, pos).getOrElse( List.empty )
+            
+      println( innerFinderResults map { _.getSnippet } mkString "," )
       
-      var copyPosition = 0
-      var copyToPosition = 0
+      assertTrue("innerFinderResults.length > 0", innerFinderResults.length > 0)
       
-      for ((result, ind) <- innerFinderResults zip (0 until innerFinderResults.size)) {
-		    val newContent = Array.ofDim[Char](content.length +
-		        ( (0 /: inserts) { (sum, insert) => sum + insert.length } + result.getSnippet.length 
+      val content = contentString.toCharArray
+      
+      // NOTE temporary
+      for ((result, ind) <- innerFinderResults filterNot { _.getSnippet.contains("this") } zip (0 until innerFinderResults.size)) {
+      //for ((result, ind) <- innerFinderResults zip (0 until innerFinderResults.size)) {
+                
+	      var copyPosition = 0
+	      var copyToPosition = 0
+	      println("old content is" + content)
+	      
+		    var newContent = Array.ofDim[Char](content.length +
+		        ( (0 /: (inserts diff List(inserts(index))) ) { (sum, insert) => sum + insert.length } + result.getSnippet.length 
 		        - positions.length * mark.length )
 	        )
+        println("newContent.length: " + newContent.length)
+        println("content.length: " + content.length)
 		        
-		    for ((position, insert) <- positions zip inserts) {
-        	System.arraycopy(content, copyPosition, newContent, copyToPosition, position - copyPosition)
-        	copyPosition += position - copyPosition
-        	copyToPosition += position - copyPosition
+        assertEquals(positions.length, inserts.length)	        
+      
+		    for ((position, insert) <- positions map { _ + 1 } zip inserts) {
+		    	println("current content copy for position: " + position)
+		    	
+		    	val difference = position - copyPosition
+		    	
+        	System.arraycopy(content, copyPosition, newContent, copyToPosition, difference)
+        	copyPosition += difference
+        	copyToPosition += difference
 		      position match {
 		        case `pos` => 
 		        	System.arraycopy(insert.toCharArray, 0, newContent, copyToPosition, insert.length)
@@ -93,11 +111,13 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       	      
 	      import Utility._
 	      
-	      println(newContent)
+	      println("new content is" + newContent)
 	      
 	      writeToFile(filename format ind, newContent)
-      }      
-    } (  )
+      }
+      
+      innerFinderResults.size
+    } ( 0 )
   }
 
   object Utility {
