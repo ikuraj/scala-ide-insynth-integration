@@ -72,8 +72,8 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       val content = contentString.toCharArray
       
       // NOTE temporary
-      for ((result, ind) <- innerFinderResults filterNot { _.getSnippet.contains("this") } zip (0 until innerFinderResults.size)) {
-      //for ((result, ind) <- innerFinderResults zip (0 until innerFinderResults.size)) {
+      //for ((result, ind) <- innerFinderResults filterNot { _.getSnippet.contains("this") } zip (0 until innerFinderResults.size)) {
+      for ((result, ind) <- innerFinderResults zip (0 until innerFinderResults.size)) {
                 
 	      var copyPosition = 0
 	      var copyToPosition = 0
