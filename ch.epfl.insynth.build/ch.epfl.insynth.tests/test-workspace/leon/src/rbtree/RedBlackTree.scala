@@ -19,14 +19,14 @@ case class None() extends OptionInt
 
 object RedBlackTree { 
 
-  // INSYNTH: polymorphic
+  // INSYNTH: not good example
   def content(t: Tree) : Set[Int] = t match {
     case Empty() => Set.empty
     case Node(_, l, v, r) => content(l) ++ Set(v) ++ content(r)
   }
 
   // INSYNTH: InSynth does not work here
-  def size(t: Tree) : Int = (t match {
+  def size(t: Tree) : Int = {t match {
     case Empty() =>
       //0
       val result: Int =  /*!*/
@@ -35,9 +35,9 @@ object RedBlackTree {
       //size(l) + 1 + size(r)
       val result: Int =  /*!*/
       return result
-  }) ensuring(_ >= 0)
+  }} ensuring(_ >= 0)
 
-  // INSYNTH: InSynth is not useful here
+  // INSYNTH: not good example
   /* We consider leaves to be black by definition */
   def isBlack(t: Tree) : Boolean = t match {
     case Empty() => true
@@ -45,20 +45,20 @@ object RedBlackTree {
     case _ => false
   }
 
-  // INSYNTH: InSynth does not work here
+  // INSYNTH: not good example
   def redNodesHaveBlackChildren(t: Tree) : Boolean = t match {
     case Empty() => true
     case Node(Black(), l, _, r) => redNodesHaveBlackChildren(l) && redNodesHaveBlackChildren(r)
     case Node(Red(), l, _, r) => isBlack(l) && isBlack(r) && redNodesHaveBlackChildren(l) && redNodesHaveBlackChildren(r)
   }
 
-  // INSYNTH: InSynth does not work here
+  // INSYNTH: not good example
   def redDescHaveBlackChildren(t: Tree) : Boolean = t match {
     case Empty() => true
     case Node(_,l,_,r) => redNodesHaveBlackChildren(l) && redNodesHaveBlackChildren(r)
   }
 
-  // INSYNTH: InSynth does not work here
+  // INSYNTH: not good example
   def blackBalanced(t : Tree) : Boolean = t match {
     case Node(_,l,_,r) => blackBalanced(l) && blackBalanced(r) && blackHeight(l) == blackHeight(r)
     case Empty() => true
@@ -80,7 +80,7 @@ object RedBlackTree {
       return result
   }
 
-  // INSYNTH: synthesizes wrong solution
+  // INSYNTH: works here
   // <<insert element x into the tree t>>
   def ins(x: Int, t: Tree): Tree = {
     require(redNodesHaveBlackChildren(t) && blackBalanced(t))
@@ -114,19 +114,19 @@ object RedBlackTree {
     }
   } ensuring(res => redNodesHaveBlackChildren(res) && blackBalanced(res))
 
-  // INSYNTH: InSynth does not work here
+  // INSYNTH: not good example
   def add(x: Int, t: Tree): Tree = {
     require(redNodesHaveBlackChildren(t) && blackBalanced(t))
     makeBlack(ins(x, t))
   } ensuring (res => content(res) == content(t) ++ Set(x) && redNodesHaveBlackChildren(res) && blackBalanced(res))
   
-  // INSYNTH: InSynth does not work here
+  // INSYNTH: not good example
   def buggyAdd(x: Int, t: Tree): Tree = {
     require(redNodesHaveBlackChildren(t))
     ins(x, t)
   } ensuring (res => content(res) == content(t) ++ Set(x) && redNodesHaveBlackChildren(res))
   
-  // INSYNTH: InSynth does not see everything here
+  // INSYNTH: InSynth does not see everything here (inned matching)
   def balance(c: Color, a: Tree, x: Int, b: Tree): Tree = {
     Node(c,a,x,b) match {
       case Node(Black(),Node(Red(),Node(Red(),a,xV,b),yV,c),zV,d) => {
