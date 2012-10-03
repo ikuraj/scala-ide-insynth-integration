@@ -31,9 +31,10 @@ class LeonProjectSetup {
 	
 	@Test
 	def run() {
-	  val numberOfFiles = withCompletions("list/List.scala")(List("sizeTail(tail, acc+1)"), 0)("ListGenerated_%d.scala")
+	  val validCompletions = List("sizeTail(tail, 1)", "sizeTail(tail, acc+1)", "0")
 	  
-
+	  val numberOfFiles = withCompletions("list/List.scala")(validCompletions, 0)("ListGenerated_%d.scala")
+	  
 	  assertTrue(numberOfFiles > 0)
 	  
 //	   val settings = new NSCSettings
@@ -42,7 +43,7 @@ class LeonProjectSetup {
 //    
 //    assertTrue(false)  
 	  for (fileIndex <- 0 until numberOfFiles) {
-	  	LeonMain.run(Array("ListGenerated_%d.scala" format fileIndex/*, "--timeout=3", "--noLuckyTests"*/), new DefaultReporter, Some(List(SCALACLASSPATH)))
+	  	LeonMain.run(Array("ListGenerated_%d.scala" format fileIndex, "--timeout=3", "--noLuckyTests"), new DefaultReporter, Some(List(SCALACLASSPATH)))
 	  	println("=========================================")
 	  }
 	  
