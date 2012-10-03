@@ -32,7 +32,7 @@ class LeonProjectSetup {
 	
 	@Test
 	def run() {
-	  val validCompletions = List("sizeTail(tail, 1)", "sizeTail(tail, acc+1)", "0")
+	  val validCompletions = List("sizeTail(tail, 1)", "0", "sizeTail(tail, acc+1)")
 	  
 	  val numberOfFiles = withCompletions("list/List.scala")(validCompletions, 0)("ListGenerated_%d.scala")
 	  
