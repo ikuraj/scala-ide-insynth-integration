@@ -62,6 +62,7 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       assertTrue("positions.size=" + positions.size, positions.size > 0)
            
       val pos = positions(index)
+    	val incPos = pos + 1
 
       val innerFinderResults = InnerFinder(unit, pos).getOrElse( List.empty )
             
@@ -92,21 +93,34 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
 		    	println("current content copy for position: " + position)
 		    	
 		    	val difference = position - copyPosition
+		    		    	
+//		      println("copyposition[]: " + content(copyPosition) + content(copyPosition+1) + content(copyPosition+2))
+//		      println("copyToposition[]: " + newContent(copyToPosition) + newContent(copyToPosition+1) + newContent(copyToPosition+2))
 		    	
         	System.arraycopy(content, copyPosition, newContent, copyToPosition, difference)
         	copyPosition += difference
         	copyToPosition += difference
+        	
+        	println("copyPosition: " + copyPosition + " copyToPosition: " + copyToPosition )
+	      
+        	
 		      position match {
-		        case `pos` => 
-		        	System.arraycopy(insert.toCharArray, 0, newContent, copyToPosition, insert.length)
-		        	copyPosition += mark.length
-		        	copyToPosition += insert.length
-		        case _ =>
+		        case `incPos` => 
 		        	System.arraycopy(result.getSnippet.toCharArray, 0, newContent, copyToPosition, result.getSnippet.length)
 		        	copyPosition += mark.length
 		        	copyToPosition += result.getSnippet.length
+		        case _ =>
+		        	System.arraycopy(insert.toCharArray, 0, newContent, copyToPosition, insert.length)
+		        	copyPosition += mark.length
+		        	copyToPosition += insert.length		        			        	
 		      }
+		    	println("copyPosition: " + copyPosition + " copyToPosition: " + copyToPosition )
+//		      println("copyposition[]: " + content(copyPosition) + content(copyPosition+1) + content(copyPosition+2))
+//		      println("copyToposition[]: " + newContent(copyToPosition) + newContent(copyToPosition+1) + newContent(copyToPosition+2))
 		    }    
+	      
+        println("final copyPosition: " + copyPosition + " copyToPosition: " + copyToPosition + "newContent.length - copyToPosition: " + (newContent.length - copyToPosition) )
+	      
       	System.arraycopy(content, copyPosition, newContent, copyToPosition, newContent.length - copyToPosition)
       	      
 	      import Utility._

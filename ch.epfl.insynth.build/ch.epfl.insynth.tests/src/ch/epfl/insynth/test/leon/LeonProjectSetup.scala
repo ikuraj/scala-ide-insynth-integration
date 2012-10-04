@@ -20,11 +20,11 @@ class LeonProjectSetup {
 	import testProjectSetup._
 	  
 	  val classpathArray = Array(
-      "/home/kuraj/git/leon-2.0/target/scala-2.9.1-1/classes",
-      "/home/kuraj/git/leon-2.0/library/target/scala-2.9.1-1/classes",
-      "/home/kuraj/git/leon-2.0/unmanaged/z3-64.jar",
-      "/home/kuraj/.sbt/boot/scala-2.9.1-1/lib/scala-library.jar",
-      "/home/kuraj/.sbt/boot/scala-2.9.1-1/lib/scala-compiler.jar"
+      "/home/ivcha/git/leon-2.0/target/scala-2.9.1-1/classes",
+      "/home/ivcha/git/leon-2.0/library/target/scala-2.9.1-1/classes",
+      "/home/ivcha/git/leon-2.0/unmanaged/z3-64.jar",
+      "/home/ivcha/.sbt/boot/scala-2.9.1-1/lib/scala-library.jar",
+      "/home/ivcha/.sbt/boot/scala-2.9.1-1/lib/scala-compiler.jar"
 		)
 		
 	val SCALACLASSPATH = classpathArray mkString ":" 
@@ -32,9 +32,10 @@ class LeonProjectSetup {
 	
 	@Test
 	def run() {
-	  val numberOfFiles = withCompletions("list/List.scala")(List("sizeTail(tail, acc+1)"), 0)("ListGenerated_%d.scala")
+	  val validCompletions = List("sizeTail(tail, 1)", "0", "sizeTail(tail, acc+1)")
 	  
-
+	  val numberOfFiles = withCompletions("list/List.scala")(validCompletions, 0)("ListGenerated_%d.scala")
+	  
 	  assertTrue(numberOfFiles > 0)
 	  
 //	   val settings = new NSCSettings
@@ -56,7 +57,6 @@ class LeonProjectSetup {
 	  	  case Some(res) => results(res) += 1
 	  	  case None => fail("Globals.allSolved is None")
 	  	}	
-	  	
 	  }
 	  
 	  println("Results: solved(" + results(true) + "), not solved(" +  results(false) + ")")
