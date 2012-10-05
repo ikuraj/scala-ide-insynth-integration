@@ -21,7 +21,7 @@ object TestSuite {
     import InSynthConstants._
     
     // set appropriate preference values
-		Activator.getDefault.getPreferenceStore.setValue(OfferedSnippetsPropertyString, 5)        
+		Activator.getDefault.getPreferenceStore.setValue(OfferedSnippetsPropertyString, 10)        
 		Activator.getDefault.getPreferenceStore.setValue(MaximumTimePropertyString, 500)      
 		Activator.getDefault.getPreferenceStore.setValue(DoSeparateLoggingPropertyString, true)
   }
