@@ -34,32 +34,34 @@ class LeonProjectSetup {
 	def run() {
 	  val validCompletions = List("sizeTail(tail, 1)", "0", "sizeTail(tail, acc+1)")
 	  
-	  val numberOfFiles = withCompletions("list/List.scala")(validCompletions, 0)("ListGenerated_%d.scala")
-	  
-	  assertTrue(numberOfFiles > 0)
-	  
-//	   val settings = new NSCSettings
-//    settings.classpath.tryToSet(List(SCALACLASSPATH))    
-//    println(settings.classpath.value)
-//    
-//    assertTrue(false)
-	  
-	  var results = scala.collection.mutable.Map[Boolean, Int]( (true -> 0), (false -> 0) )
-	  
-	  println("Calling leon with classpath argument: " + SCALACLASSPATH)
-	  
-	  for (fileIndex <- 0 until numberOfFiles) {
-	  	println("Calling leon on file: " + ("ListGenerated_%d.scala" format fileIndex))
-	  	
-	  	LeonMain.run(Array("ListGenerated_%d.scala" format fileIndex, "--timeout=3", "--noLuckyTests"), new DefaultReporter, Some(List(SCALACLASSPATH)))
-	  	
-	  	Globals.allSolved match {
-	  	  case Some(res) => results(res) += 1
-	  	  case None => fail("Globals.allSolved is None")
-	  	}	
+	  for (index <- 0 until 3) {
+		  val numberOfFiles = withCompletions("list/List.scala")(validCompletions, index)("ListGenerated_%d.scala")
+		  
+		  assertTrue(numberOfFiles > 0)
+		  
+	//	   val settings = new NSCSettings
+	//    settings.classpath.tryToSet(List(SCALACLASSPATH))    
+	//    println(settings.classpath.value)
+	//    
+	//    assertTrue(false)
+		  
+		  var results = scala.collection.mutable.Map[Boolean, Int]( (true -> 0), (false -> 0) )
+		  
+		  println("Calling leon with classpath argument: " + SCALACLASSPATH)
+		  
+		  for (fileIndex <- 0 until numberOfFiles) {
+		  	println("Calling leon on file: " + ("ListGenerated_%d.scala" format fileIndex))
+		  	
+		  	LeonMain.run(Array("ListGenerated_%d.scala" format fileIndex, "--timeout=3", "--noLuckyTests"), new DefaultReporter, Some(List(SCALACLASSPATH)))
+		  	
+		  	Globals.allSolved match {
+		  	  case Some(res) => results(res) += 1
+		  	  case None => fail("Globals.allSolved is None")
+		  	}	
+		  }
+		  
+		  println("Results for index " + index + ": solved(" + results(true) + "), not solved(" +  results(false) + ")")
 	  }
-	  
-	  println("Results: solved(" + results(true) + "), not solved(" +  results(false) + ")")
 	  
 	  //withCompletions("RedBlackTree.scala")(List("Node(Red(),Node(Black(),a,xV,b),yV,Node(Black(),c,zV,d))"), 0)("RedBlackTreeGenerated_%d.scala")
 	}
