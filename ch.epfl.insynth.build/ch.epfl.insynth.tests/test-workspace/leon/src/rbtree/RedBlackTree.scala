@@ -4,20 +4,20 @@ import scala.collection.immutable.Set
 import leon.Annotations._
 import leon.Utils._
 
-// note moved outside of the object to be recognized by InSynth 
-sealed abstract class Color
-case class Red() extends Color
-case class Black() extends Color
-
-sealed abstract class Tree
-case class Empty() extends Tree
-case class Node(color: Color, left: Tree, value: Int, right: Tree) extends Tree
-
-sealed abstract class OptionInt
-case class Some(v: Int) extends OptionInt
-case class None() extends OptionInt
-
-object RedBlackTree { 
+object RedBlackTree {
+  
+	// note moved outside of the object to be recognized by InSynth 
+	sealed abstract class Color
+	case class Red() extends Color
+	case class Black() extends Color
+	
+	sealed abstract class Tree
+	case class Empty() extends Tree
+	case class Node(color: Color, left: Tree, value: Int, right: Tree) extends Tree
+	
+	sealed abstract class OptionInt
+	case class Some(v: Int) extends OptionInt
+	case class None() extends OptionInt
 
   // INSYNTH: not good example
   def content(t: Tree) : Set[Int] = t match {
@@ -30,11 +30,11 @@ object RedBlackTree {
     case Empty() =>
       //0
       val result: Int =  /*!*/
-      return result
+      result
     case Node(_, l, v, r) =>
       //size(l) + 1 + size(r)
       val result: Int =  /*!*/
-      return result
+      result
   }} ensuring(_ >= 0)
 
   // INSYNTH: not good example
@@ -69,15 +69,15 @@ object RedBlackTree {
     case Empty() => 
       //1
       val result: Int =  /*!*/
-      return result
+      result
     case Node(Black(), l, _, _) =>
       //blackHeight(l) + 1
       val result: Int =  /*!*/
-      return result
+      result
     case Node(Red(), l, _, _) =>
       //blackHeight(l)
       val result: Int =  /*!*/
-      return result
+      result
   }
 
   // INSYNTH: works here
