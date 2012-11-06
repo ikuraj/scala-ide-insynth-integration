@@ -1,0 +1,9 @@
+development - stores some changes in progress (merged, changes/gets removed frequently)
+codeStyles - working on code styles (merged)
+check-thread-access - trying to work with a different compiler for thread access (not merged, stale)
+tryingJobWrapping - trying to wrap InSynth proposals into an Eclipse job (bad try, stale)
+uiTest - a branch containing working UI tests (stale) 
+updatedExtractor - working on optimizing (and refactoring extractor)
+leon - working on with leon examples (not merged, no need to merge)
+
+**note git 1.7.9 supports branch descriptions so this should be added accordingly
