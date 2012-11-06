@@ -35,6 +35,7 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 
 /** tests for benchmarks which produce less certain solutions 
  * the ones that have >10 in groundResults.tex */
+@Ignore
 @RunWith(value = classOf[Parameterized])
 class InSynthBenchmarkCompletionParametrizedLessCertainTests(fileName: String, expectedSnippet: String) {
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)

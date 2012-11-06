@@ -27,6 +27,9 @@ import ch.epfl.insynth.core.Activator
 import scala.tools.eclipse.logging.HasLogger
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.Config
+import ch.epfl.insynth.core.preferences.InSynthConstants
+import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator, ClassicStyleCodeGenerator, ApplyTransfromer }
+import ch.epfl.insynth.reconstruction.codegen.SimpleApplicationNamesTransfromer
 
 /* 
 TODO:
@@ -80,8 +83,12 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
 
             if (solution != null) {
             	logger.info("InSynth solution found, proceeding with reconstructor.")
+            	
+            	// get appropriate source code generator
+            	val codeGenerator = getSourceCodeGenerator
+            	            	
               Some(
-                Reconstructor(solution.getNodes.head).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
+                Reconstructor(solution.getNodes.head, codeGenerator).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
         			)
             }
             else {
@@ -114,6 +121,34 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
 //    newContent.foreach { print }
     //println()
     newContent
+  }
+  
+  private def getSourceCodeGenerator() = {    
+    	// import InSynth constants for convenience
+    	import InSynthConstants._
+    	
+    	// apply transformer?
+    	val applyTransformerFlag = Activator.getDefault.getPreferenceStore.getBoolean(
+  	    CodeStyleApplyOmittingPropertyString)
+    	// simple application name transformer?
+    	val simpleApplicationNameTransformerFlag = Activator.getDefault.getPreferenceStore.
+    		getBoolean( CodeStyleSimpleApplicationNameTransformPropertyString )
+    		
+    	// choose a code generator object according to the code style property
+    	Activator.getDefault.getPreferenceStore.getString(
+				CodeStyleParenthesesPropertyString
+			) match {
+    	  case `CodeStyleParenthesesClean` if applyTransformerFlag && simpleApplicationNameTransformerFlag =>
+    	    new CleanCodeGenerator with ApplyTransfromer with SimpleApplicationNamesTransfromer
+    	  case `CodeStyleParenthesesClassic` if applyTransformerFlag && simpleApplicationNameTransformerFlag =>
+    	    new ClassicStyleCodeGenerator with ApplyTransfromer with SimpleApplicationNamesTransfromer
+    	  case `CodeStyleParenthesesClean` if simpleApplicationNameTransformerFlag => new CleanCodeGenerator with SimpleApplicationNamesTransfromer
+    	  case `CodeStyleParenthesesClassic` if simpleApplicationNameTransformerFlag => new ClassicStyleCodeGenerator with SimpleApplicationNamesTransfromer
+    	  case `CodeStyleParenthesesClean` if applyTransformerFlag => new CleanCodeGenerator with ApplyTransfromer
+    	  case `CodeStyleParenthesesClassic` if applyTransformerFlag => new ClassicStyleCodeGenerator with ApplyTransfromer
+    	  case `CodeStyleParenthesesClean` => new CleanCodeGenerator
+    	  case `CodeStyleParenthesesClassic` => new ClassicStyleCodeGenerator
+    	}
   }
 }
 

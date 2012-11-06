@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Insynth Core
 Bundle-SymbolicName: ch.epfl.insynth;singleton:=true
-Bundle-Version: 0.0.1.qualifier
+Bundle-Version: 1.0.0
 Bundle-Activator: ch.epfl.insynth.core.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -19,7 +19,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- target/lib/ch.epfl.insynth.library-0.0.1-SNAPSHOT.jar
+ target/lib/ch.epfl.insynth.library-1.0.0.jar
 Export-Package: ch.epfl.insynth.reconstruction;uses:="scala.collection.immutable,ch.epfl.insynth.env",
  ch.epfl.insynth.reconstruction.codegen,
  ch.epfl.insynth.reconstruction.combinator,

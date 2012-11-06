@@ -5,7 +5,7 @@ import ch.epfl.insynth.core.preferences.LogManager
 
 object Config {  
   // flag which marks whether logging is enabled  
-  val isLogging = true
+  val isLogging = false
   // default weight for leave nodes (used in extraction phase)
   val weightForLeaves = 1.5d
   

@@ -2,14 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: InSynth Plugin (Test)
 Bundle-SymbolicName: ch.epfl.insynth.tests
-Bundle-Version: 0.0.1.qualifier
+Bundle-Version: 1.0.0
 Bundle-Vendor: ch.epfl
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: .,
- target/lib/ch.epfl.insynth.library-0.0.1-SNAPSHOT.jar
+ target/lib/ch.epfl.insynth.library-1.0.0.jar
 Require-Bundle: org.scala-ide.scala.library,
  org.eclipse.equinox.weaving.aspectj,
  org.junit4;bundle-version="4.8.1"
 Import-Package: org.aspectj.weaver.loadtime.definition,
  scala.tools.eclipse.testsetup
-Fragment-Host: ch.epfl.insynth;bundle-version="0.0.1"
+Fragment-Host: ch.epfl.insynth;bundle-version="1.0.0"

@@ -15,9 +15,9 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 /**
  * Object for reconstruction of proof trees into output(s)
  */
-object Reconstructor extends (SimpleNode => List[Output]) {
+object Reconstructor extends ( (SimpleNode, CodeGenerator) => List[Output]) {
 
-  def apply(tree: SimpleNode): List[Output] = {
+  def apply(tree: SimpleNode, codeGenerator: CodeGenerator): List[Output] = {
     // get needed number of snippets from the store
     val numberOfCombinations = Activator.getDefault.getPreferenceStore.getInt(
   		InSynthConstants.OfferedSnippetsPropertyString)
@@ -78,7 +78,7 @@ object Reconstructor extends (SimpleNode => List[Output]) {
     
     // for each tree, generate the code for it
     val generatedCode = extractedTrees map {
-      resPair => (CodeGenerator(resPair._1).head, resPair._2)
+      resPair => (codeGenerator(resPair._1).head, resPair._2)
     }
         
     // logging

@@ -3,7 +3,7 @@
   <parent>
     <groupId>ch.epfl</groupId>
     <artifactId>ch.epfl.insynth.build</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <artifactId>ch.epfl.insynth.tests</artifactId>
   <packaging>eclipse-test-plugin</packaging>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>ch.epfl</groupId>
       <artifactId>ch.epfl.insynth.library</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
 

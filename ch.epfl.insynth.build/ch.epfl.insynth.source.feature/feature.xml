@@ -2,7 +2,7 @@
 <feature
       id="ch.epfl.insynth.source.feature"
       label="InSynth Source Feature"
-      version="0.0.1.qualifier"
+      version="1.0.0"
       provider-name="scala-ide.org">
 
    <description url="https://github.com/kaptoxic/scala-ide-insynth-integration/wiki">
@@ -60,9 +60,9 @@ SUCH DAMAGE.
       <update label="Scala IDE for Eclipse update site" url="http://download.scala-ide.org/update-current"/>
       <discovery label="GitHub hosted build project for InSynth" url="https://github.com/kaptoxic/scala-ide-insynth-integration/tree/master/ch.epfl.insynth.build"/>
    </url>
-   
+
    <plugin
-         id="ch.epfl.insynth"
+         id="ch.epfl.insynth.source"
          download-size="0"
          install-size="0"
          version="0.0.0"

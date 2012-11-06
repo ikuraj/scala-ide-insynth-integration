@@ -31,16 +31,7 @@ import ch.epfl.insynth.core.completion.InnerFinder
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 
-object InSynthCompletionTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests") {
-  
-  @BeforeClass
-  def setup() {    
-    // set appropriate preference values (expect 5 completions)
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 5)        
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
-  }
-  
-}
+object InSynthCompletionTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests")
 
 class InSynthCompletionTests {
 	val testProjectSetup = new CompletionUtility(InSynthCompletionTests)
@@ -49,31 +40,36 @@ class InSynthCompletionTests {
 
   @Test
   def testExample1() {
-    val oraclePos11 = List("A m", "0")
+    val oraclePos11 = ( List("A m", "0"), List("A.m()", "0") )
     
-    val exampleCompletions = List(CheckContains(oraclePos11), CheckNumberOfCompletions(5))
+    val exampleCompletions = ( List(CheckContains(oraclePos11._1), CheckNumberOfCompletions(5)),
+      List(CheckContains(oraclePos11._2), CheckNumberOfCompletions(5)) )
     
-    checkCompletions("examplepkg1/Example1.scala")(exampleCompletions)
+    checkCompletionsDual("examplepkg1/Example1.scala")(exampleCompletions)
   }
   
   @Test
   def testExample2() {
-    val oraclePos14 = List("new A().a()", "new A() m b")
+    val oraclePos14 = ( List("new A() a", "new A() m b"), List("new A().a", "new A().m(b)") )
     
-    val exampleCompletions = List(CheckContains(oraclePos14))
+    val exampleCompletions = ( List(CheckContains(oraclePos14._1)), List(CheckContains(oraclePos14._2)) )
     
-    checkCompletions("examplepkg2/Example2.scala")(exampleCompletions)
+    checkCompletionsDual("examplepkg2/Example2.scala")(exampleCompletions)
   }
   
   @Test
   def testExample3() {
-    val oraclePos12regex = List("new A\\(\\) m1 \\{ (\\S+) => new A\\(\\) m2 \\1 \\}",
-        "new A\\(\\) m1 \\{ (\\S+) => new A\\(\\) m2 l1 \\}")
+    val oraclePos12regex = ( List("new A\\(\\) m1 (\\S+) => new A\\(\\) m2 \\1",
+        "new A\\(\\) m1 (\\S+) => new A\\(\\) m2 l1"), List("new A\\(\\)\\.m1\\((\\S+) => new A\\(\\)\\.m2\\(\\1\\)\\)",
+        "new A\\(\\)\\.m1\\((\\S+) => new A\\(\\)\\.m2\\(l1\\)\\)") )
     val oraclePos12strings = List("\"?\"")
     
-    val exampleCompletions = List(CheckRegexContains(oraclePos12regex), CheckContains(oraclePos12strings))
+    val exampleCompletions = (
+      List(CheckRegexContains(oraclePos12regex._1), CheckContains(oraclePos12strings)),
+      List(CheckRegexContains(oraclePos12regex._2), CheckContains(oraclePos12strings))
+    )
     
-    checkCompletions("examplepkg3/Example3.scala")(exampleCompletions)
+    checkCompletionsDual("examplepkg3/Example3.scala")(exampleCompletions)
   }
 
 }

@@ -1,4 +1,4 @@
-package github
+package github3
 
 /**
  * @see <a href="https://github.com/kaptoxic/scala-ide-insynth-integration/issues/3">Issue #3</a>
