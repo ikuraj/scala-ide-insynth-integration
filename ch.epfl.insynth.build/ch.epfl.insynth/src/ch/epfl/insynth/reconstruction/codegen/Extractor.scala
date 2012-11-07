@@ -55,7 +55,7 @@ object Extractor extends ((Node, Int) => List[(Node, Double)]) {
 
     result
   }
-  
+
   /**
    * recursive function for transforming a tree into a list of trees with corresponding weights
    * @param tree input tree parameter
@@ -64,87 +64,88 @@ object Extractor extends ((Node, Int) => List[(Node, Double)]) {
   def transform(tree: Node): List[NodeWithWeight] = {
     // logging
     if (Config.isLogging) {
-      logger.entering(getClass.toString, "transform"/*, FormatableIntermediate(tree)*/)
+      logger.entering(getClass.toString, "transform" /*, FormatableIntermediate(tree)*/ )
     }
-    
+
     // check if the result is cached, return immediately if it is
     if (cache contains tree) {
-      //logger.warning("cache contains tree: " + FormatableIntermediate(tree))
+      // logging
+      if (Config.isLogging)
+        logger.fine("cache contains tree: " + FormatableIntermediate(tree, 1))
       return cache(tree)
     } else {
-    	// logging
-      logger.fine("cache did not contain tree")
+      // logging
+      if (Config.isLogging)
+        logger.fine("cache did not contain tree")
     }
-    
-//    if (visited.size > 10) {
-//      logger.warning("visited.size > 10: " + visited.size)
-//    }
-    
-   val result = tree match {
+
+    val result = tree match {
       // variable (declared previously as an argument)
-      case _:Variable =>
+      case _: Variable =>
         // single pair with weight for leaves
-        List( (tree, weightForLeaves) )
+        List((tree, weightForLeaves))
       // identifier defined in Scala program  
-      case id:Identifier =>
+      case id: Identifier =>
         // single pair with weight from declaration
-        List( (tree, id.decl.getWeight) )
-      case NullLeaf => 
-        List( (tree, 0d) )
+        List((tree, id.decl.getWeight))
+      case NullLeaf =>
+        List((tree, 0d))
       // apply parameters in the tail of params according to the head of params 
       case Application(tpe, params) => {
-		    // logging
-//		    if (Config.isLogging && getSingleElementsParamsList(params).size < 1) {
-//		      logger.warning("getSingleElementsParamsList(params).size < 1")
-//		    }
+        // logging
+        //		    if (Config.isLogging && getSingleElementsParamsList(params).size < 1) {
+        //		      logger.warning("getSingleElementsParamsList(params).size < 1")
+        //		    }
 
-		    /** for a parameters list (in terms of list of sets of nodes), return multiple parameters
-		     *  lists in terms of parameter list (but with single node for each parameter) and the sum
-		     *  weight of such list of parameters */
+        /**
+         * for a parameters list (in terms of list of sets of nodes), return multiple parameters
+         *  lists in terms of parameter list (but with single node for each parameter) and the sum
+         *  weight of such list of parameters
+         */
         def getSingleElementsParamsList(params: List[Set[Node]]): List[(List[Node], Double)] = {
-      		//logger.entering(getClass.toString, "getSingleElementsParamsList"/*, FormatableIntermediate(tree)*/)
+          //logger.entering(getClass.toString, "getSingleElementsParamsList"/*, FormatableIntermediate(tree)*/)
           params match {
             // return empty list if no parameters are found
             case List() => Nil
             // a single parameter (set)
             case List(set) =>
-		          // recursively transform a single parameter set and map each result into a single-parameter
-		          // list and its weight
+              // recursively transform a single parameter set and map each result into a single-parameter
+              // list and its weight
               set flatMap { transform(_) map { pair => (List(pair._1), pair._2) } } toList
             // separate a single set from the rest of the parameter list
             case set :: list =>
-            	// calculate the recursive result (no need to do that in the for loop)
+              // calculate the recursive result (no need to do that in the for loop)
               val resultForRest = getSingleElementsParamsList(list);
               for (
                 // for a set of parameter get all possible single-snippet trees
                 (firstParamNode, firstParamWeight) <- set flatMap { transform(_) } toList;
                 // for all single-snippet trees for rest of the list recursively
                 (restParams, restOfWeight) <- resultForRest
-                // yield all possible combinations of concatenations of the two lists
+              // yield all possible combinations of concatenations of the two lists
               ) yield ((firstParamNode +: restParams, firstParamWeight + restOfWeight))
           }
         }
-        
+
         // for all single-snippet trees representing parameters list
         for (paramsList <- getSingleElementsParamsList(params))
           // yield an appropriate application node
-          yield ( (Application(tpe, paramsList._1 map { Set(_) }), paramsList._2) )
+          yield ((Application(tpe, paramsList._1 map { Set(_) }), paramsList._2))
       }
       // abstraction first creates all of its arguments
       case Abstraction(tpe, vars, subtrees) => {
-        for ( (subtree, weight) <- subtrees flatMap { transform(_) } toList )
-          yield ( (Abstraction(tpe, vars, Set(subtree)), weight) )
+        for ((subtree, weight) <- subtrees flatMap { transform(_) } toList)
+          yield ((Abstraction(tpe, vars, Set(subtree)), weight))
       }
     }
-   
-   // cache the result
-   cache += tree -> result
-		// logging
-		if (Config.isLogging) {
-		  logger.exiting(getClass.toString, "transform"/*, FormatableIntermediate(tree)*/)
-		}
 
-   result
+    // cache the result
+    cache += tree -> result
+    // logging
+    if (Config.isLogging) {
+      logger.exiting(getClass.toString, "transform" /*, FormatableIntermediate(tree)*/ )
+    }
+
+    result
   }
   
 }
