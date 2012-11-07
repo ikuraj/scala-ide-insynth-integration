@@ -36,19 +36,32 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 /** tests for benchmarks which produce less certain solutions 
  * the ones that have >10 in groundResults.tex */
 @RunWith(value = classOf[Parameterized])
-class InSynthBenchmarkCompletionParametrizedLessCertainTests(fileName: String, expectedSnippet: String) {
+class InSynthBenchmarkCompletionParametrizedLessCertainTests(fileName: String, expectedSnippet: String,
+    expectedPositionJavaAPI: (Int, Int), expectedPositionGeneralized: (Int, Int)) {
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
 	
 	import testProjectSetup._
 	
   @Test
-  def test() {
-    val oraclePos = List(expectedSnippet)
+  // non generalized tests (individual import.clazz used)
+  def testJavaAPI {
+    val oraclePos = List( (expectedSnippet, expectedPositionJavaAPI) )
     
-    val exampleCompletions = List(CheckContains(oraclePos),
+    val exampleCompletions = List(CheckContainsAtPosition(oraclePos),
         CheckNumberOfCompletions(InSynthBenchmarkCompletionParametrizedLessCertainTests.numberOfSnippets))
     
     checkCompletions("main/scala/javaapi/nongenerics/" + fileName + ".scala")(exampleCompletions)
+  }
+	
+  @Test
+  // generalized tests
+  def testGeneralized {
+    val oraclePos = List( (expectedSnippet, expectedPositionJavaAPI) )
+    
+    val exampleCompletions = List(CheckContainsAtPosition(oraclePos),
+        CheckNumberOfCompletions(InSynthBenchmarkCompletionParametrizedLessCertainTests.numberOfSnippets))
+    
+    checkCompletions("main/scala/generalized/nongenerics/" + fileName + ".scala")(exampleCompletions)
   }
 
 }
@@ -67,7 +80,7 @@ object InSynthBenchmarkCompletionParametrizedLessCertainTests {
   def setup() {
 		store.setValue(OfferedSnippetsPropertyString, numberOfSnippets)        
 		store.setValue(MaximumTimePropertyString, maximumTime)
-		store.setValue(DoSeparateLoggingPropertyString, true)
+		//store.setValue(DoSeparateLoggingPropertyString, true)
 		
 		storeParenthesesStyle = store.getString(CodeStyleParenthesesPropertyString)
 		store.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClean)
@@ -81,27 +94,34 @@ object InSynthBenchmarkCompletionParametrizedLessCertainTests {
   }
   
 	@Parameters
-	def parameters: ju.Collection[Array[jl.String]] = {
-	  val list = new ju.ArrayList[Array[jl.String]]
-	  list add Array( "BoxLayoutContainertargetintaxis" , "new BoxLayout(container, BoxLayout.Y_AXIS)" )
-	  list add Array( "BufferedImageintwidthintheightintimageType" , "new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB)" )
-	  list add Array( "ByteArrayInputStream" , "new DataInputStream(new ByteArrayInputStream(\"?\".getBytes()))" )
-	  list add Array( "ByteArrayInputStreambytebufintoffsetintlength" , "new ByteArrayInputStream(b, 0, 0)" )
-	  list add Array( "CharArrayReadercharbuf" , "new CharArrayReader(outStream.toCharArray())" )
-	  list add Array( "DatagramPacketbytebufferintbufferLength" , "new DatagramPacket(buffer, buffer.length)" )
-	  list add Array( "DatagramPacketbytebufintlengthInetAddressaddressintport" , "new DatagramPacket(buffer, buffer.length, ia, 0)" )
-	  list add Array( "FileWriterStringfileNamebooleanappend" , "new BufferedWriter(new FileWriter(\"?\", true))" )
-	  list add Array( "GridLayoutintrowsintcolsinthgapintvgap" , "new GridLayout(0, 0, 0, 0)" )
-	  list add Array( "InputStreamReaderInputStreaminStringcharsetName" , "new BufferedReader(new InputStreamReader(fis, \"?\"))" )
-	  list add Array( "JButtonStringtextIconicon" , "new JButton(\"?\",warnIcon)" )
-	  // true needed but InSynth constants include only false
-	  list add Array( "JCheckBoxStringtextbooleanselected" , "new JCheckBox(\"?\", false)" )
-	  list add Array( "JTextAreaDocumentdocument" , "new JTextArea(document)" )
-	  list add Array( "JTextAreaStringtext" , "new JTextArea(\"?\")" )
-	  list add Array( "OverlayLayoutContainertarget" , "new OverlayLayout(panel)" )
-	  list add Array( "PrintStreamFilefile" , "new PrintStream(file)" )
-	  list add Array( "SocketInetAddressaddressintportthrowsIOException" , "InetAddress.getByName(\"?\")" )
-	  list add Array( "StreamTokenizerReaderr" , "new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)))" )
+	def parameters: ju.Collection[Array[Object]] = {
+	  val list = new ju.ArrayList[Array[Object]]
+	  
+	  case class GivesObject(int: Int) {
+	  	def unary_! = (int, int) //int : jl.Integer
+	  }
+	  implicit def convertIntToGivesObject(int: Int) = GivesObject(int)
+	  
+	  list add Array( "BoxLayoutContainertargetintaxis" , "new BoxLayout(container, BoxLayout.Y_AXIS)", ! 0, ! 0 ) // 1
+	  list add Array( "BufferedImageintwidthintheightintimageType" , "new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB)", ! 0, ! 0 )
+	  list add Array( "ByteArrayInputStream" , "new DataInputStream(new ByteArrayInputStream(\"?\".getBytes()))", ! 0, ! 0 )
+//	  list add Array( "ByteArrayInputStreambytebufintoffsetintlength" , "new ByteArrayInputStream(b, 0, 0)" )
+//	  list add Array( "CharArrayReadercharbuf" , "new CharArrayReader(outStream.toCharArray())" )
+//	  list add Array( "DatagramPacketbytebufferintbufferLength" , "new DatagramPacket(buffer, buffer.length)" )
+//	  list add Array( "DatagramPacketbytebufintlengthInetAddressaddressintport" , "new DatagramPacket(buffer, buffer.length, ia, 0)" )
+//	  list add Array( "FileWriterStringfileNamebooleanappend" , "new BufferedWriter(new FileWriter(\"?\", true))" )
+//	  list add Array( "GridLayoutintrowsintcolsinthgapintvgap" , "new GridLayout(0, 0, 0, 0)" )
+//	  list add Array( "InputStreamReaderInputStreaminStringcharsetName" , "new BufferedReader(new InputStreamReader(fis, \"?\"))" ) // 10
+//	  list add Array( "JButtonStringtextIconicon" , "new JButton(\"?\",warnIcon)" )
+//	  // true needed but InSynth constants include only false
+//	  list add Array( "JCheckBoxStringtextbooleanselected" , "new JCheckBox(\"?\", false)" )
+//	  list add Array( "JTextAreaDocumentdocument" , "new JTextArea(document)" )
+//	  list add Array( "JTextAreaStringtext" , "new JTextArea(\"?\")" )
+//	  list add Array( "OverlayLayoutContainertarget" , "new OverlayLayout(panel)" )
+//	  list add Array( "PrintStreamFilefile" , "new PrintStream(file)" )
+//	  list add Array( "SocketInetAddressaddressintportthrowsIOException" , "InetAddress.getByName(\"?\")" )
+//	  list add Array( "StreamTokenizerReaderr" , "new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)))" )
+	  
 	  list
 	}
 
