@@ -7,7 +7,8 @@ import java.security.AccessController;
 
 class Main {
   def  main(args:Array[String]){
-    var ap:AWTPermission = new AWTPermission("accessClipboard") //r=1
+    //var ap:AWTPermission = new AWTPermission("accessClipboard") //r=1
+    var ap:AWTPermission =  /*!*/ //r=1
     AccessController.checkPermission(ap)
   }
 }

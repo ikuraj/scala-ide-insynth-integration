@@ -23,7 +23,8 @@ class MainClass {
     var table:JTable = new JTable(rows,headers)
     
     var scrollPane:JScrollPane = new JScrollPane(table)
-    var viewport:JViewport = new JViewport() //r=5
+    //var viewport:JViewport = new JViewport() //r=5
+    var viewport:JViewport =  /*!*/ //r=5
     viewport.setView(table);
     scrollPane.setColumnHeaderView(new JLabel("table header here"));
     scrollPane.setRowHeaderView(viewport);

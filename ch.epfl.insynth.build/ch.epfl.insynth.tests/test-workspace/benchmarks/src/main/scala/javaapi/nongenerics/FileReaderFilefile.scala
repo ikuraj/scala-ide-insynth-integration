@@ -12,7 +12,8 @@ class Main {
     var inputFile:File = new File("farrago.txt")
     var outputFile:File = new File("outagain.txt")
 
-    var in:FileReader = new FileReader(inputFile) //r=2
+    //var in:FileReader = new FileReader(inputFile) //r=2
+    var in:FileReader =  /*!*/ //r=2
 
     var out:FileWriter = new FileWriter(outputFile)
     

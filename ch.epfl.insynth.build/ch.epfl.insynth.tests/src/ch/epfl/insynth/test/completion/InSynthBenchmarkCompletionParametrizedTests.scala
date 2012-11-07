@@ -34,16 +34,16 @@ import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 
 @RunWith(value = classOf[Parameterized])
-class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnippet: String) {
+class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnippet: String, expectedPosition: (Int, Int)) {
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
 	
 	import testProjectSetup._
 	
   @Test
   def test() {
-    val oraclePos = List(expectedSnippet)
+    val oraclePos = List( (expectedSnippet, expectedPosition) )
     
-    val exampleCompletions = List(CheckContains(oraclePos))
+    val exampleCompletions = List(CheckContainsAtPosition(oraclePos))
     
     checkCompletions("main/scala/javaapi/nongenerics/" + fileName + ".scala")(exampleCompletions)
   }
@@ -60,40 +60,67 @@ object InSynthBenchmarkCompletionParametrizedTests {
   }
   
 	@Parameters
-	def parameters: ju.Collection[Array[jl.String]] = {
-	  val list = new ju.ArrayList[Array[jl.String]]
-	  list add Array( "FileInputStreamStringname" , "new FileInputStream(\"?\")" )
-	  list add Array( "FileOutputStreamFilefile" , "new FileOutputStream(tempFile)" )
-	  list add Array( "FileStringname" , "new File(\"?\")" )
-	  list add Array( "FileWriterFilefile" , "new FileWriter(outputFile)" )
-	  list add Array( "FileWriterLPT1" , "new FileWriter(\"?\")" )
-	  list add Array( "GridBagConstraints" , "new GridBagConstraints" )
-	  list add Array( "GroupLayoutContainerhost" , "new GroupLayout(panel)" )
-	  list add Array( "ImageIconStringfilename" , "new ImageIcon(\"?\")" )
-	  list add Array( "GridBagConstraints" , "new GridBagConstraints" )
-//	  list add Array( "InputStreamReaderInputStreamin" , "new InputStreamReader(System.in)" )
-	  list add Array( "JButtonStringtext" , "new JButton(\"?\")" )
-	  list add Array( "JCheckBoxStringtext" , "new JCheckBox(\"?\")" )
-	  list add Array( "JFormattedTextFieldAbstractFormatterFactoryfactoryObjectcurrentValue" , "new JFormattedTextField(factory)" )
-	  list add Array( "JFormattedTextFieldFormatterformatter" , "new MaskFormatter(\"?\")" )
-	  list add Array( "JTableObjectnameObjectdata" , "new JTable(rows, columns)" )
-	  list add Array( "JToggleButtonStringtext" , "new JFrame(\"?\")" )
-	  list add Array( "JTree" , "new JTree" )
-	  list add Array( "JWindow" , "new JWindow" )
-	  list add Array( "ObjectInputStreamInputStreamin" , "new ObjectInputStream(fis)" )
-	  list add Array( "ObjectOutputStreamOutputStreamout" , "new ObjectOutputStream(fos)" )
-	  list add Array( "PipedReaderPipedWritersrc" , "new PipedReader(pw)" )
-	  list add Array( "PipedWriter" , "new PipedWriter" )
-	  list add Array( "Pointintxinty" , "new Point(0, 0)" )
-	  list add Array( "PrintStreamOutputStreamout" , "new PrintStream(fout)" )
-	  list add Array( "PrintWriterBufferedWriterbooleanautoFlush" , "new PrintWriter(bw, false)" )
-	  list add Array( "SequenceInputStreamInputStreams1InputStreams2" , "new SequenceInputStream(f1, f2)" )
-	  list add Array( "ServerSocketintport" , "new ServerSocket(port)" )
-	  list add Array( "StreamTokenizerFileReaderfileReader" , "new StreamTokenizer(br)" )
-	  list add Array( "StringReaderStrings" , "new StringReader(\"?\")" )
-	  list add Array( "TimerintvalueActionListeneract" , "new Timer(0, actionListener)" )
-	  list add Array( "TransferHandlerStringproperty" , "new TransferHandler(s)" )
-	  list add Array( "URLStringspecthrowsMalformedURLException" , "new URL(\"?\") openConnection" )
+	def parameters: ju.Collection[Array[Object]] = {
+	  val list = new ju.ArrayList[Array[Object]]
+	  
+	  case class GivesObject(int: Int) {
+	  	def unary_! = (int, int) //int : jl.Integer
+	  }
+	  implicit def convertIntToGivesObject(int: Int) = GivesObject(int)
+	  
+	  list add Array( "FileInputStreamStringname" , "new FileInputStream(\"?\")", ! 0 ) // 0
+	  list add Array( "FileOutputStreamFilefile" , "new FileOutputStream(tempFile)", ! 0 )
+	  list add Array( "FileStringname" , "new File(\"?\")", ! 0 )
+	  list add Array( "FileWriterFilefile" , "new FileWriter(outputFile)", ! 0 )
+	  list add Array( "FileWriterLPT1" , "new FileWriter(\"?\")", ! 0 )
+	  list add Array( "GridBagConstraints" , "new GridBagConstraints", ! 0 )
+	  list add Array( "GroupLayoutContainerhost" , "new GroupLayout(panel)", ! 0 )
+	  list add Array( "ImageIconStringfilename" , "new ImageIcon(\"?\")", ! 0 )
+	  list add Array( "InputStreamReaderInputStreamin" , "new InputStreamReader(System in)", ! 0 )
+	  list add Array( "JButtonStringtext" , "new JButton(\"?\")", ! 0 )
+	  list add Array( "JCheckBoxStringtext" , "new JCheckBox(\"?\")", ! 1 ) // 10
+	  list add Array( "JFormattedTextFieldAbstractFormatterFactoryfactoryObjectcurrentValue" , "new JFormattedTextField(factory)", ! 3 )
+	  list add Array( "JFormattedTextFieldFormatterformatter" , "new MaskFormatter(\"?\")", ! 1 )
+	  list add Array( "JTableObjectnameObjectdata" , "new JTable(rows, columns)", ! 1 )
+	  list add Array( "JToggleButtonStringtext" , "new JFrame(\"?\")", ! 1 )
+	  list add Array( "JTree" , "new JTree", ! 0 )
+	  list add Array( "JWindow" , "new JWindow", ! 0 )
+	  list add Array( "ObjectInputStreamInputStreamin" , "new ObjectInputStream(fis)", ! 0 )
+	  list add Array( "ObjectOutputStreamOutputStreamout" , "new ObjectOutputStream(fos)", ! 0 )
+	  list add Array( "PipedReaderPipedWritersrc" , "new PipedReader(pw)", ! 1 )
+	  list add Array( "PipedWriter" , "new PipedWriter", ! 0 ) // 20
+	  list add Array( "Pointintxinty" , "new Point(0, 0)", ! 1 )
+	  list add Array( "PrintStreamOutputStreamout" , "new PrintStream(fout)", ! 0 )
+	  list add Array( "PrintWriterBufferedWriterbooleanautoFlush" , "new PrintWriter(bw, false)", ! 2 )
+	  list add Array( "SequenceInputStreamInputStreams1InputStreams2" , "new SequenceInputStream(f1, f2)", ! 2 )
+	  list add Array( "ServerSocketintport" , "new ServerSocket(port)", ! 0 )
+	  list add Array( "StreamTokenizerFileReaderfileReader" , "new StreamTokenizer(br)", ! 0 )
+	  list add Array( "StringReaderStrings" , "new StringReader(\"?\")", ! 0 )
+	  list add Array( "TimerintvalueActionListeneract" , "new Timer(0, actionListener)", ! 0 )
+	  list add Array( "TransferHandlerStringproperty" , "new TransferHandler(s)", ! 0 )
+	  list add Array( "URLStringspecthrowsMalformedURLException" , "new URL(\"?\") openConnection", ! 0 ) // 30
+	  
+	  // missing 4 tests
+	  list add Array( "FileReaderFilefile" , "new FileReader(inputFile)", ! 1 )
+	  list add Array( "GridBagLayout" , "new GridBagLayout", ! 0 )
+	  list add Array( "JViewport" , "new JViewport", ! 0 )
+	  list add Array( "LineNumberReaderReaderin" , "new LineNumberReader(new InputStreamReader(System in))", ! 0 )
+	  // tests from InSynthBenchmarkCompletionTests
+	  list add Array( "AWTPermissionStringname.scala" , "new AWTPermission(\"?\")", ! 0 )
+		list add Array( "BoxLayoutContainertargetintaxis" , "new BoxLayout(container, BoxLayout.Y_AXIS)", ! 0 )
+		list add Array( "BufferedInputStreamFileInputStream" , "new BufferedInputStream(fis)", ! 0 )
+		list add Array( "BufferedOutputStream" , "new BufferedOutputStream(file)", ! 0 )
+		list add Array( "BufferedReaderFileReaderfileReader" , "new BufferedReader(fr)", ! 0 )
+		list add Array( "BufferedReaderInputStreamReader" , "new BufferedReader(isr)", ! 0 )
+		list add Array( "BufferedReaderReaderin" , "new BufferedReader(new InputStreamReader(url openStream ))", ! 0 )
+		list add Array( "ByteArrayOutputStreamintsize" , "new ByteArrayOutputStream(0)", ! 0 )
+		list add Array( "DatagramSocket" , "new DatagramSocket", ! 0 )
+		list add Array( "DataInputStreamFileInputStreamfileInputStream" , "new DataInputStream(fis)", ! 0 )
+		list add Array( "DataOutputStreamFileOutputStreamfileOutputStream" , "new DataOutputStream(fos)", ! 0 )
+		list add Array( "DefaultBoundedRangeModel" , "new DefaultBoundedRangeModel", ! 0 )
+		list add Array( "DisplayModeintwidthintheightintbitDepthintrefreshRate" , "gs getDisplayMode", ! 0 )
+		list add Array( "FileInputStreamFileDescriptorfdObj" , "new FileInputStream(aFile)", ! 0 )
+	  
 	  list
 	}
 

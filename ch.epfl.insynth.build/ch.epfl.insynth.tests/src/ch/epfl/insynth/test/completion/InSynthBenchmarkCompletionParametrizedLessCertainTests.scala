@@ -29,13 +29,12 @@ import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
 import org.junit.runner.RunWith
 import java.util.ArrayList
-import org.junit.BeforeClass
+import org.junit.{ BeforeClass, AfterClass }
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 
 /** tests for benchmarks which produce less certain solutions 
  * the ones that have >10 in groundResults.tex */
-@Ignore
 @RunWith(value = classOf[Parameterized])
 class InSynthBenchmarkCompletionParametrizedLessCertainTests(fileName: String, expectedSnippet: String) {
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
@@ -46,7 +45,8 @@ class InSynthBenchmarkCompletionParametrizedLessCertainTests(fileName: String, e
   def test() {
     val oraclePos = List(expectedSnippet)
     
-    val exampleCompletions = List(CheckContains(oraclePos))
+    val exampleCompletions = List(CheckContains(oraclePos),
+        CheckNumberOfCompletions(InSynthBenchmarkCompletionParametrizedLessCertainTests.numberOfSnippets))
     
     checkCompletions("main/scala/javaapi/nongenerics/" + fileName + ".scala")(exampleCompletions)
   }
@@ -55,11 +55,29 @@ class InSynthBenchmarkCompletionParametrizedLessCertainTests(fileName: String, e
 
 object InSynthBenchmarkCompletionParametrizedLessCertainTests {
   
+  val numberOfSnippets = 100
+  val maximumTime = 2000
+  
+  var storeParenthesesStyle: String = _
+  
+  val store = Activator.getDefault.getPreferenceStore
+  import InSynthConstants._
+  
   @BeforeClass
-  def setup() {    
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 50)        
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 2000)
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.DoSeparateLoggingPropertyString, true)
+  def setup() {
+		store.setValue(OfferedSnippetsPropertyString, numberOfSnippets)        
+		store.setValue(MaximumTimePropertyString, maximumTime)
+		store.setValue(DoSeparateLoggingPropertyString, true)
+		
+		storeParenthesesStyle = store.getString(CodeStyleParenthesesPropertyString)
+		store.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClean)
+  }
+  
+  @AfterClass
+  def finish() {
+    // restore values
+		store.setValue(DoSeparateLoggingPropertyString, false)
+		store.setValue(CodeStyleParenthesesPropertyString, storeParenthesesStyle)
   }
   
 	@Parameters
@@ -76,7 +94,8 @@ object InSynthBenchmarkCompletionParametrizedLessCertainTests {
 	  list add Array( "GridLayoutintrowsintcolsinthgapintvgap" , "new GridLayout(0, 0, 0, 0)" )
 	  list add Array( "InputStreamReaderInputStreaminStringcharsetName" , "new BufferedReader(new InputStreamReader(fis, \"?\"))" )
 	  list add Array( "JButtonStringtextIconicon" , "new JButton(\"?\",warnIcon)" )
-	  list add Array( "JCheckBoxStringtextbooleanselected" , "new JCheckBox(\"?\", true)" )
+	  // true needed but InSynth constants include only false
+	  list add Array( "JCheckBoxStringtextbooleanselected" , "new JCheckBox(\"?\", false)" )
 	  list add Array( "JTextAreaDocumentdocument" , "new JTextArea(document)" )
 	  list add Array( "JTextAreaStringtext" , "new JTextArea(\"?\")" )
 	  list add Array( "OverlayLayoutContainertarget" , "new OverlayLayout(panel)" )

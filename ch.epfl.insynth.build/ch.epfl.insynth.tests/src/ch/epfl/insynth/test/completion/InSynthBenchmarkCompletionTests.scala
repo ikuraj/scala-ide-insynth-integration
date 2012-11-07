@@ -25,6 +25,8 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConverters
 import scala.tools.eclipse.testsetup.TestProjectSetup
 
+// do not depend on code style
+
 object InSynthBenchmarkCompletionTests extends TestProjectSetup("benchmarks", bundleName = "ch.epfl.insynth.tests")
 
 class InSynthBenchmarkCompletionTests {
@@ -41,7 +43,6 @@ class InSynthBenchmarkCompletionTests {
     checkCompletions("main/scala/generalized/nongenerics/AWTPermissionStringname.scala")(exampleCompletions)
   }
 	
-	@Ignore
   @Test
   def testBoxLayoutContainertargetintaxis() {
     val oraclePos22 = List("new BoxLayout(container, BoxLayout.Y_AXIS)")

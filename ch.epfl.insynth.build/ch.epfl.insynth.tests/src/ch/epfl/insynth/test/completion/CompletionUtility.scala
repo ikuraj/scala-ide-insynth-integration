@@ -27,6 +27,7 @@ import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
+import org.hamcrest.CoreMatchers._
 
 class CompletionUtility(projectSetup: TestProjectSetup) {
   import projectSetup._
@@ -117,6 +118,19 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       for (expected <- expectedCompletions) {
         val contains = calculatedStrings contains expected
         assertTrue("Expected snippet: " + expected + ", calculated snippets: " + calculatedStrings.mkString(", "), contains)
+      }
+    }
+  }
+    
+  case class CheckContainsAtPosition(expectedCompletions: List[(String, (Int, Int))]) extends Checker {
+
+    def apply(completions: List[Output]) = {
+      val calculatedStrings = completions.map { _.getSnippet }
+      for ((expectedSnippet, expectedPosition@(low, up)) <- expectedCompletions) {
+        val containsIndex = calculatedStrings indexWhere { _ == expectedSnippet }
+        assertThat("Expected snippet was not found: " + expectedSnippet + ", calculated snippets: " + calculatedStrings.mkString(", "),
+          containsIndex, not(equalTo(-1)))
+        assertTrue("Expected snippet was not found at pos: " + expectedPosition + ", found at: " + containsIndex, low <= containsIndex && containsIndex <= up)
       }
     }
   }

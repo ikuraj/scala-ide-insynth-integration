@@ -23,8 +23,11 @@ class BenchmarkTestSuite
 object BenchmarkTestSuite {
   @BeforeClass
   def setup() {    
+    import InSynthConstants._
+    
     // set appropriate preference values
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 15)        
-		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
+		Activator.getDefault.getPreferenceStore.setValue(OfferedSnippetsPropertyString, 15)        
+		Activator.getDefault.getPreferenceStore.setValue(MaximumTimePropertyString, 500)       
+		Activator.getDefault.getPreferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClassic)
   }
 }
