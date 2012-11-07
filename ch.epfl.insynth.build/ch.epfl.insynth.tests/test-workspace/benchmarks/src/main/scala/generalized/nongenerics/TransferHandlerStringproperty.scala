@@ -95,7 +95,8 @@ class MainClass extends JFrame {
   }
 
   private def setMyTransferHandlers(s:String) {
-    var th:TransferHandler = new TransferHandler(s) //r>5
+//    var th:TransferHandler = new TransferHandler(s) //r=1
+    var th:TransferHandler =  /*!*/ //r=1
     tf.setTransferHandler(th);
     l.setTransferHandler(th);
   }

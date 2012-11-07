@@ -11,7 +11,8 @@ class MainClass {
       // Create a print writer
       var fw:FileWriter  = new FileWriter(args(0))
       var bw:BufferedWriter = new BufferedWriter(fw)
-      var pw:PrintWriter = new PrintWriter(bw, false) //r>5
+//      var pw:PrintWriter = new PrintWriter(bw, false) //r>5
+      var pw:PrintWriter =  /*!*/ //r>5
 
       // Experiment with some methods
       pw.println(true);

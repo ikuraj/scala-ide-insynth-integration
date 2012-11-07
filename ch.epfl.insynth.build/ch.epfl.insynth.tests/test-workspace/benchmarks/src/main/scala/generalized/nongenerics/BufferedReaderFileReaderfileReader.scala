@@ -9,8 +9,9 @@ class MainClass {
   def main(args:Array[String]) {
     try {
       var fr:FileReader = new FileReader(args(0))
-      var br:BufferedReader = new BufferedReader(fr) //r=1
-
+      //var br:BufferedReader = new BufferedReader(fr) //r=1
+      var br:BufferedReader =  /*!*/ //r=1
+ 
       var s:String = br.readLine()
       while(s != null)
         System.out.println(s);

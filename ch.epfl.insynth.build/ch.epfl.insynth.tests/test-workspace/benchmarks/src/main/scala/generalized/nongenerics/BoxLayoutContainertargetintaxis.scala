@@ -15,7 +15,8 @@ class MainClass {
     var labels = Array( "--", "----", "--------", "------------" )
 
     var container:JPanel = new JPanel();
-    var layout:BoxLayout = new BoxLayout(container, BoxLayout.Y_AXIS) //r>5
+    //var layout:BoxLayout = new BoxLayout(container, BoxLayout.Y_AXIS) //r>5
+    var layout:BoxLayout =  /*!*/ //r>5
     container.setLayout(layout);
 
     for (i <- 0 to labels.length) {

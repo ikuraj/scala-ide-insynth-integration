@@ -7,7 +7,9 @@ import java.io._
 class Main {
   def main(args:Array[String]) {
     var file:File = new File("C:\\a.txt")
-    var ps:PrintStream = new PrintStream(file) //r>5
+    //var ps:PrintStream = new PrintStream(file) //r>5
+    var ps:PrintStream =  /*!*/ //r>5
+
     System.setOut(ps);
     System.out.println("To File");
   }

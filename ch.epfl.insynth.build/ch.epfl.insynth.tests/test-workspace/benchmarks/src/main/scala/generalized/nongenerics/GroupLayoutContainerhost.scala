@@ -11,7 +11,9 @@ class Main {
     var panel = new JPanel();
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
-    var layout:GroupLayout  = new GroupLayout(panel) //r=1
+//    var layout:GroupLayout  = new GroupLayout(panel) //r=1
+    var layout:GroupLayout =  /*!*/ //r=1
+
     panel.setLayout(layout);
 
     var buttonD:JButton  = new JButton("D");

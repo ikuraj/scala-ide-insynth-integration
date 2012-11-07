@@ -9,8 +9,11 @@ class MainClass {
 
   def main(args:Array[String]) {
     try {
-      var port = 5555
-      var ss:ServerSocket = new ServerSocket(port)//r=1
+
+      var port:Int = 5555
+
+//      var ss:ServerSocket = new ServerSocket(port) //r=1
+      var ss:ServerSocket =  /*!*/ //r=1
 
       while (true) {
         // Accept incoming requests

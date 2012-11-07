@@ -8,7 +8,8 @@ class MainClass {
   def main(args:Array[String]) {
     try {
       System.out.print("Enter your name: ");
-      var reader:InputStreamReader = new InputStreamReader(System.in) //r=1
+//      var reader:InputStreamReader = new InputStreamReader(System.in) //r=1
+      var reader:InputStreamReader =  /*!*/ //r=1
       var in:BufferedReader = new BufferedReader(reader)
       
       var name:String = in.readLine()

@@ -11,7 +11,8 @@ class MainClass {
 
       var ia:InetAddress = InetAddress.getByName("www.java2s.com")
 
-      var ds:DatagramSocket = new DatagramSocket() //r=2
+//      var ds:DatagramSocket = new DatagramSocket() //r=2
+      var ds:DatagramSocket =  /*!*/ //r=2
 
       var buffer:Array[Byte] = "hello".getBytes();
 

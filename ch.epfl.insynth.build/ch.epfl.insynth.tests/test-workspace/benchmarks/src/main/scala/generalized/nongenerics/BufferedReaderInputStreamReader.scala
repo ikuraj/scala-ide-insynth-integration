@@ -9,7 +9,8 @@ class MainClass {
   def main(args:Array[String]) {
     try {
       var isr:InputStreamReader = new InputStreamReader(System.in);
-      var br:BufferedReader = new BufferedReader(isr); //r=1
+//      var br:BufferedReader = new BufferedReader(isr); //r=1
+      var br:BufferedReader =  /*!*/ // r=1
 
       var cond = false
       while (!cond) {

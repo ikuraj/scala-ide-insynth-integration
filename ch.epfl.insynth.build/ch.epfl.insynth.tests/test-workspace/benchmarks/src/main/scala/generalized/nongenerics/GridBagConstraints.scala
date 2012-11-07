@@ -23,7 +23,8 @@ class GridBagLayoutPanel extends JPanel {
 
   def init(){
     var gridbag:GridBagLayout = new GridBagLayout()
-    var constraints:GridBagConstraints = new GridBagConstraints() //r=1
+//    var constraints:GridBagConstraints = new GridBagConstraints() //r=1
+    var constraints:GridBagConstraints =  /*!*/ //r=1
     setLayout(gridbag);
 
     constraints.weightx =  10.0;

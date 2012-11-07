@@ -14,7 +14,8 @@ class MainClass {
       }
     }
 
-    var timer:Timer = new Timer(500,actionListener) //r>5
+//    var timer:Timer = new Timer(500,actionListener) //r=1
+    var timer:Timer =  /*!*/ //r=1
     timer.start();
   }
 }

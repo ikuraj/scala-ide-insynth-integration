@@ -9,7 +9,8 @@ class MainClass {
     try {
       var tempFile:File = File.createTempFile("myfile", ".tmp")
       var fout:FileOutputStream = new FileOutputStream(tempFile)
-      var out:PrintStream = new PrintStream(fout) //r=1
+//      var out:PrintStream = new PrintStream(fout) //r=1
+      var out:PrintStream =  /*!*/ //r=1
     } catch {
       case ex =>
 	System.out.println("There was a problem creating/writing to the temp file");

@@ -6,7 +6,7 @@ import java.io.File;
 
 class MainClass {
   def main(args:Array[String]) {
-    var f1:File = new File("MainClass.java") //r=1
+    //var f1:File = new File("MainClass.java") //r=1
     var f1:File =  /*!*/ //r=1
     System.out.println("File Name:" + f1.getName());
     System.out.println("Path:" + f1.getPath());

@@ -16,7 +16,8 @@ class Main {
         false
       }
     }
-    var overlay:LayoutManager = new OverlayLayout(panel); //r>5
+    //var overlay:LayoutManager = new OverlayLayout(panel); //r>5
+    var overlay:LayoutManager =  /*!*/ //r>5
     panel.setLayout(overlay);
 
     var button:JButton = new JButton("Small");

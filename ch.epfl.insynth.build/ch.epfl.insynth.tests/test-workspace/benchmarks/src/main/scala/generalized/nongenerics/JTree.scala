@@ -10,7 +10,8 @@ class MainClass {
   def main(args:Array[String]) {
     var f:JFrame = new JFrame("JTree Sample")
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    var tree:JTree = new JTree() //r=1
+//    var tree:JTree = new JTree() //r=1
+    var tree:JTree =  /*!*/ //r=1
     var scrollPane:JScrollPane = new JScrollPane(tree);
     f.add(scrollPane, BorderLayout.CENTER);
     f.setSize(300, 200);

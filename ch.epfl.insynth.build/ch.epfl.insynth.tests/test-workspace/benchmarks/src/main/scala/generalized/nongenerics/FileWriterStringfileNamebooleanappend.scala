@@ -6,7 +6,8 @@ import java.io._
 
 class Main {
   def main(args:Array[String]) {
-    var out:BufferedWriter = new BufferedWriter(new FileWriter("filename", true)); //r>5
+//    var out:BufferedWriter = new BufferedWriter(new FileWriter("filename", true)); //r>5
+    var out:BufferedWriter =  /*!*/ //r>5
     out.write("aString");
     out.close();
   }

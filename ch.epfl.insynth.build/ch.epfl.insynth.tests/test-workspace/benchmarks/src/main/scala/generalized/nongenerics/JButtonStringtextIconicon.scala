@@ -10,7 +10,8 @@ class Main {
     var frame:JFrame = new JFrame("DefaultButton");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     var warnIcon:Icon = new ImageIcon("Warn.gif");
-    var button3:JButton = new JButton("Warning",warnIcon) //r>5
+    //var button3:JButton = new JButton("Warning",warnIcon) //r>5
+    var button3:JButton =  /*!*/ //r>5
     frame.add(button3);
     frame.setSize(300, 200);
     frame.setVisible(true);

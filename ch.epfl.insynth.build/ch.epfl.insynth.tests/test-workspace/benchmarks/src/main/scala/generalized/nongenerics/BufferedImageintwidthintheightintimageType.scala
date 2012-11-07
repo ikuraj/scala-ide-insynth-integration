@@ -25,7 +25,8 @@ class MainClass extends JPanel {
   }
   
   def createImage():Image = {
-    var bufferedImage:BufferedImage = new BufferedImage(200,200,BufferedImage.TYPE_INT_RGB) //r>5
+    //var bufferedImage:BufferedImage = new BufferedImage(200,200,BufferedImage.TYPE_INT_RGB) //r>5
+    var bufferedImage:BufferedImage =  /*!*/ //r>5
     var g:Graphics = bufferedImage.getGraphics();
     g.drawString("www.java2s.com", 20,20);
     

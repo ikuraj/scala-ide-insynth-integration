@@ -7,7 +7,8 @@ import javax.swing._
 class MainClass extends JPanel {
 
   def init() {
-    var btn1:JButton = new JButton("Button1"); //r>5
+//    var btn1:JButton = new JButton("Button1"); //r>5
+    var btn1:JButton =  /*!*/; //r>5
     var btn2:JButton = new JButton("Button2");
     var btn3:JButton = new JButton("Button3");
     var btn4:JButton = new JButton("Button4");

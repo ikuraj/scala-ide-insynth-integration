@@ -10,8 +10,9 @@ class Main {
     var list:List[String] = List( "A", "B", "C", "D");
 
     var fos:FileOutputStream = new FileOutputStream("list.ser")
-    var oos:ObjectOutputStream = new ObjectOutputStream(fos) //r=1
-    
+//    var oos:ObjectOutputStream = new ObjectOutputStream(fos) //r=1
+    var oos:ObjectOutputStream =  /*!*/ //r=1
+        
     oos.writeObject(list);
     oos.close();
 

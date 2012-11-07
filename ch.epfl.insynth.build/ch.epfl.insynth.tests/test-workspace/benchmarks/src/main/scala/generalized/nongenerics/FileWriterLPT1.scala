@@ -7,7 +7,8 @@ import java.io._
 class MainClass {
   def main(args:Array[String]) {
     try {
-      var fw:FileWriter = new FileWriter("?") //r=1
+//      var fw:FileWriter = new FileWriter("?") //r=1
+      var fw:FileWriter =  /*!*/ //r=1
 
       var pw:PrintWriter = new PrintWriter(fw)
 

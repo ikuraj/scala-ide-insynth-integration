@@ -8,7 +8,8 @@ import java.io._
 class MainClass {
 
   def main(args:Array[String]) {
-    var lineCounter:LineNumberReader = new LineNumberReader(new InputStreamReader(System.in)) //r>5
+    //var lineCounter:LineNumberReader = new LineNumberReader(new InputStreamReader(System.in)) //r>5
+    var lineCounter:LineNumberReader =  /*!*/ //r>5
 
     var nextLine:String = null;
     System.out.println("Type any text and press return. Type 'exit' to quit the program.");

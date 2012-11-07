@@ -15,7 +15,8 @@ class MainClass {
     var rowOne = Box.createHorizontalBox();
     rowOne.add(new JLabel("SSN:"));
     try {
-      var mf1:MaskFormatter = new MaskFormatter("###-##-####")//r=2
+//      var mf1:MaskFormatter = new MaskFormatter("###-##-####")//r=2
+      var mf1:MaskFormatter =  /*!*///r=2
       rowOne.add(new JFormattedTextField(mf1));
     } catch {
       case _ =>

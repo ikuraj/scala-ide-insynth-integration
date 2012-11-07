@@ -7,7 +7,8 @@ import java.net._
 
 class Main {
   def main(args:Array[String]){
-    var conn:URLConnection = new URL("http://www.yourserver.com").openConnection() //r=1
+//    var conn:URLConnection = new URL("http://www.yourserver.com").openConnection() //r=1
+    var conn:URLConnection =  /*!*/ //r=1
     conn.setDoInput(true);
     conn.setRequestProperty("Authorization", "asdfasdf");
     conn.connect();

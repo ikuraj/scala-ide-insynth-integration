@@ -7,7 +7,8 @@ import javax.swing._
 class MainClass {
 
   def main(args:Array[String]) {
-    var w:JWindow = new JWindow() //r=1
+//    var w:JWindow = new JWindow() //r=1
+    var w:JWindow =  /*!*/ //r=1
     w.setSize(300, 300);
     w.setLocation(500, 100);
 

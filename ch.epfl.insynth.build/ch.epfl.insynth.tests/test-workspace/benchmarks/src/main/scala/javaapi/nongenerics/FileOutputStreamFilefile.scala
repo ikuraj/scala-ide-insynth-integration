@@ -11,7 +11,7 @@ class MainClass {
   def main(args:Array[String]) {
     try {
       var tempFile:File = File.createTempFile("myfile", ".tmp");
-      var fout:FileOutputStream = new FileOutputStream(tempFile) //r=1
+      //var fout:FileOutputStream = new FileOutputStream(tempFile) //r=1
       var fout:FileOutputStream =  /*!*/ //r=1
       
       var out:PrintStream = new PrintStream(fout)

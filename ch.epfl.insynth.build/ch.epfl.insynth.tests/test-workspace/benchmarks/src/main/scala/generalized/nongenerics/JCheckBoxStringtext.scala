@@ -16,7 +16,8 @@ class Main {
     var panel:JPanel = new JPanel(new GridLayout(0, 1));
     var border:Border = BorderFactory.createTitledBorder("Pizza Toppings");
     panel.setBorder(border);
-    var check:JCheckBox = new JCheckBox("Anchovies"); //r=3
+//    var check:JCheckBox = new JCheckBox("Anchovies"); //r=3 
+    var check:JCheckBox =  /*!*/; //r=3 
     panel.add(check);
     check = new JCheckBox("Garlic");
     panel.add(check);

@@ -14,7 +14,8 @@ class MainClass {
     var content = frame.getContentPane();
     var textarea1 = new JTextArea();
     var document = textarea1.getDocument();
-    var textarea2:JTextArea = new JTextArea(document) //r=3
+    //var textarea2:JTextArea = new JTextArea(document) //r=3
+    var textarea2:JTextArea =  /*!*/ //r=3
     var textarea3:JTextArea = new JTextArea(document)
     content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
     content.add(new JScrollPane(textarea1));

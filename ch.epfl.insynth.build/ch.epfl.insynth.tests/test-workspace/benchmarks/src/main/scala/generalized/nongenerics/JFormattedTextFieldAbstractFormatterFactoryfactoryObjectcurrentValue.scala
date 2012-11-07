@@ -20,7 +20,8 @@ class MainClass {
     var editFormat = new SimpleDateFormat("MM/dd/yy");
     var editFormatter = new DateFormatter(editFormat);
     var factory = new DefaultFormatterFactory(displayFormatter, displayFormatter, editFormatter);
-    var date2TextField:JFormattedTextField = new JFormattedTextField(factory) //r>5
+//    var date2TextField:JFormattedTextField = new JFormattedTextField(factory) //r>5
+    var date2TextField:JFormattedTextField =  /*!*/ //r>5
     
     frame.add(date2TextField, BorderLayout.NORTH);
 

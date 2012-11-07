@@ -14,7 +14,8 @@ class MainClass {
 
       var buffer:Array[Byte] = "hello".getBytes();
 
-      var dp:DatagramPacket = new DatagramPacket(buffer, buffer.length, ia, 80); //r>5
+      //var dp:DatagramPacket = new DatagramPacket(buffer, buffer.length, ia, 80); //r>5
+      var dp:DatagramPacket =  /*!*/ //r>5
 
       // Send the datagram packet
       ds.send(dp);

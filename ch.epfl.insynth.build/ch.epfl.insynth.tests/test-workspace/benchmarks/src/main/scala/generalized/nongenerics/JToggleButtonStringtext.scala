@@ -8,7 +8,8 @@ import javax.swing._
 
 class MainClass {
   def  main(args:Array[String]) {
-    var f:JFrame = new JFrame("JToggleButton Sample"); //r=2
+//    var f:JFrame = new JFrame("JToggleButton Sample"); //r=2
+    var f:JFrame =  /*!*/; //r=2
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     f.add(new JToggleButton("North"), BorderLayout.NORTH);
     f.add(new JToggleButton("East"), BorderLayout.EAST);

@@ -9,7 +9,8 @@ class MainClass {
 
       var fis = new FileInputStream(args(0));
 
-      var bis:BufferedInputStream = new BufferedInputStream(fis) //r=1
+      //var bis:BufferedInputStream = new BufferedInputStream(fis) //r=1
+      var bis:BufferedInputStream =  /*!*/ //r=1
 
       var i:Int = bis.read();
       while (i != -1) {

@@ -24,7 +24,8 @@ class MainClass {
 class GridBagLayoutPanel extends JPanel {
 
   def init(){
-    var gridbag:GridBagLayout = new GridBagLayout() //r=1
+//    var gridbag:GridBagLayout = new GridBagLayout() //r=1
+    var gridbag:GridBagLayout =  /*!*/ //r=1
     var constraints:GridBagConstraints = new GridBagConstraints()
     setLayout(gridbag);
 

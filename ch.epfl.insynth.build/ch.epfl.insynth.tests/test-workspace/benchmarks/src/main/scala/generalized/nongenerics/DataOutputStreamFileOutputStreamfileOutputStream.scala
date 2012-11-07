@@ -10,7 +10,8 @@ class MainClass {
   def main(args:Array[String]) {
     try {
       var fos:FileOutputStream = new FileOutputStream(args(0))
-      var dos:DataOutputStream = new DataOutputStream(fos) //r=1
+//      var dos:DataOutputStream = new DataOutputStream(fos) //r=1
+      var dos:DataOutputStream =  /*!*/ //r=1
 
       dos.writeBoolean(false);
       dos.writeByte(java.lang.Byte.MAX_VALUE);

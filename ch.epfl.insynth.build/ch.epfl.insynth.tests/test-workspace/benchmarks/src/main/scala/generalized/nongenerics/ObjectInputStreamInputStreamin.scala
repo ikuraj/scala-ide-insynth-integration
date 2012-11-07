@@ -16,7 +16,8 @@ class Main {
     oos.close();
 
     var fis = new FileInputStream("list.ser");
-    var ois:ObjectInputStream = new ObjectInputStream(fis) //r=1
+    //var ois:ObjectInputStream = new ObjectInputStream(fis) //r=1
+    var ois:ObjectInputStream =  /*!*/ //r=1
     var anotherList:List[String] = ois.readObject().asInstanceOf[List[String]]
     ois.close();
 

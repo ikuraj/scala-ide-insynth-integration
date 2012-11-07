@@ -18,7 +18,8 @@ class Main {
 
     try {
       var file:FileOutputStream = new FileOutputStream("p.dat")
-      var buff:BufferedOutputStream  = new BufferedOutputStream(file) //r=1
+//      var buff:BufferedOutputStream  = new BufferedOutputStream(file) //r=1
+      var buff:BufferedOutputStream  =  /*!*/ //r=1
 
       var data:DataOutputStream  = new DataOutputStream(buff)
 

@@ -12,7 +12,8 @@ class Main {
     var outputFile:File = new File("outagain.txt")
 
     var in:FileReader = new FileReader(inputFile)
-    var out:FileWriter = new FileWriter(outputFile) //r=1
+//    var out:FileWriter = new FileWriter(outputFile) //r=1
+    var out:FileWriter =  /*!*/ //r=1
     var c:Int = in.read()
 
     while (c != -1){

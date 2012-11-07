@@ -8,7 +8,8 @@ class MainClass {
 
   def main(a:Array[String]) {
     try {
-      var fis:FileInputStream = new FileInputStream("fileName.dat") //r=1
+//      var fis:FileInputStream = new FileInputStream("fileName.dat") //r=1
+      var fis:FileInputStream =  /*!*/ //r=1
 
       // Create a data input stream
       var dis:DataInputStream = new DataInputStream(fis)

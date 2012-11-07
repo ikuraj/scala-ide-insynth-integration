@@ -9,7 +9,8 @@ class Main {
 
   def main(args:Array[String]){
     var url:URL = new URL("http://localhost:1776")
-    var in:BufferedReader = new BufferedReader(new InputStreamReader(url.openStream())) //r>5 
+//    var in:BufferedReader = new BufferedReader(new InputStreamReader(url.openStream())) //r>5 
+    var in:BufferedReader =  /*!*/ //r>5
 
     var line:String = in.readLine();
     while (line != null) {

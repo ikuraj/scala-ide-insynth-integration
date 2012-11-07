@@ -14,7 +14,7 @@ class Main {
 
     var canChg = gs.isDisplayChangeSupported();
     if (canChg) {
-      var displayMode:DisplayMode = gs.getDisplayMode();//r=1
+      //var displayMode:DisplayMode = gs.getDisplayMode();//r=1
       var displayMode:DisplayMode =  /*!*/;//r=1
       var screenWidth = 640;
       var screenHeight = 480;

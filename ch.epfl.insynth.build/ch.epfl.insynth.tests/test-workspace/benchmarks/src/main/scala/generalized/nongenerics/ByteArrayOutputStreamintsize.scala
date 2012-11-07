@@ -6,7 +6,8 @@ import java.io._
 
 class MainClass {
   def  main(args:Array[String]){
-    var f:ByteArrayOutputStream = new ByteArrayOutputStream(12) //r=2
+//    var f:ByteArrayOutputStream = new ByteArrayOutputStream(12) //r=2
+    var f:ByteArrayOutputStream =  /*!*/ //r=2
     System.out.println("Please 10 characters and a return");
     while (f.size() != 10) {
       f.write(System.in.read());

@@ -9,7 +9,8 @@ import javax.swing._
 class Main extends JFrame with ActionListener {
 
   def init() {
-    var checkbox:JCheckBox = new JCheckBox("?",false) //r>5
+    //var checkbox:JCheckBox = new JCheckBox("Show Title", true); //r>5
+    var checkbox:JCheckBox =  /*!*/ //r>5
     checkbox.addActionListener(this);
     add(checkbox);
 

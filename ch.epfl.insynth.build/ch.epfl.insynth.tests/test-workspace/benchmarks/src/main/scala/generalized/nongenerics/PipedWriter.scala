@@ -6,7 +6,8 @@ import java.io._
 
 class Main {
   def main(){
-    var pw:PipedWriter = new PipedWriter() //r=1
+//    var pw:PipedWriter = new PipedWriter() //r=1
+    var pw:PipedWriter =  /*!*/ //r=1
     var pr:PipedReader = new PipedReader(pw)
     var ch:Int = 0;
     try {

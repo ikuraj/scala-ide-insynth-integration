@@ -7,7 +7,8 @@ import java.io._
 class Main {
   def main(args:Array[String]) {
     var pw = new PipedWriter();
-    var pr:PipedReader = new PipedReader(pw)//r=2
+    //var pr:PipedReader = new PipedReader(pw)//r=2
+    var pr:PipedReader =  /*!*/ //r=2
 
     try {
       for (i <- 0 until 15)

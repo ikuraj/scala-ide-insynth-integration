@@ -9,7 +9,8 @@ import javax.swing._
 class Main {
 
   def main(args:Array[String]) {
-    var imageIcon:ImageIcon = new ImageIcon("yourFile.gif") //r>5
+//    var imageIcon:ImageIcon = new ImageIcon("yourFile.gif") //r>5
+    var imageIcon:ImageIcon =  /*!*/ //r>5
     var image:Image = imageIcon.getImage()
   }
 

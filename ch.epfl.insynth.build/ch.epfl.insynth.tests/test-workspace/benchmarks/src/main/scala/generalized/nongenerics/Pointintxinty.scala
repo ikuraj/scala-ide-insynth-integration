@@ -7,7 +7,8 @@ import java.awt._
 class MainClass {
   def main(args:Array[String]) {
     var aPoint:Point = new Point();
-    var bPoint:Point = new Point(50,25) //r>5
+    //var bPoint:Point = new Point(50,25) //r>5
+    var bPoint:Point =  /*!*/ //r>5
     var cPoint:Point = new Point(bPoint);
     
     System.out.println("cPoint is located at: " + cPoint);

@@ -11,7 +11,8 @@ class MainClass {
       var fis = new FileInputStream("fileName.dat");
 
       // Create a data input stream
-      var dis:DataInputStream = new DataInputStream(fis); //r=1
+//      var dis:DataInputStream = new DataInputStream(fis) //r=1
+      var dis:DataInputStream =  /*!*/ //r=1
 
       // Read and display data
       System.out.println(dis.readBoolean());

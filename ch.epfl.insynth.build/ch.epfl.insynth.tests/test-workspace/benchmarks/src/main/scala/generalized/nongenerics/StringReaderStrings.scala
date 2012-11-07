@@ -6,7 +6,8 @@ import java.io._
 
 class Main {
   def main(args:Array[String]) {
-    var in2:StringReader = new StringReader("a bc ddd") //r=1
+//    var in2:StringReader = new StringReader("a bc ddd") //r=1
+    var in2:StringReader =  /*!*/ //r=1
     var c = in2.read()
     while (c != -1) {
       System.out.print(c.toChar);

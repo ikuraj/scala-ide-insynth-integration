@@ -11,6 +11,7 @@ class Main {
     var fd:FileDescriptor = null 
     try {
       var inputFile2:FileInputStream = new FileInputStream(aFile) //r=2
+      var inputFile2:FileInputStream =  /*!*/ //r=2
       inputFile1 = inputFile2
       fd = inputFile1.getFD(); 
     } catch {

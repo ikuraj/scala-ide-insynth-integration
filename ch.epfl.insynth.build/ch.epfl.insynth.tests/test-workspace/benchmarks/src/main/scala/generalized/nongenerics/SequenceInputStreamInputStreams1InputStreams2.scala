@@ -7,7 +7,8 @@ object Main {
     var f1 = new FileInputStream("ByteArrayIOApp.java");
     var f2 = new FileInputStream("FileIOApp.java");
 
-    var inStream:SequenceInputStream = new SequenceInputStream(f1, f2); //r>5
+    //var inStream:SequenceInputStream = new SequenceInputStream(f1, f2); //r>5
+    var inStream:SequenceInputStream =  /*!*/ //r>5
 
     var eof:Boolean = false;
     var byteCount:Int = 0;

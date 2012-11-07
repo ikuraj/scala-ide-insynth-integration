@@ -11,7 +11,8 @@ class MainClass {
     try {
       var fr:FileReader = new FileReader(args(0))
       var br:BufferedReader = new BufferedReader(fr)
-      var st:StreamTokenizer = new StreamTokenizer(br) //r=1
+//      var st:StreamTokenizer = new StreamTokenizer(br) //r=1
+      var st:StreamTokenizer =  /*!*/ //r=1
 
       st.ordinaryChar('.');
 

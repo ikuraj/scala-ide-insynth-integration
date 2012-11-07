@@ -16,7 +16,8 @@ class MainClass {
     
     
     var columns:Array[Object] = Array[Object]("Symbol", "Name", "Price");
-    var table:JTable = new JTable(rows, columns) //r>5
+//    var table:JTable  = new JTable(rows, columns) //r>5
+    var table:JTable  =  /*!*/ //r>5
     var scrollPane:JScrollPane = new JScrollPane(table);
     f.add(scrollPane, BorderLayout.CENTER);
     f.setSize(300, 200);

@@ -8,7 +8,8 @@ import javax.swing.event._
 class MainClass {
   def main(args:Array[String]) {
     try {
-      var model:DefaultBoundedRangeModel = new DefaultBoundedRangeModel() //r=1
+//      var model:DefaultBoundedRangeModel = new DefaultBoundedRangeModel() //r=1
+      var model:DefaultBoundedRangeModel =  /*!*/ //r=1
       var myListener:ChangeListener  = new MyChangeListener();
       model.addChangeListener(myListener);
 
