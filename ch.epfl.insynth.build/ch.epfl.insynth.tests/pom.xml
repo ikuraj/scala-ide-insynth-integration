@@ -8,6 +8,10 @@
   <artifactId>ch.epfl.insynth.tests</artifactId>
   <packaging>eclipse-test-plugin</packaging>
   
+  <properties>
+    <testClassArg>ch.epfl.insynth.test.TestSuite</testClassArg>
+  </properties>
+    
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -31,7 +35,7 @@
           <showEclipseLog>true</showEclipseLog>
           <reportsDirectory>reports</reportsDirectory>
           <testSuite>${project.artifactId}</testSuite>
-          <testClass>ch.epfl.insynth.test.TestSuite</testClass>
+          <testClass>${testClassArg}</testClass>
         </configuration>
       </plugin>
       <plugin>
