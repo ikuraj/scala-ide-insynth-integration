@@ -30,6 +30,7 @@ class LeonProjectSetup {
 	val SCALACLASSPATH = classpathArray mkString ":" 
 	  //"/home/ivcha/git/leon-2.0/unmanaged/z3-64.jar:/home/ivcha/git/leon-2.0/target/scala-2.9.1-1/classes:/home/ivcha/git/leon-2.0/library/target/scala-2.9.1-1/classes:/home/ivcha/.sbt/boot/scala-2.9.1-1/lib/scala-library.jar:/home/ivcha/.sbt/boot/scala-2.9.1-1/lib/scala-compiler.jar"
 	
+	@Ignore
 	@Test
 	def runList() {
 	  val validCompletions = List("sizeTail(tail, 1)", "0", "sizeTail(tail, acc+1)")

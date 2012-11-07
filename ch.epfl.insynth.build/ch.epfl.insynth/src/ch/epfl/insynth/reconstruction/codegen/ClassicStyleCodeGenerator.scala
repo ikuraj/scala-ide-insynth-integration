@@ -125,8 +125,8 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
           				//group(decl.getObjectName :: "." :: doParen(appIdentifier, paramsDoc))
           				group(
         				    parenthesesRequired ?
-        				    (decl.getObjectName :: "." :: appIdentifier :: paren(paramsDoc)) |
-        				    decl.getObjectName :: "." :: appIdentifier        				    
+        				    (/* decl.getObjectName :: "." ::*/ appIdentifier :: paren(paramsDoc)) |
+        				    /* decl.getObjectName :: "." ::*/ appIdentifier        				    
       				    )
           	}	
           }

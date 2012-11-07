@@ -30,6 +30,10 @@ import ch.epfl.insynth.Config
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator, ClassicStyleCodeGenerator, ApplyTransfromer }
 import ch.epfl.insynth.reconstruction.codegen.SimpleApplicationNamesTransfromer
+import ch.epfl.insynth.leon.CodeExtractionForInSynth
+import leon.purescala.Definitions.Program
+import leon.Reporter
+import leon.DefaultReporter
 
 /* 
 TODO:
@@ -50,6 +54,20 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
 
     scu.withSourceFile {
       (sourceFile, compiler) =>
+        
+//        val reporter: Reporter = new DefaultReporter
+//        val actionOnProgram : Option[Program=>Unit] = Some(_ => Unit)
+//        val leonPlugin = new LeonPlugin(this, actionOnProgram)
+        
+        val codeExtraction = new CodeExtractionForInSynth(compiler, null)
+        
+//        val prog: purescala.Definitions.Program = extractCode(unit)
+//	      if(pluginInstance.stopAfterExtraction) {
+//	        println("Extracted program for " + unit + ": ")
+//	        println(prog)
+//	        println("Extraction complete. Now terminating the compiler process.")
+//	        sys.exit(0)
+//	      }
         
         Config.inSynthLogger.info("InSynth working on source file: " + sourceFile.path)
         logger.info("InSynth working on source file: " + sourceFile.path)

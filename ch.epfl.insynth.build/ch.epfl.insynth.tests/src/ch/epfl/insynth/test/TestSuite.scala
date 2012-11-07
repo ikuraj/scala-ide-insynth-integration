@@ -24,5 +24,6 @@ object TestSuite {
 		Activator.getDefault.getPreferenceStore.setValue(OfferedSnippetsPropertyString, 10)        
 		Activator.getDefault.getPreferenceStore.setValue(MaximumTimePropertyString, 500)      
 		Activator.getDefault.getPreferenceStore.setValue(DoSeparateLoggingPropertyString, true)
+		Activator.getDefault.getPreferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClassic)
   }
 }
