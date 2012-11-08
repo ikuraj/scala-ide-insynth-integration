@@ -25,6 +25,7 @@ import java.{ util => ju, lang => jl }
 import org.junit.Assert._
 import org.junit.Test
 import org.junit.Ignore
+import org.junit.After
 import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
 import org.junit.runner.RunWith
@@ -32,44 +33,128 @@ import java.util.ArrayList
 import org.junit.BeforeClass
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
+import ch.epfl.insynth.statistics.format.Utility
+import ch.epfl.insynth.statistics.format.XMLable
+import ch.epfl.insynth.statistics.ReconstructorStatistics
+import ch.epfl.insynth.statistics.InSynthStatistics
+import java.io.File
+import scala.collection.mutable.{ LinkedList => MutableList }
+import org.junit.AfterClass
 
 @RunWith(value = classOf[Parameterized])
 class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnippet: String,
     expectedPositionJavaAPI: (Int, Int), expectedPositionGeneralized: (Int, Int)) {
-	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
 	
-	import testProjectSetup._
+	import InSynthBenchmarkCompletionParametrizedTests.testProjectSetup._
+	import InSynthBenchmarkCompletionParametrizedTests._
+	import Utility._
 	
-  @Test
-  // non generalized tests (individual import.clazz used)
-  def testJavaAPI() {
-    val oraclePos = List( (expectedSnippet, expectedPositionJavaAPI) )
+	def innerTestFunction(path: String, index: Int) = {
+	  val myPosition = if (index == 0) expectedPositionJavaAPI else expectedPositionGeneralized
+    val oraclePos = List( (expectedSnippet, myPosition) )
     
     val exampleCompletions = List(CheckContainsAtPosition(oraclePos))
     
-    checkCompletions("main/scala/javaapi/nongenerics/" + fileName + ".scala")(exampleCompletions)
+    for (i <- 1 to 5)
+    	checkCompletions(path + fileName + ".scala")(exampleCompletions)
+        
+  	import InSynthStatistics._
+  	import ReconstructorStatistics._
+    	
+  	assertEquals(5, lastEngineTime.size)
+  	assertEquals(5, reconstructionTime.size)
+  	
+  	assertEquals(1, lastNumberOfDeclarations.distinct.size)
+  	
+  	tableDeclarations :+= lastNumberOfDeclarations.head
+  	tableEngineTimes :+= lastEngineTime.sum.toFloat/lastEngineTime.size
+  	tableFilenames :+= currentRun.fileName
+  	tableReconstructionTime :+= reconstructionTime.sum.toFloat/reconstructionTime.size
+    	
+    val statsFileName = statsFileNames(index)
+    appendToFile(
+      statsFileName, "######\n"
+    )
+    appendToFile(
+      statsFileName, currentRun.fileName
+    )    
+    appendToFile(
+      statsFileName, InSynthStatistics.toString
+    )
+    appendToFile(
+      statsFileName, ReconstructorStatistics.toString
+    )    
+    
+  }
+
+	@Ignore
+  @Test
+  // non generalized tests (individual import.clazz used)
+  def testJavaAPI() {
+    innerTestFunction("main/scala/javaapi/nongenerics/", 0)
   }
 	
   @Test
   // generalized tests
   def testGeneralized() {
-    val oraclePos = List( (expectedSnippet, expectedPositionGeneralized) )
-    
-    val exampleCompletions = List(CheckContainsAtPosition(oraclePos))
-    
-    checkCompletions("main/scala/generalized/nongenerics/" + fileName + ".scala")(exampleCompletions)
+    innerTestFunction("main/scala/generalized/nongenerics/", 1)
   }
+        
+	@After
+	def resetRunStatistics = {
+	  import ReconstructorStatistics._
+	  import InSynthStatistics._
+    
+    resetLastRun
+    resetStatistics
+	}
 
 }
 
 object InSynthBenchmarkCompletionParametrizedTests {
-      
+	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
+	
+  val statsFileNames = List("insynth_statistics_javaapi.txt", "insynth_statistics_generalized.txt")
+  val statsCSVFileNames = List("insynth_statistics_javaapi.txt", "insynth_statistics_generalized.txt")
+  val csvFile = "data.csv"
+  for (statsFileName <- List(csvFile) ++ statsFileNames ++ statsCSVFileNames) {
+	  val file = new File(statsFileName)
+	  file.delete
+	  file.createNewFile    
+  }
+	
+	// data for csv
+	val firstRowString = "Filename, #declarations, Engine (avg), Reconstruction (avg)"
+  var tableFilenames: MutableList[String] = MutableList.empty
+  var tableDeclarations: MutableList[Int] = MutableList.empty
+  var tableEngineTimes: MutableList[Float] = MutableList.empty
+  var tableReconstructionTime: MutableList[Float] = MutableList.empty
+	
   @BeforeClass
   def setup() {    
 		// tests are made according to the clean code style
 		Activator.getDefault.getPreferenceStore.
 			setValue(InSynthConstants.CodeStyleParenthesesPropertyString, InSynthConstants.CodeStyleParenthesesClean)
+			
+		// run "warming-up" tests
+		val fileName = "FileInputStreamStringname"
+    testProjectSetup.checkCompletions("main/scala/generalized/nongenerics/" + fileName + ".scala")(Nil)
+    testProjectSetup.checkCompletions("main/scala/javaapi/nongenerics/" + fileName + ".scala")(Nil)
   }
+	
+	@AfterClass
+	def writeCSVTable = {
+		import Utility._
+	
+	  appendToFile(csvFile, firstRowString)
+		assertEquals(parameters.size, tableFilenames.size)
+		assertEquals(parameters.size, tableDeclarations.size)
+		assertEquals(parameters.size, tableEngineTimes.size)
+		assertEquals(parameters.size, tableReconstructionTime.size)
+		for( (((fileName, numberDec), engine), reconstruction) <- tableFilenames zip tableDeclarations zip tableEngineTimes zip tableReconstructionTime) {		  
+			appendToFile(csvFile, fileName + ", " + numberDec + ", " + engine + ", " + reconstruction)
+		}
+	}
   
 	@Parameters
 	def parameters: ju.Collection[Array[Object]] = {
@@ -119,7 +204,8 @@ object InSynthBenchmarkCompletionParametrizedTests {
 	  list add Array( "LineNumberReaderReaderin" , "new LineNumberReader(new InputStreamReader(System in))", ! 0, ! 8 )
 	  // tests from InSynthBenchmarkCompletionTests
 	  list add Array( "AWTPermissionStringname" , "new AWTPermission(\"?\")", ! 0, ! 0 ) // 35
-		list add Array( "BoxLayoutContainertargetintaxis" , "new BoxLayout(container, BoxLayout.Y_AXIS)", ! 0, ! 0 )
+	  // cannot find, not even in 100 snippets
+		//list add Array( "BoxLayoutContainertargetintaxis" , "new BoxLayout(container, BoxLayout.Y_AXIS)", ! 0, ! 0 )
 		list add Array( "BufferedInputStreamFileInputStream" , "new BufferedInputStream(fis)", ! 0, ! 0 )
 		list add Array( "BufferedOutputStream" , "new BufferedOutputStream(file)", ! 0, ! 0 )
 		list add Array( "BufferedReaderFileReaderfileReader" , "new BufferedReader(fr)", ! 0, ! 0 )

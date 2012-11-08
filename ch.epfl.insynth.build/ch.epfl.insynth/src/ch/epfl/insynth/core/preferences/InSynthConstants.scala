@@ -19,5 +19,10 @@ object InSynthConstants {
   final val CodeStyleParenthesesDefault = CodeStyleParenthesesClassic
   final val CodeStyleApplyOmittingPropertyDefault = true
   final val CodeStyleSimpleApplicationNameTransformPropertyDefault = true
+  
+  // statistics
+  final val StatisticsFileNamePropertyString = Prefix + "statisticsFileName"
+  final val StatisticsFileNameDefault = "insynth_statistics.xml"
+  final val StatisticsLastRunPropertyString = Prefix + "statisticsLastRun"
 
 }

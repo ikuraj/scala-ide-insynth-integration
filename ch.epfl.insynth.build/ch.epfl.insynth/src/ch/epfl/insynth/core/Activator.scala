@@ -7,6 +7,7 @@ import org.osgi.framework.BundleContext
 
 // InSynth
 import ch.epfl.insynth.core.preferences.LogManager
+import ch.epfl.insynth.core.preferences.InSynthConstants
 
 /**
  * The activator class for the InSynth plugin, it controls the plug-in life cycle
@@ -19,6 +20,12 @@ class Activator extends AbstractUIPlugin {
 		
 		// set shared instance
 		Activator.plugin = this;
+		
+		// set default statistics filename
+		Activator.plugin.getPreferenceStore.setDefault(
+	    InSynthConstants.StatisticsFileNamePropertyString,
+	    InSynthConstants.StatisticsFileNameDefault
+    )
 		
 		// configure InSynth log manager
 		LogManager.configure

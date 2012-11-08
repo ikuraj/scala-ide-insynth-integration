@@ -30,6 +30,8 @@ import ch.epfl.insynth.Config
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator, ClassicStyleCodeGenerator, ApplyTransfromer }
 import ch.epfl.insynth.reconstruction.codegen.SimpleApplicationNamesTransfromer
+import ch.epfl.insynth.statistics.SynthesisRun
+import ch.epfl.insynth.statistics.ReconstructorStatistics
 
 /* 
 TODO:
@@ -79,16 +81,32 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
         
         try {
           InSynthWrapper.builder.synchronized {
+            // create a new statistics object for a run
+            val synthesisRun = new SynthesisRun(sourceFile.file.name)
+            
+            synthesisRun.initialDeclarations = InSynthWrapper.builder.getAllDeclarations.size
+            
+            val synthesisStartTime = System.currentTimeMillis
             val solution = InSynthWrapper.insynth.getSnippets(sourceFile.position(position), InSynthWrapper.builder)
+            synthesisRun.synthesisTime = System.currentTimeMillis - synthesisStartTime
 
             if (solution != null) {
             	logger.info("InSynth solution found, proceeding with reconstructor.")
             	
             	// get appropriate source code generator
             	val codeGenerator = getSourceCodeGenerator
-            	            	
+            	           
+            	val reconstructionStartTime = System.currentTimeMillis
+            	val reconstructorResults = Reconstructor(solution.getNodes.head, codeGenerator)
+            	synthesisRun.reconstructionTime = System.currentTimeMillis - reconstructionStartTime
+            	
+            	ReconstructorStatistics.reconstructionTime :+= synthesisRun.reconstructionTime
+            	
+            	// update statistics object
+            	ReconstructorStatistics.currentRun = synthesisRun
+            	
               Some(
-                Reconstructor(solution.getNodes.head, codeGenerator).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
+                reconstructorResults.sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
         			)
             }
             else {
