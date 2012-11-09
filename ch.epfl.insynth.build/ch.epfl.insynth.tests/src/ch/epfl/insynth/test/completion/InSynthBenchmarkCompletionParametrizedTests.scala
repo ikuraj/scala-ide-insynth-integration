@@ -61,8 +61,8 @@ class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnip
   	import InSynthStatistics._
   	import ReconstructorStatistics._
     	
-  	assertEquals(5, lastEngineTime.size)
-  	assertEquals(5, reconstructionTime.size)
+  	assertEquals("lastEngineTime should contain 5 elements", 5, lastEngineTime.size)
+  	assertEquals("reconstructionTime should contain 5 elements", 5, reconstructionTime.size)
   	
   	assertEquals(1, lastNumberOfDeclarations.distinct.size)
   	
@@ -101,13 +101,7 @@ class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnip
   }
         
 	@After
-	def resetRunStatistics = {
-	  import ReconstructorStatistics._
-	  import InSynthStatistics._
-    
-    resetLastRun
-    resetStatistics
-	}
+	def resetRunStatistics = resetRunStatisticsStatic 
 
 }
 
@@ -124,12 +118,25 @@ object InSynthBenchmarkCompletionParametrizedTests {
   }
 	
 	// data for csv
-	val firstRowString = "Filename, #declarations, Engine (avg), Reconstruction (avg)"
+	val firstRowString = "Filename, position, #declarations, Engine (avg), Reconstruction (avg)"
   var tableFilenames: MutableList[String] = MutableList.empty
   var tableDeclarations: MutableList[Int] = MutableList.empty
   var tableEngineTimes: MutableList[Float] = MutableList.empty
   var tableReconstructionTime: MutableList[Float] = MutableList.empty
+  
+  val generalizedPositions = List(
+    0, 0, 0, 0, 0,  0, 0, 0, 3, 0, 1, 3, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 
+    3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 7, 8, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 0, 1
+  )
 	
+  def resetRunStatisticsStatic = {
+	  import ReconstructorStatistics._
+	  import InSynthStatistics._
+    
+    resetLastRun
+    resetStatistics
+	}
+  
   @BeforeClass
   def setup() {    
 		// tests are made according to the clean code style
@@ -140,6 +147,8 @@ object InSynthBenchmarkCompletionParametrizedTests {
 		val fileName = "FileInputStreamStringname"
     testProjectSetup.checkCompletions("main/scala/generalized/nongenerics/" + fileName + ".scala")(Nil)
     testProjectSetup.checkCompletions("main/scala/javaapi/nongenerics/" + fileName + ".scala")(Nil)
+    
+    resetRunStatisticsStatic
   }
 	
 	@AfterClass
@@ -151,8 +160,10 @@ object InSynthBenchmarkCompletionParametrizedTests {
 		assertEquals(parameters.size, tableDeclarations.size)
 		assertEquals(parameters.size, tableEngineTimes.size)
 		assertEquals(parameters.size, tableReconstructionTime.size)
-		for( (((fileName, numberDec), engine), reconstruction) <- tableFilenames zip tableDeclarations zip tableEngineTimes zip tableReconstructionTime) {		  
-			appendToFile(csvFile, fileName + ", " + numberDec + ", " + engine + ", " + reconstruction)
+		assertEquals(parameters.size, generalizedPositions.size)
+		for( ((((fileName, numberDec), engine), reconstruction), position) <- tableFilenames zip tableDeclarations zip
+	    tableEngineTimes zip tableReconstructionTime zip generalizedPositions) {		  
+			appendToFile(csvFile, fileName.dropRight(6) + "," + (position + 1) + ", " + numberDec + ", " + engine + ", " + reconstruction)
 		}
 	}
   
