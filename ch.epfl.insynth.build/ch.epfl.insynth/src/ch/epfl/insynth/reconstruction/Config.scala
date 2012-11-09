@@ -7,7 +7,7 @@ object Config {
   // flag which marks whether logging is enabled  
   val isLogging = false
   // default weight for leave nodes (used in extraction phase)
-  val weightForLeaves = 1.5d
+  var weightForLeaves = 1.5d
   
   // logging for code generation phase
   val logReconstructor = Logger.getLogger("reconstruction.reconstructor")

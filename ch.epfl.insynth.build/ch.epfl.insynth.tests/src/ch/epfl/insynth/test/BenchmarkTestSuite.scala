@@ -7,6 +7,7 @@ import org.junit.BeforeClass
 import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionTests
 import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedTests
 import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedLessCertainTests
+import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedTestsZeroLoader
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 
@@ -14,7 +15,8 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 @Suite.SuiteClasses(
   Array(
     //classOf[InSynthBenchmarkCompletionTests],
-    classOf[InSynthBenchmarkCompletionParametrizedTests]//,
+    classOf[InSynthBenchmarkCompletionParametrizedTestsZeroLoader]
+    //classOf[InSynthBenchmarkCompletionParametrizedTests]//,
     //classOf[InSynthBenchmarkCompletionParametrizedLessCertainTests]
   )
 )
@@ -27,7 +29,7 @@ object BenchmarkTestSuite {
     
     // set appropriate preference values
 		Activator.getDefault.getPreferenceStore.setValue(OfferedSnippetsPropertyString, 10)        
-		Activator.getDefault.getPreferenceStore.setValue(MaximumTimePropertyString, 500)       
+		Activator.getDefault.getPreferenceStore.setValue(MaximumTimePropertyString, 5000)       
 		Activator.getDefault.getPreferenceStore.setValue(CodeStyleParenthesesPropertyString, CodeStyleParenthesesClassic)
   }
 }
