@@ -43,12 +43,41 @@ import org.junit.AfterClass
 
 import ch.epfl.insynth.{ Config => IConfig }
 import ch.epfl.insynth.reconstruction.{ Config => RConfig }
-import ch.epfl.insynth.loader.{ ZeroWeightsLoader, RegularWeightsLoader }
+import ch.epfl.insynth.loader.{ ZeroWeightsLoader, RegularWeightsLoader, NoCorpusWeightsLoader }
 
 @RunWith(value = classOf[Parameterized])
 class InSynthBenchmarkCompletionParametrizedTestsZeroLoader(fileName: String, expectedSnippet: String,
     expectedPositionJavaAPI: (Int, Int), expectedPositionGeneralized: (Int, Int))
-  extends InSynthBenchmarkCompletionParametrizedTests(fileName, expectedSnippet, expectedPositionJavaAPI, expectedPositionGeneralized) 
+  extends InSynthBenchmarkCompletionParametrizedTests(fileName, expectedSnippet, expectedPositionJavaAPI, expectedPositionGeneralized) {
+  
+	import InSynthBenchmarkCompletionParametrizedTests.testProjectSetup._
+	
+	@Ignore
+  @Test
+  // non generalized tests (individual import.clazz used)
+  override def testJavaAPI() {
+	  val myPosition = expectedPositionJavaAPI
+    val oraclePos = List( (expectedSnippet, myPosition) )
+    
+    val exampleCompletions = List(CheckContainsAtPosition(oraclePos))
+    
+    innerTestFunction("main/scala/javaapi/nongenerics/", 0, exampleCompletions)
+  }
+	
+  @Test
+  // generalized tests
+  override def testGeneralized() {
+	  val myPosition = expectedPositionGeneralized
+    val oraclePos = List( (expectedSnippet, myPosition) )
+    
+    val exampleCompletions = 
+      if (myPosition != (-1, -1)) List(CheckContainsAtPosition(oraclePos))
+      else Nil
+    
+    innerTestFunction("main/scala/generalized/nongenerics/", 1, exampleCompletions)
+  }
+  
+} 
 
 
 object InSynthBenchmarkCompletionParametrizedTestsZeroLoader {
@@ -63,23 +92,43 @@ object InSynthBenchmarkCompletionParametrizedTestsZeroLoader {
 	  file.createNewFile    
   }
 	  
+//  val generalizedPositions = List(
+//    0, 0, 0, -1, 0,  
+//    0, -1, 0, 1, 0, // 10 
+//    -1, -1, 1, -1, 1,
+//    0, 0, 0, 0, -1, // 20
+//    0, -1, -1, -1, -1,
+//    0, -1, 0, 0, 0, // 30
+//    -1, 1, 0, 4, -1, 
+//    -1, 0, 0, -1, 0, // 40
+//    -1, 1, 0, 0, 0, 
+//    0, 0, -1
+//  )
+//  val generalizedPositions = List(
+//    0, 0, 0, 0, 0,
+//    0, 0, 1, 7, 1, // 10
+//    2, 1, 1, 1, 1,
+//    0, 0, 0, 0, 1, // 20
+//    0, 4, 5, 3, 1,
+//    1, 0, 0, 0, 0, // 30
+//    5, 1, 0, 0, -1,
+//    0, 0, 0, 1, 1, // 40
+//    -1, 1, 0, 0, 0,
+//    0, 0, 2
+//  )
+  
   val generalizedPositions = List(
-    0, 0, 0, 0, 0,  
-    0, 0, 0, 3, 0, // 10 
-    1, 3, 1, 1, 1,
-    0, 0, 0, 0, 1, // 20
-    0, 1, 0, 3, 1,
-    0, 0, 0, 0, 0, // 30
-    0, 1, 0, 7, 8, 
-    0, 0, 0, 0, 0, // 40
-    5, 1, 0, 0, 0, 
-    0, 0, 1
+    0, 0, 0, 0, 0,  0, 0, 0, 3, 0, 1, 3, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 
+    3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 7, 8, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 0, 1
   )
 	
   def resetRunStatisticsStatic = InSynthBenchmarkCompletionParametrizedTests.resetRunStatisticsStatic
   
   var storedWeightForLeaves: Double = _
   var storedDeclarationWeight: Double = _
+  
+  val store = Activator.getDefault.getPreferenceStore
+  import InSynthConstants._
   
   @BeforeClass
   def setup() {    
@@ -93,7 +142,10 @@ object InSynthBenchmarkCompletionParametrizedTestsZeroLoader {
 		storedDeclarationWeight = IConfig.declarationDefaultWeight
 		IConfig.declarationDefaultWeight = 0.
 		// weight loader		
-		IConfig.defaultWeightsLoader = ZeroWeightsLoader
+		IConfig.defaultWeightsLoader = RegularWeightsLoader
+		
+		store.setValue(OfferedSnippetsPropertyString, 10)        
+		store.setValue(MaximumTimePropertyString, 8000)
   }
 	
 	@AfterClass
@@ -103,11 +155,17 @@ object InSynthBenchmarkCompletionParametrizedTestsZeroLoader {
 		import InSynthBenchmarkCompletionParametrizedTests.{ csvFile => _, parameters => _, generalizedPositions => _, _ }
 		
 	  appendToFile(csvFile, firstRowString)
-		assertEquals(parameters.size, tableFilenames.size)
-		assertEquals(parameters.size, tableDeclarations.size)
-		assertEquals(parameters.size, tableEngineTimes.size)
-		assertEquals(parameters.size, tableReconstructionTime.size)
-		assertEquals(parameters.size, generalizedPositions.size)
+//		assertEquals(parameters.size, tableFilenames.size)
+//		assertEquals(parameters.size, tableDeclarations.size)
+//		assertEquals(parameters.size, tableEngineTimes.size)
+//		assertEquals(parameters.size, tableReconstructionTime.size)
+//		assertEquals(parameters.size, generalizedPositions.size)
+	  val paramssize = tableFilenames.size
+		assertEquals(paramssize, tableFilenames.size)
+		assertEquals(paramssize, tableDeclarations.size)
+		assertEquals(paramssize, tableEngineTimes.size)
+		assertEquals(paramssize, tableReconstructionTime.size)
+		assertEquals(paramssize, generalizedPositions.size)
 		for( ((((fileName, numberDec), engine), reconstruction), position) <- tableFilenames zip tableDeclarations zip
 	    tableEngineTimes zip tableReconstructionTime zip generalizedPositions) {		  
 			appendToFile(csvFile, fileName.dropRight(6) + "," + (position + 1) + ", " + numberDec + ", " + engine + ", " + reconstruction)

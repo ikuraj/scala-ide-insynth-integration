@@ -49,14 +49,9 @@ class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnip
 	import InSynthBenchmarkCompletionParametrizedTests._
 	import Utility._
 	
-	def innerTestFunction(path: String, index: Int) = {
-	  val myPosition = if (index == 0) expectedPositionJavaAPI else expectedPositionGeneralized
-    val oraclePos = List( (expectedSnippet, myPosition) )
-    
-    val exampleCompletions = List(CheckContainsAtPosition(oraclePos))
-    
+	def innerTestFunction(path: String, index: Int, exampleCompletions: List[Checker]*) = {    
     for (i <- 1 to 5)
-    	checkCompletions(path + fileName + ".scala")(exampleCompletions)
+    	checkCompletions(path + fileName + ".scala")(exampleCompletions: _*)
         
   	import InSynthStatistics._
   	import ReconstructorStatistics._
@@ -91,13 +86,23 @@ class InSynthBenchmarkCompletionParametrizedTests(fileName: String, expectedSnip
   @Test
   // non generalized tests (individual import.clazz used)
   def testJavaAPI() {
-    innerTestFunction("main/scala/javaapi/nongenerics/", 0)
+	  val myPosition = expectedPositionJavaAPI
+    val oraclePos = List( (expectedSnippet, myPosition) )
+    
+    val exampleCompletions = List(CheckContainsAtPosition(oraclePos))
+    
+    innerTestFunction("main/scala/javaapi/nongenerics/", 0, exampleCompletions)
   }
 	
   @Test
   // generalized tests
   def testGeneralized() {
-    innerTestFunction("main/scala/generalized/nongenerics/", 1)
+	  val myPosition = expectedPositionGeneralized
+    val oraclePos = List( (expectedSnippet, myPosition) )
+    
+    val exampleCompletions = List(CheckContainsAtPosition(oraclePos))
+    
+    innerTestFunction("main/scala/generalized/nongenerics/", 1, exampleCompletions)
   }
         
 	@After

@@ -10,10 +10,10 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 @RunWith(classOf[Suite])
 @Suite.SuiteClasses(
   Array(
-    classOf[InSynthLibraryTestSuite],
-    classOf[CodeGenerationTestSuite],
-    classOf[CompletionTestSuite],
-    classOf[BenchmarkTestSuite],
+//    classOf[InSynthLibraryTestSuite],
+//    classOf[CodeGenerationTestSuite],
+//    classOf[CompletionTestSuite],
+//    classOf[BenchmarkTestSuite],
     classOf[InSynthPreferencesTests]
   )
 )

@@ -8,6 +8,7 @@ import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionTests
 import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedTests
 import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedLessCertainTests
 import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedTestsZeroLoader
+import ch.epfl.insynth.test.completion.InSynthBenchmarkCompletionParametrizedTestsAllLoader
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 
@@ -15,9 +16,10 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 @Suite.SuiteClasses(
   Array(
     //classOf[InSynthBenchmarkCompletionTests],
-    classOf[InSynthBenchmarkCompletionParametrizedTestsZeroLoader]
+    //classOf[InSynthBenchmarkCompletionParametrizedTestsZeroLoader]
     //classOf[InSynthBenchmarkCompletionParametrizedTests]//,
     //classOf[InSynthBenchmarkCompletionParametrizedLessCertainTests]
+    classOf[InSynthBenchmarkCompletionParametrizedTestsAllLoader]
   )
 )
 class BenchmarkTestSuite 

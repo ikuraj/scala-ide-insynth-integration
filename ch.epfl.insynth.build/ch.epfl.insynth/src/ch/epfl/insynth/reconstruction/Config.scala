@@ -3,11 +3,15 @@ package ch.epfl.insynth.reconstruction
 import java.util.logging._
 import ch.epfl.insynth.core.preferences.LogManager
 
+import ch.epfl.insynth.{ Config => IConfig }
+
 object Config {  
   // flag which marks whether logging is enabled  
   val isLogging = false
   // default weight for leave nodes (used in extraction phase)
-  var weightForLeaves = 1.5d
+  val weightForLeaves = IConfig.defaultWeightsLoader.declarationDefaultWeight
+  
+  var numberOfSnippetsForExtractor: Int = 10
   
   // logging for code generation phase
   val logReconstructor = Logger.getLogger("reconstruction.reconstructor")

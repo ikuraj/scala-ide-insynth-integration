@@ -69,7 +69,7 @@ object Reconstructor extends ( (SimpleNode, CodeGenerator) => List[Output]) {
     }
     
     // for each tree, generate the code for it
-    val extractedTrees = Extractor(transformedTree, numberOfCombinations)
+    val extractedTrees = Extractor(transformedTree, Config.numberOfSnippetsForExtractor)
     
     // logging
     if (Config.isLogging) {

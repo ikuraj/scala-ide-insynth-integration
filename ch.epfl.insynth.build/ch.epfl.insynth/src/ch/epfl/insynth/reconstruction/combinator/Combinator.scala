@@ -8,6 +8,9 @@ import java.util.logging.ConsoleHandler
 import ch.epfl.insynth.env.FormatNode
 import java.util.logging.Level
 import ch.epfl.insynth.reconstruction.Config
+import ch.epfl.insynth.{ Config => IConfig }
+import ch.epfl.insynth.loader.{ ZeroWeightsLoader, RegularWeightsLoader }
+import scala.collection.mutable.Queue
 
 /**
  * object which application transforms an InSynth representation input
@@ -50,12 +53,24 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
     // ( expression to be explored, a set of expressions visited on the path )
     type ExpressionPair = (Expression, Set[InSynth.Node])
     // priority queue
-    var pq = new PriorityQueue[ExpressionPair]() (
-      // ordering defined on the expressions  
-      new Ordering[ExpressionPair] {                                                                    
-	    def compare(a : ExpressionPair, b : ExpressionPair) = b._1.compare(a._1)                                           
-      } 
-    )    
+    var pq = 
+      if (IConfig.defaultWeightsLoader == ZeroWeightsLoader) {
+      	new Queue[ExpressionPair]()
+      } else {
+	      new PriorityQueue[ExpressionPair]() (
+	    		// ordering defined on the expressions  
+		      new Ordering[ExpressionPair] {                                                                    
+			    def compare(a : ExpressionPair, b : ExpressionPair) = b._1.compare(a._1)                                           
+		      } 
+	  		) 
+      }
+    
+    def dequeue = 
+      if (pq.isInstanceOf[Queue[ExpressionPair]])
+        pq.asInstanceOf[Queue[ExpressionPair]].dequeue
+      else
+        pq.asInstanceOf[PriorityQueue[ExpressionPair]].dequeue
+    
     // declare root Tree which starts the hierarchy 
     val rootTree:Tree = new TopTree(neededCombinations)
     // a single declaration of the root Tree is the one corresponding to the root node
@@ -71,7 +86,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
     while (!pq.isEmpty && (System.currentTimeMillis - startTime < maximumTime)) {
       
       // dequeue a pair
-      val (currentDeclaration, visited) = pq.dequeue
+      val (currentDeclaration, visited) = dequeue
               
       // logging
       if (Config.isLogging) {
