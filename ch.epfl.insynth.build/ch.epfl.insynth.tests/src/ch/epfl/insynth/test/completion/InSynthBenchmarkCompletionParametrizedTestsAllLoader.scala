@@ -71,6 +71,10 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
   	tableEngineTimes(index) :+= lastEngineTime.sum.toFloat/lastEngineTime.size
   	tableFilenames(index) :+= currentRun.fileName
   	tableReconstructionTimes(index) :+= reconstructionTime.sum.toFloat/reconstructionTime.size
+  	
+  	assertTrue(ReconstructorStatistics.lastDeclarationCount != -1)
+  	tableExpressionDeclarations(index) :+= ReconstructorStatistics.lastDeclarationCount
+  	ReconstructorStatistics.lastDeclarationCount = -1
     	    
   }
   
@@ -79,7 +83,6 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
   }
   implicit def convertIntToGivesObject(int: Int) = GivesObject(int)
   
-  @Ignore
   @Test
   // generalized tests
   def testRegular() {
@@ -111,6 +114,7 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
     innerTestFunction("main/scala/generalized/nongenerics/", 0, tries, exampleCompletions)
   }
   
+  @Ignore
   @Test
   // generalized tests
   def testZero() {
@@ -122,16 +126,17 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 		IConfig.defaultWeightsLoader = ZeroWeightsLoader
 		
     val exampleCompletions = 
-      if (myPosition != -1) List(CheckContainsAtPosition(oraclePos))
-      else List(CheckDoesNotContain(List(expectedSnippet)))
+      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
+      else if (myPosition == -2) Nil 
+      else List(CheckContainsAtPosition(oraclePos))
       
     if (myPosition < 10 && myPosition > -1) {
       store.setValue(OfferedSnippetsPropertyString, 10)
-      RConfig.numberOfSnippetsForExtractor = 10
+      RConfig.numberOfSnippetsForExtractor = 100
     }
     else {
-    	store.setValue(OfferedSnippetsPropertyString, 10)
-    	RConfig.numberOfSnippetsForExtractor = 10
+    	store.setValue(OfferedSnippetsPropertyString, 50)
+    	RConfig.numberOfSnippetsForExtractor = 200
     }
     
     val tries = 
@@ -153,8 +158,9 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 		IConfig.defaultWeightsLoader = NoCorpusWeightsLoader
 		
     val exampleCompletions = 
-      if (myPosition != -1) List(CheckContainsAtPosition(oraclePos))
-      else List(CheckDoesNotContain(List(expectedSnippet)))
+      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
+      else if (myPosition == -2) Nil 
+      else List(CheckContainsAtPosition(oraclePos))
       
     if (myPosition < 10 && myPosition > -1) {
       store.setValue(OfferedSnippetsPropertyString, 10)
@@ -184,8 +190,9 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 		IConfig.defaultWeightsLoader = RegularWeightsLoaderModified
 		
     val exampleCompletions = 
-      if (myPosition != -1) List(CheckContainsAtPosition(oraclePos))
-      else List(CheckDoesNotContain(List(expectedSnippet)))
+      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
+      else if (myPosition == -2) Nil 
+      else List(CheckContainsAtPosition(oraclePos))
       
     if (myPosition < 10 && myPosition > -1) {
       store.setValue(OfferedSnippetsPropertyString, 10)
@@ -223,7 +230,7 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 
 object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
   
-  val approved = List(false, true, false, false)
+  val approved = List(true, false, false, false)
   
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
 	
@@ -267,22 +274,22 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	  ),
 	  // zero
 	  List(
-	    0, 0, 0, -1, 0,  
-	    0, -1, 0, 1, 0, // 10 
-	    -1, -1, 1, -1, 1,
-	    0, 0, 0, 0, -1, // 20
-	    0, -1, -1, -1, -1,
-	    0, -1, 0, 0, 0, // 30
-	    -1, 1, 0, 4, -1, 
-	    -1, 0, 0, -1, 0, // 40
-	    -1, 1, 0, 0, 0, 
-	    0, 0, -1,
+	    0, 0, 0, -2, 0,  
+	    0, -2, 0, 1, 0, // 10 
+	    -2, -2, 1, -2, 1,
+	    0, 0, 0, 0, -2, // 20
+	    0, -2, -2, -2, -2,
+	    0, -2, 0, 0, 0, // 30
+	    -2, 1, 0, 4, -2, 
+	    -2, 0, 0, -2, 0, // 40
+	    -2, 1, 0, 0, 0, 
+	    0, 0, -2,
 	    // less certain
-	    -1, -1, // 50
-	    -1, -1, -1, -1 , -1,
-	    -1, -1, -1, -1 , -1, // 60
-	    -1, -1, -1, -1 , -1,
-	    -1
+	    -2, -2, // 50
+	    -2, -2, -2, -2 , -2,
+	    -2, -2, -2, -2 , -2, // 60
+	    -2, -2, -2, -2 , -2,
+	    -2
 	  ),
 	  // no corpus
 	  List(
@@ -297,8 +304,8 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	    -1, 1, 0, 0, 0,
 	    0, 0, 2,
 	    // less certain
-	    -1 , -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1 ,-1,
-	    -1
+	    -2 , -2, -2, -2, -2, -2 , -2, -2, -2, -2, -2 , -2, -2, -2, -2, -2 ,-2,
+	    -2
 	  ),
 	  // modified
 	  List(
@@ -324,11 +331,12 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	var generalizedPositionsCurrentList: List[Int] = _
   
 	// data for csv
-	val firstRowString = "Filename, position, #declarations, Engine (avg), Reconstruction (avg)"
+	val firstRowString = "Filename, position, #declarations, Engine (avg), Reconstruction (avg), Expression declarations"
   var tableFilenames: MutableList[MutableList[String]] = MutableList.fill(4)(MutableList.empty)
   var tableDeclarations: MutableList[MutableList[Int]] = MutableList.fill(4)(MutableList.empty)
   var tableEngineTimes: MutableList[MutableList[Float]] = MutableList.fill(4)(MutableList.empty)
   var tableReconstructionTimes: MutableList[MutableList[Float]] = MutableList.fill(4)(MutableList.empty)
+  var tableExpressionDeclarations: MutableList[MutableList[Int]] = MutableList.fill(4)(MutableList.empty)
 	
   def resetRunStatisticsStatic = {
 	  import ReconstructorStatistics._
@@ -369,14 +377,15 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 			assertEquals(parameters.size, tableDeclarations(ind).size)
 			assertEquals(parameters.size, tableEngineTimes(ind).size)
 			assertEquals(parameters.size, tableReconstructionTimes(ind).size)
+			assertEquals(parameters.size, tableExpressionDeclarations(ind).size)
 			assertEquals(parameters.size, generalizedPositions(ind).size)
 		}
 		
 		for (ind <- 0 to 3; if (approved(ind))) {
-			for( ((((fileName, numberDec), engine), reconstruction), position) <- tableFilenames(ind) zip tableDeclarations(ind) zip
-		    tableEngineTimes(ind) zip tableReconstructionTimes(ind) zip generalizedPositions(ind)) {		  
+			for( (((((fileName, numberDec), engine), reconstruction), position), expDecs) <- tableFilenames(ind) zip tableDeclarations(ind) zip
+		    tableEngineTimes(ind) zip tableReconstructionTimes(ind) zip generalizedPositions(ind) zip tableExpressionDeclarations(ind)) {		  
 				appendToFile(statsCSVFileNames(ind), fileName.dropRight(6) + "," + (position + 1) + ", "
-				    + numberDec + ", " + engine + ", " + reconstruction)
+				    + numberDec + ", " + engine + ", " + reconstruction + ", " + expDecs)
 			}
 		}
 		

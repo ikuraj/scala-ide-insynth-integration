@@ -92,18 +92,18 @@ object InSynthBenchmarkCompletionParametrizedTestsZeroLoader {
 	  file.createNewFile    
   }
 	  
-//  val generalizedPositions = List(
-//    0, 0, 0, -1, 0,  
-//    0, -1, 0, 1, 0, // 10 
-//    -1, -1, 1, -1, 1,
-//    0, 0, 0, 0, -1, // 20
-//    0, -1, -1, -1, -1,
-//    0, -1, 0, 0, 0, // 30
-//    -1, 1, 0, 4, -1, 
-//    -1, 0, 0, -1, 0, // 40
-//    -1, 1, 0, 0, 0, 
-//    0, 0, -1
-//  )
+  val generalizedPositions = List(
+    0, 0, 0, -1, 0,  
+    0, -1, 0, 1, 0, // 10 
+    -1, -1, 1, -1, 1,
+    0, 0, 0, 0, -1, // 20
+    0, -1, -1, -1, -1,
+    0, -1, 0, 0, 0, // 30
+    -1, 1, 0, 4, -1, 
+    -1, 0, 0, -1, 0, // 40
+    -1, 1, 0, 0, 0, 
+    0, 0, -1
+  )
 //  val generalizedPositions = List(
 //    0, 0, 0, 0, 0,
 //    0, 0, 1, 7, 1, // 10
@@ -117,10 +117,10 @@ object InSynthBenchmarkCompletionParametrizedTestsZeroLoader {
 //    0, 0, 2
 //  )
   
-  val generalizedPositions = List(
-    0, 0, 0, 0, 0,  0, 0, 0, 3, 0, 1, 3, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 
-    3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 7, 8, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 0, 1
-  )
+//  val generalizedPositions = List(
+//    0, 0, 0, 0, 0,  0, 0, 0, 3, 0, 1, 3, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 
+//    3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 7, 8, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 0, 1
+//  )
 	
   def resetRunStatisticsStatic = InSynthBenchmarkCompletionParametrizedTests.resetRunStatisticsStatic
   
@@ -136,13 +136,8 @@ object InSynthBenchmarkCompletionParametrizedTestsZeroLoader {
 		
 		resetRunStatisticsStatic
 		
-		// set weights
-		storedWeightForLeaves = RConfig.weightForLeaves
-		RConfig.weightForLeaves = 0.
-		storedDeclarationWeight = IConfig.declarationDefaultWeight
-		IConfig.declarationDefaultWeight = 0.
 		// weight loader		
-		IConfig.defaultWeightsLoader = RegularWeightsLoader
+		IConfig.defaultWeightsLoader = ZeroWeightsLoader
 		
 		store.setValue(OfferedSnippetsPropertyString, 10)        
 		store.setValue(MaximumTimePropertyString, 8000)
@@ -171,9 +166,6 @@ object InSynthBenchmarkCompletionParametrizedTestsZeroLoader {
 			appendToFile(csvFile, fileName.dropRight(6) + "," + (position + 1) + ", " + numberDec + ", " + engine + ", " + reconstruction)
 		}
 		
-		// reset weights back
-		RConfig.weightForLeaves = storedWeightForLeaves
-		IConfig.declarationDefaultWeight = storedDeclarationWeight
 		// weight loader		
 		IConfig.defaultWeightsLoader = RegularWeightsLoader
 	}
