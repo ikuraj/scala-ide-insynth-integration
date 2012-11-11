@@ -44,25 +44,26 @@ import ch.epfl.insynth.{ Config => IConfig }
 import ch.epfl.insynth.reconstruction.{ Config => RConfig }
 import ch.epfl.insynth.loader.{ ZeroWeightsLoader, RegularWeightsLoader, NoCorpusWeightsLoader }
 import org.junit.Before
+import ch.epfl.insynth.loader.RegularWeightsLoaderModified
 
 @RunWith(value = classOf[Parameterized])
 class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, expectedSnippet: String) {
-  
+    
 	import InSynthBenchmarkCompletionParametrizedTests.testProjectSetup._
 	import InSynthBenchmarkCompletionParametrizedTestsAllLoader._
-	
+					  		
   val store = Activator.getDefault.getPreferenceStore
   import InSynthConstants._
-				  		
-	def innerTestFunction(path: String, index: Int, exampleCompletions: List[Checker]*) = {    
-    for (i <- 1 to 5)
+	  
+	def innerTestFunction(path: String, index: Int, tries: Int, exampleCompletions: List[Checker]*) = {    
+    for (i <- 1 to tries)
     	checkCompletions(path + fileName + ".scala")(exampleCompletions: _*)
         
   	import InSynthStatistics._
   	import ReconstructorStatistics._
     	
-  	assertEquals("lastEngineTime should contain 5 elements", 5, lastEngineTime.size)
-  	assertEquals("reconstructionTime should contain 5 elements", 5, reconstructionTime.size)
+  	assertEquals("lastEngineTime should contain 5 elements", tries, lastEngineTime.size)
+  	assertEquals("reconstructionTime should contain 5 elements", tries, reconstructionTime.size)
   	
   	assertEquals(1, lastNumberOfDeclarations.distinct.size)
   	
@@ -78,28 +79,139 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
   }
   implicit def convertIntToGivesObject(int: Int) = GivesObject(int)
   
+  @Ignore
   @Test
   // generalized tests
-  override def testRegular() {
+  def testRegular() {
+    assertTrue(approved(0))
 	  val myPosition = generalizedPositionsCurrentList(0)
     val oraclePos = List( (expectedSnippet, ! myPosition) )
     
 		// weight loader		
 		IConfig.defaultWeightsLoader = RegularWeightsLoader
 		
-		store.setValue(OfferedSnippetsPropertyString, 10)        
-		store.setValue(MaximumTimePropertyString, 8000)
+    val exampleCompletions = 
+      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
+      else if (myPosition == -2) Nil 
+      else List(CheckContainsAtPosition(oraclePos))
+      
+    if (myPosition < 10 && myPosition > -1) {
+      store.setValue(OfferedSnippetsPropertyString, 10)
+      RConfig.numberOfSnippetsForExtractor = 100
+    }
+    else {
+    	store.setValue(OfferedSnippetsPropertyString, 50)
+    	RConfig.numberOfSnippetsForExtractor = 100
+    }
+    
+    val tries = 
+  		if (myPosition < 10 && myPosition > -1) 5
+  		else 1
+    
+    innerTestFunction("main/scala/generalized/nongenerics/", 0, tries, exampleCompletions)
+  }
+  
+  @Test
+  // generalized tests
+  def testZero() {
+    assertTrue(approved(1))
+	  val myPosition = generalizedPositionsCurrentList(1)
+    val oraclePos = List( (expectedSnippet, ! myPosition) )
+    
+		// weight loader		
+		IConfig.defaultWeightsLoader = ZeroWeightsLoader
 		
     val exampleCompletions = 
       if (myPosition != -1) List(CheckContainsAtPosition(oraclePos))
       else List(CheckDoesNotContain(List(expectedSnippet)))
+      
+    if (myPosition < 10 && myPosition > -1) {
+      store.setValue(OfferedSnippetsPropertyString, 10)
+      RConfig.numberOfSnippetsForExtractor = 10
+    }
+    else {
+    	store.setValue(OfferedSnippetsPropertyString, 10)
+    	RConfig.numberOfSnippetsForExtractor = 10
+    }
     
-    innerTestFunction("main/scala/generalized/nongenerics/", 1, exampleCompletions)
+    val tries = 
+  		if (myPosition < 10 && myPosition > -1) 5
+  		else 1
+  		
+    innerTestFunction("main/scala/generalized/nongenerics/", 1, tries, exampleCompletions)
+  }
+  
+  @Ignore
+  @Test
+  // generalized tests
+  def testNoCorpus() {
+    assertTrue(approved(2))
+	  val myPosition = generalizedPositionsCurrentList(2)
+    val oraclePos = List( (expectedSnippet, ! myPosition) )
+    
+		// weight loader		
+		IConfig.defaultWeightsLoader = NoCorpusWeightsLoader
+		
+    val exampleCompletions = 
+      if (myPosition != -1) List(CheckContainsAtPosition(oraclePos))
+      else List(CheckDoesNotContain(List(expectedSnippet)))
+      
+    if (myPosition < 10 && myPosition > -1) {
+      store.setValue(OfferedSnippetsPropertyString, 10)
+      RConfig.numberOfSnippetsForExtractor = 100
+    }
+    else {
+    	store.setValue(OfferedSnippetsPropertyString, 50)
+    	RConfig.numberOfSnippetsForExtractor = 100
+    }
+    
+    val tries = 
+  		if (myPosition < 10 && myPosition > -1) 5
+  		else 1
+  		
+    innerTestFunction("main/scala/generalized/nongenerics/", 2, tries, exampleCompletions)
+  }
+  
+  @Ignore
+  @Test
+  // generalized tests
+  def testModified() {
+    assertTrue(approved(3))
+	  val myPosition = generalizedPositionsCurrentList(3)
+    val oraclePos = List( (expectedSnippet, ! myPosition) )
+    
+		// weight loader		
+		IConfig.defaultWeightsLoader = RegularWeightsLoaderModified
+		
+    val exampleCompletions = 
+      if (myPosition != -1) List(CheckContainsAtPosition(oraclePos))
+      else List(CheckDoesNotContain(List(expectedSnippet)))
+      
+    if (myPosition < 10 && myPosition > -1) {
+      store.setValue(OfferedSnippetsPropertyString, 10)
+      RConfig.numberOfSnippetsForExtractor = 10
+    }
+    else {
+    	store.setValue(OfferedSnippetsPropertyString, 50)
+    	RConfig.numberOfSnippetsForExtractor = 200
+    }
+    
+    val tries = 
+  		if (myPosition < 10 && myPosition > -1) 5
+  		else 1
+  		
+    innerTestFunction("main/scala/generalized/nongenerics/", 3, tries, exampleCompletions)
   }
   
   @Before
   def forwardIterator {
-    generalizedPositionsCurrentList = generalizedPositionsIterator.next
+    if (testCounter % (approved filter identity size) == 0) {
+	    for (generalizedPositionsIterator <- generalizedPositionsIterators)
+	    	assertTrue(generalizedPositionsIterator.hasNext)
+	    	
+	    generalizedPositionsCurrentList = generalizedPositionsIterators map { _.next }
+    }
+    testCounter+=1
   }
   
 	@After
@@ -111,7 +223,7 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 
 object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
   
-  val approved = List(true, false, false, false)
+  val approved = List(false, true, false, false)
   
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
 	
@@ -136,9 +248,23 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
   val generalizedPositions = List(
     // regular
     List(
-	    0, 0, 0, 0, 0,  0, 0, 0, 3, 0, 1, 3, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 
-	    3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 7, 8, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 0, 1
-	  ) ++ List.fill(18)(-1),
+	    0, 0, 0, 0, 0, 
+	    0, 0, 0, 3, 0, // 10
+	    1, 3, 1, 1, 1,
+	    0, 0, 0, 0, 1, // 20
+	    0, 1, 0, 3, 1,
+	    0, 0, 0, 0, 0, // 30
+	    0, 1, 0, 7, 8,
+	    0, 0, 0, 0, 0, // 40
+	    5, 1, 0, 0, 0,
+	    0, 0, 1,
+	    // less certain
+	    -1, -1, // 50
+	    -1, -1, -1, -1 , -1,
+	    -1, -1, -2, -1 , -1, // 60
+	    -1, -1, -1, -1 , -1,
+	    -1
+	  ),
 	  // zero
 	  List(
 	    0, 0, 0, -1, 0,  
@@ -150,7 +276,13 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	    -1, 1, 0, 4, -1, 
 	    -1, 0, 0, -1, 0, // 40
 	    -1, 1, 0, 0, 0, 
-	    0, 0, -1
+	    0, 0, -1,
+	    // less certain
+	    -1, -1, // 50
+	    -1, -1, -1, -1 , -1,
+	    -1, -1, -1, -1 , -1, // 60
+	    -1, -1, -1, -1 , -1,
+	    -1
 	  ),
 	  // no corpus
 	  List(
@@ -163,7 +295,10 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	    5, 1, 0, 0, -1,
 	    0, 0, 0, 1, 1, // 40
 	    -1, 1, 0, 0, 0,
-	    0, 0, 2
+	    0, 0, 2,
+	    // less certain
+	    -1 , -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1 ,-1,
+	    -1
 	  ),
 	  // modified
 	  List(
@@ -176,10 +311,16 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	    5, 1, 0, 0, -1,
 	    0, 0, 0, 1, 1, // 40
 	    -1, 1, 0, 0, 0,
-	    0, 0, 2
+	    0, 0, 2,
+	    // less certain
+	    -1 , -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1 ,-1,
+	    -1
 	  )
   )
-	var generalizedPositionsIterator = generalizedPositions.iterator
+  
+  var testCounter = 0
+	var generalizedPositionsIterators: List[Iterator[Int]] = 
+	  generalizedPositions map { _.iterator }
 	var generalizedPositionsCurrentList: List[Int] = _
   
 	// data for csv
@@ -198,17 +339,22 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	}
     
   @BeforeClass
-  def setup() {    
-		InSynthBenchmarkCompletionParametrizedTests.setup
-		
+  def setup() {		
+		// tests are made according to the clean code style
+		Activator.getDefault.getPreferenceStore.
+			setValue(InSynthConstants.CodeStyleParenthesesPropertyString, InSynthConstants.CodeStyleParenthesesClean)
+			
 		// run "warming-up" tests
 		val fileName = "FileInputStreamStringname"
     testProjectSetup.checkCompletions("main/scala/generalized/nongenerics/" + fileName + ".scala")(Nil)
     testProjectSetup.checkCompletions("main/scala/javaapi/nongenerics/" + fileName + ".scala")(Nil)
     
     resetRunStatisticsStatic
-    
-    RConfig.numberOfSnippetsForExtractor = 100
+    		
+	  val store = Activator.getDefault.getPreferenceStore
+	  import InSynthConstants._
+  
+		store.setValue(MaximumTimePropertyString, 8000)    
   }
 	
 	@AfterClass
@@ -218,16 +364,19 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 		for (csvFile <- statsCSVFileNames)
 			appendToFile(csvFile, firstRowString)
 			
-		for (list <- List(tableFilenames, tableDeclarations, tableEngineTimes, tableReconstructionTimes, generalizedPositions);
-				innerList <- list) {
-			assertEquals(parameters.size, innerList.size)
+		for (ind <- 0 to 3; if (approved(ind))) {
+			assertEquals(parameters.size, tableFilenames(ind).size)
+			assertEquals(parameters.size, tableDeclarations(ind).size)
+			assertEquals(parameters.size, tableEngineTimes(ind).size)
+			assertEquals(parameters.size, tableReconstructionTimes(ind).size)
+			assertEquals(parameters.size, generalizedPositions(ind).size)
 		}
 		
 		for (ind <- 0 to 3; if (approved(ind))) {
-			for( ((((fileName, numberDec), engine), reconstruction), position) <- tableFilenames zip tableDeclarations zip
-		    tableEngineTimes zip tableReconstructionTimes zip generalizedPositions) {		  
-				appendToFile(statsCSVFileNames(ind), fileName(ind).dropRight(6) + "," + (position(ind) + 1) + ", "
-				    + numberDec(ind) + ", " + engine(ind) + ", " + reconstruction(ind))
+			for( ((((fileName, numberDec), engine), reconstruction), position) <- tableFilenames(ind) zip tableDeclarations(ind) zip
+		    tableEngineTimes(ind) zip tableReconstructionTimes(ind) zip generalizedPositions(ind)) {		  
+				appendToFile(statsCSVFileNames(ind), fileName.dropRight(6) + "," + (position + 1) + ", "
+				    + numberDec + ", " + engine + ", " + reconstruction)
 			}
 		}
 		
@@ -295,12 +444,12 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	  
 	  list add Array( "BoxLayoutContainertargetintaxis" , "new BoxLayout(container, BoxLayout.Y_AXIS)" )
 	  list add Array( "BufferedImageintwidthintheightintimageType" , "new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB)" )
-	  list add Array( "ByteArrayInputStream" , "new DataInputStream(new ByteArrayInputStream(\"?\".getBytes()))" )
+	  list add Array( "ByteArrayInputStream" , "new DataInputStream(new ByteArrayInputStream(\"?\".getBytes()))" ) // 50
 	  list add Array( "ByteArrayInputStreambytebufintoffsetintlength" , "new ByteArrayInputStream(b, 0, 0)" )
 	  list add Array( "CharArrayReadercharbuf" , "new CharArrayReader(outStream.toCharArray())" )
 	  list add Array( "DatagramPacketbytebufferintbufferLength" , "new DatagramPacket(buffer, buffer.length)" )
 	  list add Array( "DatagramPacketbytebufintlengthInetAddressaddressintport" , "new DatagramPacket(buffer, buffer.length, ia, 0)" )
-	  list add Array( "FileWriterStringfileNamebooleanappend" , "new BufferedWriter(new FileWriter(\"?\", true))" )
+	  list add Array( "FileWriterStringfileNamebooleanappend" , "new BufferedWriter(new FileWriter(\"?\", true))" )  // 55
 	  list add Array( "GridLayoutintrowsintcolsinthgapintvgap" , "new GridLayout(0, 0, 0, 0)" )
 	  list add Array( "InputStreamReaderInputStreaminStringcharsetName" , "new BufferedReader(new InputStreamReader(fis, \"?\"))" )
 	  list add Array( "JButtonStringtextIconicon" , "new JButton(\"?\",warnIcon)" )
