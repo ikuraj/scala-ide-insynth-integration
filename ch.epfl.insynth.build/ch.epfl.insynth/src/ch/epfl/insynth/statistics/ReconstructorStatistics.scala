@@ -19,4 +19,6 @@ object ReconstructorStatistics {
     ) map { case (description, value) => String.format(formatString, description, value)  } mkString ("\n")
   }
   
+  var lastDeclarationCount: Int = -1
+  
 }

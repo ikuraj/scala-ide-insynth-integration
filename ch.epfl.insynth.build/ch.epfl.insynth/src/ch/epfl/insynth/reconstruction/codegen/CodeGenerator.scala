@@ -21,6 +21,8 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
   // convenience ?: operator
   import Bool._
 
+  type TransformResult = (Document, Int)
+  
   /**
    * takes the tree and calls the recursive function and maps documents to Output elements
    * @param tree root of intermediate (sub)tree to transform
@@ -29,7 +31,7 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
   def apply(tree:Node) = {
     tree match {
       case Application(Scala.Function(_, _ /* BottomType */), queryDec :: List(set)) =>
-      	transform(set.toList, TransformContext.Expr) map { CodeGenOutput(_:Document) }
+      	transform(set.toList, TransformContext.Expr) map { e => CodeGenOutput(e._1, e._2) }
       case _ => throw new RuntimeException
     }    
   }
@@ -49,7 +51,7 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
    * @return list of documents containing all combinations of available expression for
    * the given (sub)tree
    */
-  def transform(tree: Node, ctx: TransformContext = Expr): List[Document]
+  def transform(tree: Node, ctx: TransformContext = Expr): List[TransformResult]
   
   /**
    * transform a scala type into an appropriate document
@@ -73,8 +75,8 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
    * @return a list of documents, concatenation of lists of transformed documents
    * for each element of the parameter list 
    */
-  protected def transform(nodeList: List[Node], ctx: TransformContext): List[Document] = {
-    (List[Document]() /: nodeList) {
+  protected def transform(nodeList: List[Node], ctx: TransformContext): List[TransformResult] = {
+    (List[TransformResult]() /: nodeList) {
       (list, node) => {
         list ++ transform(node, ctx)
       }
@@ -87,13 +89,13 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
    * @param params parameter list for transform
    * @return list of documents with all parameter combinations
    */
-  protected def getParamsCombinations(params: List[Set[Node]], ctx: TransformContext = Par):List[Document] = {
-    def getParamsCombinationsRec(listOfPicked: List[Document], params: List[Set[Node]]):List[Document] = {
+  protected def getParamsCombinations(params: List[Set[Node]], ctx: TransformContext = Par):List[TransformResult] = {
+    def getParamsCombinationsRec(listOfPicked: List[TransformResult], params: List[Set[Node]]):List[TransformResult] = {
       params match {
         case List() =>
-          List(foldDoc(listOfPicked.tail, ", "))
+          List((foldDoc(listOfPicked.tail.map(_._1), ", "), listOfPicked.tail.map(_._2).sum))
         case set :: list =>
-          (List[Document]() /: transform(set.toList, ctx)) {
+          (List[TransformResult]() /: transform(set.toList, ctx)) {
             (listSoFar, el) => {
               listSoFar ++ getParamsCombinationsRec(listOfPicked :+ el, list)
             }
@@ -101,7 +103,7 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
       }
     }
     
-    getParamsCombinationsRec(List(empty), params)
+    getParamsCombinationsRec(List( (empty, 0) ), params)
   }
   
   /**
@@ -111,14 +113,14 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
    * @param paramsInfo parameter list information
    * @return list of documents with all parameter combinations
    */
-  protected def getParamsCombinations(params: List[Set[Node]], paramsInfo: List[List[Scala.ScalaType]], parenthesesRequired: Boolean):List[Document] = {
+  protected def getParamsCombinations(params: List[Set[Node]], paramsInfo: List[List[Scala.ScalaType]], parenthesesRequired: Boolean): List[TransformResult] = {
     
     // convenient solution for currying
     val backToBackParentheses: Document = ")("
     
     def getParamsCombinationsRec(
         params: List[Set[Node]],
-        paramsInfo: List[List[Scala.ScalaType]]):List[Document] = 
+        paramsInfo: List[List[Scala.ScalaType]]): List[TransformResult] = 
     {
       paramsInfo match {
         case List(lastList) =>
@@ -129,15 +131,19 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
         case currentList :: restOfTheList => {
           val currentListDocuments = getParamsCombinations(params take currentList.size)
           // go through all recursively got documents
-          (List[Document]() /: getParamsCombinationsRec((params drop currentList.size), restOfTheList)) {
+          (List[TransformResult]() /: getParamsCombinationsRec((params drop currentList.size), restOfTheList)) {
             (list, currentDocument) =>
               // add the combination with current parentheses documents
               list ++ currentListDocuments map {
-                (_:Document) :: backToBackParentheses :: currentDocument
+                x =>
+                	(
+              	    (x._1:Document) :: backToBackParentheses :: currentDocument._1,
+              	    x._2 + currentDocument._2
+            	    )
               }
           }
         }
-        case Nil => List(empty)
+        case Nil => List( (empty, 0) )
       }
     }
     
@@ -188,7 +194,7 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
 /**
  * class for encapsulation of code snippets
  */
-case class CodeGenOutput(doc: Document) extends Formatable {
+case class CodeGenOutput(doc: Document, declarationCount: Int) extends Formatable {
   def toDocument = doc
   // weight
 }

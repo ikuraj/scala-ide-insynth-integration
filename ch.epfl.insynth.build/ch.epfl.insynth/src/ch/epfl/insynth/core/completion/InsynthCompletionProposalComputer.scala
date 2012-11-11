@@ -28,7 +28,7 @@ import scala.tools.eclipse.logging.HasLogger
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.Config
 import ch.epfl.insynth.core.preferences.InSynthConstants
-import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator, ClassicStyleCodeGenerator, ApplyTransfromer }
+import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator, ApplyTransfromer }
 import ch.epfl.insynth.reconstruction.codegen.SimpleApplicationNamesTransfromer
 import ch.epfl.insynth.statistics.SynthesisRun
 import ch.epfl.insynth.statistics.ReconstructorStatistics
@@ -157,15 +157,15 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
 				CodeStyleParenthesesPropertyString
 			) match {
     	  case `CodeStyleParenthesesClean` if applyTransformerFlag && simpleApplicationNameTransformerFlag =>
-    	    new CleanCodeGenerator with ApplyTransfromer with SimpleApplicationNamesTransfromer
+    	    throw new RuntimeException
     	  case `CodeStyleParenthesesClassic` if applyTransformerFlag && simpleApplicationNameTransformerFlag =>
-    	    new ClassicStyleCodeGenerator with ApplyTransfromer with SimpleApplicationNamesTransfromer
-    	  case `CodeStyleParenthesesClean` if simpleApplicationNameTransformerFlag => new CleanCodeGenerator with SimpleApplicationNamesTransfromer
-    	  case `CodeStyleParenthesesClassic` if simpleApplicationNameTransformerFlag => new ClassicStyleCodeGenerator with SimpleApplicationNamesTransfromer
-    	  case `CodeStyleParenthesesClean` if applyTransformerFlag => new CleanCodeGenerator with ApplyTransfromer
-    	  case `CodeStyleParenthesesClassic` if applyTransformerFlag => new ClassicStyleCodeGenerator with ApplyTransfromer
+    	    throw new RuntimeException
+    	  case `CodeStyleParenthesesClean` if simpleApplicationNameTransformerFlag => throw new RuntimeException
+    	  case `CodeStyleParenthesesClassic` if simpleApplicationNameTransformerFlag => throw new RuntimeException
+    	  case `CodeStyleParenthesesClean` if applyTransformerFlag => throw new RuntimeException
+    	  case `CodeStyleParenthesesClassic` if applyTransformerFlag => throw new RuntimeException
     	  case `CodeStyleParenthesesClean` => new CleanCodeGenerator
-    	  case `CodeStyleParenthesesClassic` => new ClassicStyleCodeGenerator
+    	  case `CodeStyleParenthesesClassic` => throw new RuntimeException
     	}
   }
 }

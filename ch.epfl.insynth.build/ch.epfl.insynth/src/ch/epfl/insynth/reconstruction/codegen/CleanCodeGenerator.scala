@@ -33,7 +33,7 @@ class CleanCodeGenerator extends CodeGenerator {
    * @return list of documents containing all combinations of available expression for
    * the given (sub)tree
    */
-  override def transform(tree: Node, ctx: TransformContext = Expr): List[Document] = {
+  override def transform(tree: Node, ctx: TransformContext = Expr): List[(Document, Int)] = {
     
     // a local variable to set if parentheses are needed
     var parenthesesRequired = true
@@ -65,10 +65,10 @@ class CleanCodeGenerator extends CodeGenerator {
       // variable (declared previously as arguments)
       // NOTE case when it is an argument (type is not needed)
       //case Variable(tpe, name) if ctx==Arg => List ( group(name :: ": " :: transform(tpe) ) )
-      case Variable(tpe, name) => List(name)
+      case Variable(tpe, name) => List((name, 1))
       // identifier from the scope
       case Identifier(tpe, dec) =>
-        List(dec.getSimpleName)
+        List((dec.getSimpleName, 1))
       // apply parameters in the tail of params according to the head of params 
       case Application(tpe, params) => {
         // so far as we constructed, there should be only one application definition term
@@ -83,13 +83,15 @@ class CleanCodeGenerator extends CodeGenerator {
           // set the recursive transformation context
           val recCtx = if (params.tail.size == 1) SinglePar else Par
           // go through all possible transformations of functions
-          (List[Document]() /: transform(params.head.head, App)) {
+          (List[(Document, Int)]() /: transform(params.head.head, App)) {
             (list, appIdentifier) =>
               // get every possible parameter combination
               (list /: getParamsCombinations(params.tail, recCtx)) {
                 (list2, paramsDoc) =>
                   list2 :+
-                    group(doParenApp(appIdentifier, paramsDoc))
+                    (group(doParenApp(appIdentifier._1, paramsDoc._1)),
+                      appIdentifier._2 + paramsDoc._2
+                    )
               }
           }
         }
@@ -111,7 +113,7 @@ class CleanCodeGenerator extends CodeGenerator {
             // if literal just return simple name
             if (decl.isLiteral) {
               assert(params.size == 1)
-              return List(decl.getSimpleName)
+              return List((decl.getSimpleName, 1))
             }
 
             // constructor call
@@ -124,10 +126,13 @@ class CleanCodeGenerator extends CodeGenerator {
                 // if there are any parameters or ctx is as receiver (App)
                 params.drop(2).size > 0 || ctx == App
               // go through all combinations of parameters documents
-              return (List[Document]() /: getParamsCombinations(params.drop(2))) {
+              return (List[TransformResult]() /: getParamsCombinations(params.drop(2))) {
                 (list, paramsDoc) =>
                   list :+
-                    group("new" :/: doParenApp(appIdentifier, paramsDoc))
+                  	(
+                			group("new" :/: doParenApp(appIdentifier._1, paramsDoc._1)),
+                			appIdentifier._2 + paramsDoc._2
+              			)
               }
             }
             
@@ -153,12 +158,15 @@ class CleanCodeGenerator extends CodeGenerator {
 	              }
               
               // go through all combinations of parameters documents
-              return (List[Document]() /: getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)) {
+              return (List[TransformResult]() /: getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)) {
                 (list, paramsDoc) =>
                   list :+
                     // TODO when to generate dot and when not??
                     //group(decl.getObjectName :: "." :: doParen(appIdentifier, paramsDoc))
-                    group(doParenRecApp(decl.getObjectName, appIdentifier, paramsDoc))
+                    (
+                      group(doParenRecApp(decl.getObjectName, appIdentifier._1, paramsDoc._1)),
+                      appIdentifier._2 + paramsDoc._2
+                    )
               }
             }
 
@@ -167,7 +175,7 @@ class CleanCodeGenerator extends CodeGenerator {
               assert(params.size == 2)
               // if the field needs this keyword
               val needsThis = decl.hasThis
-              (List[Document]() /: params(1)) {
+              (List[TransformResult]() /: params(1)) {
                 (listDocsReceivers, receiver) =>
                   {
                     // get documents for the receiver objects (or empty if none is needed)
@@ -175,7 +183,7 @@ class CleanCodeGenerator extends CodeGenerator {
                       if (!needsThis)
                         receiver match {
                           case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
-                            List(empty)
+                            List( (empty, 0) )
                           case _ => transform(receiver, App)
                         }
                       else transform(receiver, App)
@@ -184,7 +192,8 @@ class CleanCodeGenerator extends CodeGenerator {
                     (listDocsReceivers /: documentsForThis) {
                       (listDocsTransformedReceiver, receiverDoc) =>
                         {
-                          listDocsTransformedReceiver :+ group(receiverDoc :?/: appIdentifier)
+                          listDocsTransformedReceiver :+ 
+                          	(group(receiverDoc._1 :?/: appIdentifier._1), receiverDoc._2 + appIdentifier._2)
                         }
                     }
                   }
@@ -217,7 +226,7 @@ class CleanCodeGenerator extends CodeGenerator {
               // if the method needs this keyword
               val needsThis = decl.hasThis
               
-              (List[Document]() /: params(1)) {
+              (List[TransformResult]() /: params(1)) {
                 (listDocsReceivers, receiver) =>
                   {
                     // get documents for the receiver objects (or empty if none is needed)
@@ -226,7 +235,7 @@ class CleanCodeGenerator extends CodeGenerator {
                         receiver match {
                           case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
                             parenthesesRequired = params.drop(2).size >= 1
-                            List(empty)
+                            List( (empty, 0) )
                           case _ => transform(receiver, App) // map { (_:Document) :: "." }			            
                         }
                       else transform(receiver, App) // map { (_:Document) :: "." }
@@ -241,7 +250,10 @@ class CleanCodeGenerator extends CodeGenerator {
                             // and add them to the list
                             (listDocsTransformedParameters, paramsDoc) =>
                               listDocsTransformedParameters :+
-                                group(doParenRecApp(receiverDoc, appIdentifier, paramsDoc))
+                                (
+                                  group(doParenRecApp(receiverDoc._1, appIdentifier._1, paramsDoc._1))
+                                  , receiverDoc._2 + appIdentifier._2 + paramsDoc._2
+                                )
                           }
                         }
                     }
@@ -260,26 +272,29 @@ class CleanCodeGenerator extends CodeGenerator {
         // check if we need parentheses for variables
         parenthesesRequired = vars.size > 1
         // for all bodies of this abstraction
-        val abstractionResults = (List[Document]() /: subtrees) {
+        val abstractionResults = (List[TransformResult]() /: subtrees) {
           (listOfAbstractions, body) =>
             {
               listOfAbstractions ++
                 // for all transformations of bodies
-                (List[Document]() /: transform(body, Expr)) {
+                (List[TransformResult]() /: transform(body, Expr)) {
                   (listOfBodies, transformedBody) =>
-                    listOfBodies :+ (
-                      // transform argument variables
-                      doParen(seqToDoc(vars, ", ", { v: Variable => transform(v, Arg).head }))
+                    listOfBodies :+ 
+                    (
+                    	(// transform argument variables
+                      doParen(seqToDoc(vars, ", ", { v: Variable => transform(v, Arg).head._1 }))
                       :/: "=>" :/:
                       // transform the body
-                      transformedBody)
+                      transformedBody._1)
+                      , transformedBody._2
+                    )
                 }
             }
         }
         // return abstraction results
         // we need brackets only if this abstraction is parameter and it will not have parentheses
         if (ctx == SinglePar)
-          abstractionResults map { brackets(_: Document) }
+          abstractionResults map { x => (brackets(x._1: Document), x._2 + 1) }
         else
           abstractionResults
     }

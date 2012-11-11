@@ -98,7 +98,7 @@ object Reconstructor extends ( (SimpleNode, CodeGenerator) => List[Output]) {
     
     // collect all generated snippets
     (generatedCode map {      
-      output => Output(output._1.toString.trim, new Weight(output._2))
+      output => Output(output._1.toString.trim, new Weight(output._2), output._1.declarationCount)
     })    
   }
   
@@ -107,7 +107,7 @@ object Reconstructor extends ( (SimpleNode, CodeGenerator) => List[Output]) {
 /**
  * Encapsulation of the result output from the reconstruction phase, non UI dependent
  */
-case class Output(snippet:String, weight:Weight){
+case class Output(snippet:String, weight:Weight, declarations: Int){
   def getSnippet = snippet
   def getWieght = weight
 }
