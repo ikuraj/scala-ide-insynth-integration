@@ -54,7 +54,7 @@ object Combinator extends ((InSynth.SimpleNode, Int, Int) => Option[Node]) {
     type ExpressionPair = (Expression, Set[InSynth.Node])
     // priority queue
     var pq = 
-      if (IConfig.defaultWeightsLoader == ZeroWeightsLoader) {
+      if (false && IConfig.defaultWeightsLoader == ZeroWeightsLoader) {
       	new Queue[ExpressionPair]()
       } else {
 	      new PriorityQueue[ExpressionPair]() (

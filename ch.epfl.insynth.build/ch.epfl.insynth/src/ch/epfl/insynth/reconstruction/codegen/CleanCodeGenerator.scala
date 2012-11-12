@@ -107,7 +107,7 @@ class CleanCodeGenerator extends CodeGenerator {
             // if inheritance function, just recursively transform
             if (decl.isInheritanceFun) {
               assert(params.size == 2)
-              return transform(params(1).toList, ctx)
+              return transform(params(1).toList, ctx) map { p => (p._1, 1 + p._2) }
             }
 
             // if literal just return simple name
@@ -165,7 +165,7 @@ class CleanCodeGenerator extends CodeGenerator {
                     //group(decl.getObjectName :: "." :: doParen(appIdentifier, paramsDoc))
                     (
                       group(doParenRecApp(decl.getObjectName, appIdentifier._1, paramsDoc._1)),
-                      appIdentifier._2 + paramsDoc._2
+                      1 + appIdentifier._2 + paramsDoc._2
                     )
               }
             }
@@ -183,7 +183,7 @@ class CleanCodeGenerator extends CodeGenerator {
                       if (!needsThis)
                         receiver match {
                           case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
-                            List( (empty, 0) )
+                            List( (empty, 1) )
                           case _ => transform(receiver, App)
                         }
                       else transform(receiver, App)
@@ -235,7 +235,7 @@ class CleanCodeGenerator extends CodeGenerator {
                         receiver match {
                           case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
                             parenthesesRequired = params.drop(2).size >= 1
-                            List( (empty, 0) )
+                            List( (empty, 1) )
                           case _ => transform(receiver, App) // map { (_:Document) :: "." }			            
                         }
                       else transform(receiver, App) // map { (_:Document) :: "." }

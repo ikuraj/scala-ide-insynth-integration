@@ -8,7 +8,10 @@ object ReconstructorStatistics {
   
   var reconstructionTime: MutableList[Long] = MutableList.empty
   
-  def resetStatistics = reconstructionTime = MutableList.empty
+  def resetStatistics = {
+    reconstructionTime = MutableList.empty
+    lastDeclarationCount = MutableList.empty
+  }
   
   val formatString = "%20s%s"
     
@@ -19,6 +22,6 @@ object ReconstructorStatistics {
     ) map { case (description, value) => String.format(formatString, description, value)  } mkString ("\n")
   }
   
-  var lastDeclarationCount: Int = -1
+  var lastDeclarationCount: MutableList[Int] = MutableList.empty
   
 }

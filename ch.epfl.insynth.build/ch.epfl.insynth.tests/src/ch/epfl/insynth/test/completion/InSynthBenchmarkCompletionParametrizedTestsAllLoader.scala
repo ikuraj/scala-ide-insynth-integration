@@ -72,10 +72,10 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
   	tableFilenames(index) :+= currentRun.fileName
   	tableReconstructionTimes(index) :+= reconstructionTime.sum.toFloat/reconstructionTime.size
   	
-  	assertTrue(ReconstructorStatistics.lastDeclarationCount != -1)
-  	tableExpressionDeclarations(index) :+= ReconstructorStatistics.lastDeclarationCount
-  	ReconstructorStatistics.lastDeclarationCount = -1
-    	    
+  	if (!lastDeclarationCount.isEmpty)
+  		assertEquals(1, lastDeclarationCount.distinct.size)
+  	tableExpressionDeclarations(index) :+= 
+  	  { if (lastDeclarationCount.isEmpty) -1 else lastDeclarationCount.head }    	    
   }
   
   case class GivesObject(int: Int) {
@@ -83,131 +83,144 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
   }
   implicit def convertIntToGivesObject(int: Int) = GivesObject(int)
   
+  @Ignore
   @Test
   // generalized tests
-  def testRegular() {
-    assertTrue(approved(0))
-	  val myPosition = generalizedPositionsCurrentList(0)
-    val oraclePos = List( (expectedSnippet, ! myPosition) )
-    
-		// weight loader		
-		IConfig.defaultWeightsLoader = RegularWeightsLoader
-		
-    val exampleCompletions = 
-      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
-      else if (myPosition == -2) Nil 
-      else List(CheckContainsAtPosition(oraclePos))
+  def testRegular() = {
+    assertTrue(true)
+    if (approved(0)) {
       
-    if (myPosition < 10 && myPosition > -1) {
-      store.setValue(OfferedSnippetsPropertyString, 10)
-      RConfig.numberOfSnippetsForExtractor = 100
+	    assertTrue(approved(0))
+		  val myPosition = generalizedPositionsCurrentList(0)
+	    val oraclePos = List( (expectedSnippet, ! myPosition) )
+	    
+			// weight loader		
+			IConfig.defaultWeightsLoader = RegularWeightsLoader
+			
+	    val exampleCompletions = 
+	      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
+	      else if (myPosition == -2) Nil 
+	      else List(CheckContainsAtPosition(oraclePos))
+	      
+	    if (myPosition < 10 && myPosition > -1) {
+	      store.setValue(OfferedSnippetsPropertyString, 10)
+	      RConfig.numberOfSnippetsForExtractor = 100
+	    }
+	    else {
+	    	store.setValue(OfferedSnippetsPropertyString, 50)
+	    	RConfig.numberOfSnippetsForExtractor = 100
+	    }
+	    
+	    val tries = 
+	  		if (myPosition < 10 && myPosition > -1) 5
+	  		else 1
+	    
+	    innerTestFunction("main/scala/generalized/nongenerics/", 0, tries, exampleCompletions)
     }
-    else {
-    	store.setValue(OfferedSnippetsPropertyString, 50)
-    	RConfig.numberOfSnippetsForExtractor = 100
+  }
+  
+  @Test
+  // generalized tests
+  def testZero() =  {
+    if (approved(1)) {
+	      
+	    assertTrue(approved(1))
+		  val myPosition = generalizedPositionsCurrentList(1)
+	    val oraclePos = List( (expectedSnippet, ! myPosition) )
+	    
+			// weight loader		
+			IConfig.defaultWeightsLoader = ZeroWeightsLoader
+			
+	    val exampleCompletions = 
+	      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
+	      else if (myPosition == -2) Nil 
+	      else List(CheckContainsAtPosition(oraclePos))
+	      
+	    if (myPosition < 10 && myPosition > -1) {
+	      store.setValue(OfferedSnippetsPropertyString, 10)
+	      RConfig.numberOfSnippetsForExtractor = 100
+	    }
+	    else {
+	    	store.setValue(OfferedSnippetsPropertyString, 50)
+	    	RConfig.numberOfSnippetsForExtractor = 200
+	    }
+	    
+	    val tries = 
+	  		if (myPosition < 10 && myPosition > -1) 5
+	  		else 1
+	  		
+	    innerTestFunction("main/scala/generalized/nongenerics/", 1, tries, exampleCompletions)
     }
-    
-    val tries = 
-  		if (myPosition < 10 && myPosition > -1) 5
-  		else 1
-    
-    innerTestFunction("main/scala/generalized/nongenerics/", 0, tries, exampleCompletions)
   }
   
   @Ignore
   @Test
   // generalized tests
-  def testZero() {
-    assertTrue(approved(1))
-	  val myPosition = generalizedPositionsCurrentList(1)
-    val oraclePos = List( (expectedSnippet, ! myPosition) )
-    
-		// weight loader		
-		IConfig.defaultWeightsLoader = ZeroWeightsLoader
-		
-    val exampleCompletions = 
-      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
-      else if (myPosition == -2) Nil 
-      else List(CheckContainsAtPosition(oraclePos))
-      
-    if (myPosition < 10 && myPosition > -1) {
-      store.setValue(OfferedSnippetsPropertyString, 10)
-      RConfig.numberOfSnippetsForExtractor = 100
+  def testNoCorpus() =  {
+    if (approved(2)) {
+	      
+	    assertTrue(approved(2))
+		  val myPosition = generalizedPositionsCurrentList(2)
+	    val oraclePos = List( (expectedSnippet, ! myPosition) )
+	    
+			// weight loader		
+			IConfig.defaultWeightsLoader = NoCorpusWeightsLoader
+			
+	    val exampleCompletions = 
+	      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
+	      else if (myPosition == -2) Nil 
+	      else List(CheckContainsAtPosition(oraclePos))
+	      
+	    if (myPosition < 10 && myPosition > -1) {
+	      store.setValue(OfferedSnippetsPropertyString, 10)
+	      RConfig.numberOfSnippetsForExtractor = 100
+	    }
+	    else {
+	    	store.setValue(OfferedSnippetsPropertyString, 50)
+	    	RConfig.numberOfSnippetsForExtractor = 200
+	    }
+	    
+	    val tries = 
+	  		if (myPosition < 10 && myPosition > -1) 5
+	  		else 1
+	  		
+	    innerTestFunction("main/scala/generalized/nongenerics/", 2, tries, exampleCompletions)
     }
-    else {
-    	store.setValue(OfferedSnippetsPropertyString, 50)
-    	RConfig.numberOfSnippetsForExtractor = 200
-    }
-    
-    val tries = 
-  		if (myPosition < 10 && myPosition > -1) 5
-  		else 1
-  		
-    innerTestFunction("main/scala/generalized/nongenerics/", 1, tries, exampleCompletions)
   }
   
   @Ignore
   @Test
   // generalized tests
-  def testNoCorpus() {
-    assertTrue(approved(2))
-	  val myPosition = generalizedPositionsCurrentList(2)
-    val oraclePos = List( (expectedSnippet, ! myPosition) )
-    
-		// weight loader		
-		IConfig.defaultWeightsLoader = NoCorpusWeightsLoader
-		
-    val exampleCompletions = 
-      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
-      else if (myPosition == -2) Nil 
-      else List(CheckContainsAtPosition(oraclePos))
+  def testModified() =  {
+    if (approved(3)) {
       
-    if (myPosition < 10 && myPosition > -1) {
-      store.setValue(OfferedSnippetsPropertyString, 10)
-      RConfig.numberOfSnippetsForExtractor = 100
+	    assertTrue(approved(3))
+		  val myPosition = generalizedPositionsCurrentList(3)
+	    val oraclePos = List( (expectedSnippet, ! myPosition) )
+	    
+			// weight loader		
+			IConfig.defaultWeightsLoader = RegularWeightsLoaderModified
+			
+	    val exampleCompletions = 
+	      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
+	      else if (myPosition == -2) Nil 
+	      else List(CheckContainsAtPosition(oraclePos))
+	      
+	    if (myPosition < 10 && myPosition > -1) {
+	      store.setValue(OfferedSnippetsPropertyString, 10)
+	      RConfig.numberOfSnippetsForExtractor = 100
+	    }
+	    else {
+	    	store.setValue(OfferedSnippetsPropertyString, 50)
+	    	RConfig.numberOfSnippetsForExtractor = 200
+	    }
+	    
+	    val tries = 
+	  		if (myPosition < 10 && myPosition > -1) 5
+	  		else 1
+	  		
+	    innerTestFunction("main/scala/generalized/nongenerics/", 3, tries, exampleCompletions)
     }
-    else {
-    	store.setValue(OfferedSnippetsPropertyString, 50)
-    	RConfig.numberOfSnippetsForExtractor = 100
-    }
-    
-    val tries = 
-  		if (myPosition < 10 && myPosition > -1) 5
-  		else 1
-  		
-    innerTestFunction("main/scala/generalized/nongenerics/", 2, tries, exampleCompletions)
-  }
-  
-  @Ignore
-  @Test
-  // generalized tests
-  def testModified() {
-    assertTrue(approved(3))
-	  val myPosition = generalizedPositionsCurrentList(3)
-    val oraclePos = List( (expectedSnippet, ! myPosition) )
-    
-		// weight loader		
-		IConfig.defaultWeightsLoader = RegularWeightsLoaderModified
-		
-    val exampleCompletions = 
-      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
-      else if (myPosition == -2) Nil 
-      else List(CheckContainsAtPosition(oraclePos))
-      
-    if (myPosition < 10 && myPosition > -1) {
-      store.setValue(OfferedSnippetsPropertyString, 10)
-      RConfig.numberOfSnippetsForExtractor = 10
-    }
-    else {
-    	store.setValue(OfferedSnippetsPropertyString, 50)
-    	RConfig.numberOfSnippetsForExtractor = 200
-    }
-    
-    val tries = 
-  		if (myPosition < 10 && myPosition > -1) 5
-  		else 1
-  		
-    innerTestFunction("main/scala/generalized/nongenerics/", 3, tries, exampleCompletions)
   }
   
   @Before
@@ -230,14 +243,14 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 
 object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
   
-  val approved = List(true, false, false, false)
+  val approved = List(false, true, false, false)
   
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
 	
 //  val statsFileNames = List(
 //    "insynth_statistics_generalized_regular.txt",
 //    "insynth_statistics_generalized_nocorpus.txt",
-//    "insynth_statistics_generalized_zero.txt",
+//    "insynth_statistics_generalized_zero.txt",Google Nexus 7 Black Wi-Fi 16GB Table
 //    "insynth_statistics_generalized_modified.txt"
 //  )
   val statsCSVFileNames = List(
@@ -362,7 +375,7 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	  val store = Activator.getDefault.getPreferenceStore
 	  import InSynthConstants._
   
-		store.setValue(MaximumTimePropertyString, 8000)    
+		store.setValue(MaximumTimePropertyString, 3000)    
   }
 	
 	@AfterClass

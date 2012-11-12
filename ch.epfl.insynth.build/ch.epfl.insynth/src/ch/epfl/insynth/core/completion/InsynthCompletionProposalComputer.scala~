@@ -29,6 +29,7 @@ import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.Config
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator }
+import ch.epfl.insynth.reconstruction.codegen.SimpleApplicationNamesTransfromer
 import ch.epfl.insynth.statistics.SynthesisRun
 import ch.epfl.insynth.statistics.ReconstructorStatistics
 

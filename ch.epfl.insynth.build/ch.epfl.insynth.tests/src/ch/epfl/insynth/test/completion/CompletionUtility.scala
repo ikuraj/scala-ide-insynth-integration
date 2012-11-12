@@ -131,9 +131,8 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
         val containsIndex = calculatedStrings map { _._1 } indexWhere { _ == expectedSnippet }
         assertThat("Expected snippet was not found: " + expectedSnippet + ", calculated snippets: " + calculatedStrings.mkString(", "),
           containsIndex, not(equalTo(-1)))
-        assertTrue("Expected snippet was not found at pos: " + expectedPosition + ", found at: " + containsIndex, low <= containsIndex && containsIndex <= up)
-        assertEquals(-1, ReconstructorStatistics.lastDeclarationCount)
-        ReconstructorStatistics.lastDeclarationCount = calculatedStrings(containsIndex)._2
+        assertTrue("Expected snippet was not found at pos: " + expectedPosition + ", found at: " + containsIndex, low <= containsIndex && containsIndex <= up)        
+        ReconstructorStatistics.lastDeclarationCount :+= calculatedStrings(containsIndex)._2
       }
     }
   }
