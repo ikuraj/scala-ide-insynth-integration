@@ -16,10 +16,10 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 @Suite.SuiteClasses(
   Array(
     //classOf[InSynthBenchmarkCompletionTests],
-    classOf[InSynthBenchmarkCompletionParametrizedTestsZeroLoader]
+    //classOf[InSynthBenchmarkCompletionParametrizedTestsZeroLoader]
     //classOf[InSynthBenchmarkCompletionParametrizedTests]//,
     //classOf[InSynthBenchmarkCompletionParametrizedLessCertainTests]
-    //classOf[InSynthBenchmarkCompletionParametrizedTestsAllLoader]
+    classOf[InSynthBenchmarkCompletionParametrizedTestsAllLoader]
   )
 )
 class BenchmarkTestSuite 

@@ -136,6 +136,20 @@ class CompletionUtility(projectSetup: TestProjectSetup) {
       }
     }
   }
+  
+  case class CheckContainsAtPositionHigherThan(expectedCompletions: List[(String, Int)]) extends Checker {
+
+    def apply(completions: List[Output]) = {
+      val calculatedStrings = completions.map { x => (x.getSnippet, x.declarations) }
+      for ((expectedSnippet, expectedPosition) <- expectedCompletions) {
+        val containsIndex = calculatedStrings map { _._1 } indexWhere { _ == expectedSnippet }
+        assertThat("Expected snippet was not found: " + expectedSnippet + ", calculated snippets: " + calculatedStrings.mkString(", "),
+          containsIndex, not(equalTo(-1)))
+        assertTrue("Expected snippet was not found at pos: " + expectedPosition + ", found at: " + containsIndex, expectedPosition <= containsIndex)        
+        ReconstructorStatistics.lastDeclarationCount :+= calculatedStrings(containsIndex)._2
+      }
+    }
+  }
     
   case class CheckDoesNotContain(expectedCompletions: List[String]) extends Checker {
 

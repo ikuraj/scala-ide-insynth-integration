@@ -64,13 +64,19 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
     	
   	assertEquals("lastEngineTime should contain 5 elements", tries, lastEngineTime.size)
   	assertEquals("reconstructionTime should contain 5 elements", tries, reconstructionTime.size)
-  	
-  	assertEquals(1, lastNumberOfDeclarations.distinct.size)
-  	
-  	tableDeclarations(index) :+= lastNumberOfDeclarations.head
-  	tableEngineTimes(index) :+= lastEngineTime.sum.toFloat/lastEngineTime.size
-  	tableFilenames(index) :+= currentRun.fileName
-  	tableReconstructionTimes(index) :+= reconstructionTime.sum.toFloat/reconstructionTime.size
+  	  	
+//  	if (tries > 0) {
+  		assertEquals(1, lastNumberOfDeclarations.distinct.size)
+	  	tableDeclarations(index) :+= lastNumberOfDeclarations.head
+	  	tableEngineTimes(index) :+= lastEngineTime.sum.toFloat/lastEngineTime.size
+	  	tableFilenames(index) :+= currentRun.fileName
+	  	tableReconstructionTimes(index) :+= reconstructionTime.sum.toFloat/reconstructionTime.size
+//  	} else {  	  
+//	  	tableDeclarations(index) :+= -1
+//	  	tableEngineTimes(index) :+= -1f
+//	  	tableFilenames(index) :+= fileName + ".scala"
+//	  	tableReconstructionTimes(index) :+= -1f
+//  	}
   	
   	if (!lastDeclarationCount.isEmpty)
   		assertEquals(1, lastDeclarationCount.distinct.size)
@@ -83,7 +89,6 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
   }
   implicit def convertIntToGivesObject(int: Int) = GivesObject(int)
   
-  @Ignore
   @Test
   // generalized tests
   def testRegular() = {
@@ -107,13 +112,23 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 	      RConfig.numberOfSnippetsForExtractor = 100
 	    }
 	    else {
-	    	store.setValue(OfferedSnippetsPropertyString, 50)
-	    	RConfig.numberOfSnippetsForExtractor = 100
+	    	store.setValue(OfferedSnippetsPropertyString, 10)
+	    	RConfig.numberOfSnippetsForExtractor = 10
 	    }
 	    
 	    val tries = 
 	  		if (myPosition < 10 && myPosition > -1) 5
 	  		else 1
+	  		
+	  		
+	    for (i <- 1 to 5)
+	    	checkCompletions("main/scala/generalized/nongenerics/" + fileName + ".scala")(exampleCompletions)
+	    	
+	  import ReconstructorStatistics._
+	  import InSynthStatistics._
+    
+    resetLastRun
+    resetStatistics
 	    
 	    innerTestFunction("main/scala/generalized/nongenerics/", 0, tries, exampleCompletions)
     }
@@ -134,6 +149,7 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 	    val exampleCompletions = 
 	      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
 	      else if (myPosition == -2) Nil 
+	      else if (myPosition >= 10) List(CheckContainsAtPositionHigherThan(List((expectedSnippet, 10))))
 	      else List(CheckContainsAtPosition(oraclePos))
 	      
 	    if (myPosition < 10 && myPosition > -1) {
@@ -145,15 +161,15 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 	    	RConfig.numberOfSnippetsForExtractor = 200
 	    }
 	    
+	    assertTrue(myPosition != -3)
 	    val tries = 
 	  		if (myPosition < 10 && myPosition > -1) 5
 	  		else 1
 	  		
-	    innerTestFunction("main/scala/generalized/nongenerics/", 1, tries, exampleCompletions)
+  			innerTestFunction("main/scala/generalized/nongenerics/", 1, tries, exampleCompletions)
     }
   }
   
-  @Ignore
   @Test
   // generalized tests
   def testNoCorpus() =  {
@@ -169,6 +185,7 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 	    val exampleCompletions = 
 	      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
 	      else if (myPosition == -2) Nil 
+	      else if (myPosition >= 10) List(CheckContainsAtPositionHigherThan(List((expectedSnippet, 10))))
 	      else List(CheckContainsAtPosition(oraclePos))
 	      
 	    if (myPosition < 10 && myPosition > -1) {
@@ -188,7 +205,6 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
     }
   }
   
-  @Ignore
   @Test
   // generalized tests
   def testModified() =  {
@@ -204,6 +220,7 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 	    val exampleCompletions = 
 	      if (myPosition == -1) List(CheckDoesNotContain(List(expectedSnippet)))
 	      else if (myPosition == -2) Nil 
+	      else if (myPosition >= 10) List(CheckContainsAtPositionHigherThan(List((expectedSnippet, 10))))
 	      else List(CheckContainsAtPosition(oraclePos))
 	      
 	    if (myPosition < 10 && myPosition > -1) {
@@ -225,7 +242,8 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
   
   @Before
   def forwardIterator {
-    if (testCounter % (approved filter identity size) == 0) {
+    //if (testCounter % (approved filter identity size) == 0) {
+    if (testCounter % 4 == 0) {
 	    for (generalizedPositionsIterator <- generalizedPositionsIterators)
 	    	assertTrue(generalizedPositionsIterator.hasNext)
 	    	
@@ -243,7 +261,7 @@ class InSynthBenchmarkCompletionParametrizedTestsAllLoader(fileName: String, exp
 
 object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
   
-  val approved = List(false, true, false, false)
+  val approved = List(true, false, false, false)
   
 	val testProjectSetup = new CompletionUtility(InSynthBenchmarkCompletionTests)
 	
@@ -255,8 +273,8 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 //  )
   val statsCSVFileNames = List(
     "data_regular.csv",
-    "data_nocorpus.csv",
     "data_zero.csv",
+    "data_nocorpus.csv",
     "data_modified.csv"
   )
   for (statsFileName <- statsCSVFileNames) {
@@ -277,26 +295,46 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	    0, 1, 0, 7, 8,
 	    0, 0, 0, 0, 0, // 40
 	    5, 1, 0, 0, 0,
-	    0, 0, 1,
-	    // less certain
-	    -1, -1, // 50
-	    -1, -1, -1, -1 , -1,
-	    -1, -1, -2, -1 , -1, // 60
-	    -1, -1, -1, -1 , -1,
-	    -1
+	    0, 0, 1
+//	    ,
+//	    // less certain
+//	    -1, -1, // 50
+//	    -1, -1, -1, -1 , -1,
+//	    -1, -1, -2, -1 , -1, // 60
+//	    -1, -1, -1, -1 , -1,
+//	    -1
 	  ),
+//	  // zero
+//	  List(
+//	    -1, -2, -1, -2, -1,  
+//	    -2 /* 0,6 */, -1, -1, -1, -1, // 10 
+//	    -2, -1, -1, -1, -1,
+//	    -2 /* 1, 2*/, -2 /* 2, 3*/, -2 /* > 10 */, -2 /* > 10 */, -2 /* > 10 */, // 20
+//	    -2 /* 0, 1 */, -1, -1, -1, -1,
+//	    -1, -1, -1, -1, -1, // 30
+//	    -1, -1, -2 /* > 10 */, -2 /* 8 */, -1, 
+//	    -1, -1, -1, -1, -1, // 40
+//	    -1, -1, -2 /* > 10 */, -1, -2 /* > 10 */, 
+//	    -2 /* > 10 */, -2 /* > 10 */, -2 /* > 10 */,
+//	    // less certain
+//	    -2, -2, // 50
+//	    -2, -2, -2, -2 , -2,
+//	    -2, -2, -2, -2 , -2, // 60
+//	    -2, -2, -2, -2 , -2,
+//	    -2
+//	  ),
 	  // zero
 	  List(
-	    0, 0, 0, -2, 0,  
-	    0, -2, 0, 1, 0, // 10 
-	    -2, -2, 1, -2, 1,
-	    0, 0, 0, 0, -2, // 20
-	    0, -2, -2, -2, -2,
-	    0, -2, 0, 0, 0, // 30
-	    -2, 1, 0, 4, -2, 
-	    -2, 0, 0, -2, 0, // 40
-	    -2, 1, 0, 0, 0, 
-	    0, 0, -2,
+	    -2, -2, -2, -2, -2,  
+	    -2 /* 0,6 */, -2, -2, -2, -2, // 10 
+	    -2, -2, -2, -2, -2,
+	    -2 /* 1, 2*/, -2 /* 2, 3*/, -2 /* > 10 */, -2 /* > 10 */, -2 /* > 10 */, // 20
+	    -2 /* 0, 1 */, -2, -2, -2, -2,
+	    -2, -2, -2, -2, -2, // 30
+	    -2, -2, -2 /* > 10 */, -2 /* 8 */, -2, 
+	    -2, -2, -2, -2, -2, // 40
+	    -2, -2, -2 /* > 10 */, -2, -2 /* > 10 */, 
+	    -2 /* > 10 */, -2 /* > 10 */, -2 /* > 10 */,
 	    // less certain
 	    -2, -2, // 50
 	    -2, -2, -2, -2 , -2,
@@ -317,8 +355,11 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 	    -1, 1, 0, 0, 0,
 	    0, 0, 2,
 	    // less certain
-	    -2 , -2, -2, -2, -2, -2 , -2, -2, -2, -2, -2 , -2, -2, -2, -2, -2 ,-2,
-	    -2
+	    -1, -1, // 50
+	    -1, 15 /* 3 */, -1, -1, -1,
+	    -1, -1, -1, -1, 15, // 60
+	    -2 /* 2 */, 1, 15, -2 /* 4 */, -1,
+	    -1
 	  ),
 	  // modified
 	  List(
@@ -364,6 +405,11 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 		// tests are made according to the clean code style
 		Activator.getDefault.getPreferenceStore.
 			setValue(InSynthConstants.CodeStyleParenthesesPropertyString, InSynthConstants.CodeStyleParenthesesClean)
+			    		
+	  val store = Activator.getDefault.getPreferenceStore
+	  import InSynthConstants._
+  
+		store.setValue(MaximumTimePropertyString, 2000)    
 			
 		// run "warming-up" tests
 		val fileName = "FileInputStreamStringname"
@@ -371,11 +417,6 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
     testProjectSetup.checkCompletions("main/scala/javaapi/nongenerics/" + fileName + ".scala")(Nil)
     
     resetRunStatisticsStatic
-    		
-	  val store = Activator.getDefault.getPreferenceStore
-	  import InSynthConstants._
-  
-		store.setValue(MaximumTimePropertyString, 3000)    
   }
 	
 	@AfterClass
@@ -463,26 +504,26 @@ object InSynthBenchmarkCompletionParametrizedTestsAllLoader {
 		list add Array( "DefaultBoundedRangeModel" , "new DefaultBoundedRangeModel" )
 		list add Array( "DisplayModeintwidthintheightintbitDepthintrefreshRate" , "gs getDisplayMode" )
 		list add Array( "FileInputStreamFileDescriptorfdObj" , "new FileInputStream(aFile)" )
-	  
-	  list add Array( "BoxLayoutContainertargetintaxis" , "new BoxLayout(container, BoxLayout.Y_AXIS)" )
-	  list add Array( "BufferedImageintwidthintheightintimageType" , "new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB)" )
-	  list add Array( "ByteArrayInputStream" , "new DataInputStream(new ByteArrayInputStream(\"?\".getBytes()))" ) // 50
-	  list add Array( "ByteArrayInputStreambytebufintoffsetintlength" , "new ByteArrayInputStream(b, 0, 0)" )
-	  list add Array( "CharArrayReadercharbuf" , "new CharArrayReader(outStream.toCharArray())" )
-	  list add Array( "DatagramPacketbytebufferintbufferLength" , "new DatagramPacket(buffer, buffer.length)" )
-	  list add Array( "DatagramPacketbytebufintlengthInetAddressaddressintport" , "new DatagramPacket(buffer, buffer.length, ia, 0)" )
-	  list add Array( "FileWriterStringfileNamebooleanappend" , "new BufferedWriter(new FileWriter(\"?\", true))" )  // 55
-	  list add Array( "GridLayoutintrowsintcolsinthgapintvgap" , "new GridLayout(0, 0, 0, 0)" )
-	  list add Array( "InputStreamReaderInputStreaminStringcharsetName" , "new BufferedReader(new InputStreamReader(fis, \"?\"))" )
-	  list add Array( "JButtonStringtextIconicon" , "new JButton(\"?\",warnIcon)" )
-	  // true needed but InSynth constants include only false
-	  list add Array( "JCheckBoxStringtextbooleanselected" , "new JCheckBox(\"?\", false)" )
-	  list add Array( "JTextAreaDocumentdocument" , "new JTextArea(document)" )
-	  list add Array( "JTextAreaStringtext" , "new JTextArea(\"?\")" )
-	  list add Array( "OverlayLayoutContainertarget" , "new OverlayLayout(panel)" )
-	  list add Array( "PrintStreamFilefile" , "new PrintStream(file)" )
-	  list add Array( "SocketInetAddressaddressintportthrowsIOException" , "InetAddress.getByName(\"?\")" )
-	  list add Array( "StreamTokenizerReaderr" , "new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)))" )
+//	  
+//	  list add Array( "BoxLayoutContainertargetintaxis" , "new BoxLayout(container, BoxLayout.Y_AXIS)" )
+//	  list add Array( "BufferedImageintwidthintheightintimageType" , "new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB)" )
+//	  list add Array( "ByteArrayInputStream" , "new DataInputStream(new ByteArrayInputStream(\"?\".getBytes()))" ) // 50
+//	  list add Array( "ByteArrayInputStreambytebufintoffsetintlength" , "new ByteArrayInputStream(b, 0, 0)" )
+//	  list add Array( "CharArrayReadercharbuf" , "new CharArrayReader(outStream.toCharArray())" )
+//	  list add Array( "DatagramPacketbytebufferintbufferLength" , "new DatagramPacket(buffer, buffer.length)" )
+//	  list add Array( "DatagramPacketbytebufintlengthInetAddressaddressintport" , "new DatagramPacket(buffer, buffer.length, ia, 0)" )
+//	  list add Array( "FileWriterStringfileNamebooleanappend" , "new BufferedWriter(new FileWriter(\"?\", true))" )  // 55
+//	  list add Array( "GridLayoutintrowsintcolsinthgapintvgap" , "new GridLayout(0, 0, 0, 0)" )
+//	  list add Array( "InputStreamReaderInputStreaminStringcharsetName" , "new BufferedReader(new InputStreamReader(fis, \"?\"))" )
+//	  list add Array( "JButtonStringtextIconicon" , "new JButton(\"?\",warnIcon)" )
+//	  // true needed but InSynth constants include only false
+//	  list add Array( "JCheckBoxStringtextbooleanselected" , "new JCheckBox(\"?\", false)" )
+//	  list add Array( "JTextAreaDocumentdocument" , "new JTextArea(document)" )
+//	  list add Array( "JTextAreaStringtext" , "new JTextArea(\"?\")" )
+//	  list add Array( "OverlayLayoutContainertarget" , "new OverlayLayout(panel)" )
+//	  list add Array( "PrintStreamFilefile" , "new PrintStream(file)" )
+//	  list add Array( "SocketInetAddressaddressintportthrowsIOException" , "InetAddress.getByName(\"?\")" )
+//	  list add Array( "StreamTokenizerReaderr" , "new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)))" )
 	  
 	  list
 	}
