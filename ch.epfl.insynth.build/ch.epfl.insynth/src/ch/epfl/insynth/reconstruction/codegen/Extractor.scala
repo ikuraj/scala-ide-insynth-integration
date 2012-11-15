@@ -3,6 +3,7 @@ package ch.epfl.insynth.reconstruction.codegen
 import ch.epfl.insynth.reconstruction.intermediate._
 import ch.epfl.insynth.print._
 import ch.epfl.insynth.reconstruction.Config
+import java.util.concurrent.TimeoutException
 
 /**
  * class that extract the needed amount of snippets from the intermediate representation
@@ -19,6 +20,8 @@ object Extractor extends ((Node, Int) => List[(Node, Double)]) {
   val logger = Config.logExtractor
   // caching already extracted trees to improve performance
   var cache = new scala.collection.mutable.HashMap[Node, List[NodeWithWeight]]
+  
+  var startTime: Long = _
 
   /**
    * apply method invokes combination of the intermediate representation tree into
@@ -35,7 +38,15 @@ object Extractor extends ((Node, Int) => List[(Node, Double)]) {
     // initialize new cache instance
     cache = new scala.collection.mutable.HashMap[Node, List[NodeWithWeight]]
 		// do the transformation
-    val transformed = transform(tree)
+    
+    startTime = System.currentTimeMillis
+    
+    val transformed = 
+      try {
+        transform(tree)
+      } catch {
+        case _ => Nil
+      }
     // logging
     logger.fine("transform call done")
 
@@ -62,6 +73,9 @@ object Extractor extends ((Node, Int) => List[(Node, Double)]) {
    * @return list of tree, weight pairs
    */
   def transform(tree: Node): List[NodeWithWeight] = {
+    if (System.currentTimeMillis - startTime > 3000)
+      throw new TimeoutException
+
     // logging
     if (Config.isLogging) {
       logger.entering(getClass.toString, "transform" /*, FormatableIntermediate(tree)*/ )
@@ -103,6 +117,8 @@ object Extractor extends ((Node, Int) => List[(Node, Double)]) {
          *  weight of such list of parameters
          */
         def getSingleElementsParamsList(params: List[Set[Node]]): List[(List[Node], Double)] = {
+          if (System.currentTimeMillis - startTime > 3000)
+            throw new TimeoutException
           //logger.entering(getClass.toString, "getSingleElementsParamsList"/*, FormatableIntermediate(tree)*/)
           params match {
             // return empty list if no parameters are found
@@ -116,6 +132,8 @@ object Extractor extends ((Node, Int) => List[(Node, Double)]) {
             case set :: list =>
               // calculate the recursive result (no need to do that in the for loop)
               val resultForRest = getSingleElementsParamsList(list);
+              if (System.currentTimeMillis - startTime > 3000)
+                throw new TimeoutException
               for (
                 // for a set of parameter get all possible single-snippet trees
                 (firstParamNode, firstParamWeight) <- set flatMap { transform(_) } toList;
@@ -126,6 +144,8 @@ object Extractor extends ((Node, Int) => List[(Node, Double)]) {
           }
         }
 
+        if (System.currentTimeMillis - startTime > 3000)
+          throw new TimeoutException
         // for all single-snippet trees representing parameters list
         for (paramsList <- getSingleElementsParamsList(params))
           // yield an appropriate application node
