@@ -21,6 +21,9 @@ object CleanCodeGenerator {
  * this class support scala syntax without unnecessary parentheses and dots
  */
 class CleanCodeGenerator extends CodeGenerator {
+	// count coercions? (1 if yes)
+	val countCoercions = 0
+
   // import methods for easier document manipulation
   import FormatHelpers._
   import Document._
@@ -107,7 +110,7 @@ class CleanCodeGenerator extends CodeGenerator {
             // if inheritance function, just recursively transform
             if (decl.isInheritanceFun) {
               assert(params.size == 2)
-              return transform(params(1).toList, ctx) map { p => (p._1, 1 + p._2) }
+              return transform(params(1).toList, ctx) map { p => (p._1, countCoercions + p._2) }
             }
 
             // if literal just return simple name
