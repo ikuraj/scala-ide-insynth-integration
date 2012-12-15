@@ -2,12 +2,10 @@ package ch.epfl.insynth.test.completion
 
 import scala.collection.JavaConversions
 import scala.collection.JavaConverters
-
 import org.junit.Assert._
 import org.junit.Test
 import org.junit.BeforeClass
 import org.junit.Ignore
-
 import scala.tools.eclipse.testsetup.SDTTestUtils
 import scala.tools.eclipse.javaelements.ScalaCompilationUnit
 import scala.tools.nsc.interactive.Response
@@ -25,19 +23,31 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext
 import org.eclipse.jdt.core.ICompilationUnit
 import org.eclipse.core.runtime.NullProgressMonitor
 import scala.tools.eclipse.testsetup.TestProjectSetup
-
 import ch.epfl.insynth.core.completion.InsynthCompletionProposalComputer
 import ch.epfl.insynth.core.completion.InnerFinder
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
+import ch.epfl.insynth.Config
 
-object InSynthCompletionTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests")
+object InSynthCompletionTests extends TestProjectSetup("insynth", bundleName = "ch.epfl.insynth.tests") {
+  
+  @BeforeClass
+  def setup() {    
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.OfferedSnippetsPropertyString, 100)        
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.MaximumTimePropertyString, 500)
+		        
+		Activator.getDefault.getPreferenceStore.setValue(InSynthConstants.DoSeparateLoggingPropertyString, true)        
+		Config.proofTreeLevelToLog = 4
+  }
+  
+}
 
 class InSynthCompletionTests {
 	val testProjectSetup = new CompletionUtility(InSynthCompletionTests)
 	
 	import testProjectSetup._
 
+	@Ignore
   @Test
   def testExample1() {
     val oraclePos11 = ( List("A m", "0"), List("A.m()", "0") )
@@ -57,6 +67,7 @@ class InSynthCompletionTests {
     checkCompletionsDual("examplepkg2/Example2.scala")(exampleCompletions)
   }
   
+	@Ignore
   @Test
   def testExample3() {
     val oraclePos12regex = ( List("new A\\(\\) m1 (\\S+) => new A\\(\\) m2 \\1",

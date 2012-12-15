@@ -200,7 +200,7 @@ object InSynthWrapper {
   var builder:InitialEnvironmentBuilder = null;
   var predefDecls:List[Declaration] = null;
   
-  final val loadPredefs = true
+  final val loadPredefs = false
   
 }
 

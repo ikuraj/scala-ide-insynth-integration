@@ -5,7 +5,7 @@ import ch.epfl.insynth.core.preferences.LogManager
 
 object Config {  
   // flag which marks whether logging is enabled  
-  val isLogging = false
+  val isLogging = true
   // default weight for leave nodes (used in extraction phase)
   val weightForLeaves = 1.5d
   
@@ -16,15 +16,19 @@ object Config {
   
   // combinator loggers
   val loggerCombinator = Logger.getLogger("reconstruction.combination")  
-  val logStructures = Logger.getLogger("reconstruction.combination.structures")
-  val logApply = Logger.getLogger("reconstruction.combination.apply")  
+  // combinator structures
+  val logStructures = Logger.getLogger("reconstruction.combination.structures")  
+  // combinator apply method
+  val logApply = Logger.getLogger("reconstruction.combination.apply")
+  // combinator priority queue search
   val logPQAdding = Logger.getLogger("reconstruction.combination.apply.pqadding")
   // log of input proof tree level
-  val logCombinatorInputProofTreeLevel = 6  
-  // extractor logging
-  val logExtractor = Logger.getLogger("reconstruction.extractor")
+  val logCombinatorInputProofTreeLevel = 6
+  
   // intermediate transformer logging
   val logIntermediate = Logger.getLogger("reconstruction.intermediate")
+  // extractor logging
+  val logExtractor = Logger.getLogger("reconstruction.extractor")
   
   // static code for loggers setup  
   val array = Array(loggerCombinator, logStructures, logApply,
@@ -54,23 +58,29 @@ object Config {
 //    
 //    logExtractor.setLevel(Level.FINEST)
 //      
-//    val handler = new FileHandler("%h/combinator%u.log");
-//    val handlerEx = new FileHandler("%h/extractor%u.log");
-//    val handlerInt = new FileHandler("%h/intermediate%u.log");
-//    val handlerSol = new FileHandler("%h/solutions%u.log");
-//    handler.setFormatter(new SimpleFormatter)
-//    handlerEx.setFormatter(new SimpleFormatter)
-//    handlerInt.setFormatter(new SimpleFormatter)
-//    handlerSol.setFormatter(new SimpleFormatter)
-//    // PUBLISH this level
-//    handler.setLevel(Level.FINEST);
-//    handlerSol.setLevel(Level.FINEST)
-//    //logger.addHandler(handler);
-//    //logStructures.addHandler(handler);
-//    logExtractor.addHandler(handlerEx)
-    //logReconstructor.addHandler(handlerInt)
-    //logSolutions.addHandler(handlerSol)
-//    Logger.getLogger("reconstruction.combination.apply").addHandler(handler);
-//    Logger.getLogger("reconstruction.combination.structures").addHandler(handler);
+    val handler = new FileHandler("combinator%u.log");
+    val handlerEx = new FileHandler("extractor%u.log");
+    val handlerInt = new FileHandler("intermediate%u.log");
+    val handlerSol = new FileHandler("solutions%u.log");
+    val handlerRec = new FileHandler("reconstructor%u.log");
+    handler.setFormatter(new SimpleFormatter)
+    handlerEx.setFormatter(new SimpleFormatter)
+    handlerInt.setFormatter(new SimpleFormatter)
+    handlerSol.setFormatter(new SimpleFormatter)
+    handlerRec.setFormatter(new SimpleFormatter)
+    // PUBLISH this level
+    handler.setLevel(Level.ALL)
+    handlerSol.setLevel(Level.FINEST)
+    handlerRec.setLevel(Level.ALL)
+    logExtractor.addHandler(handlerEx)
+    logSolutions.addHandler(handlerSol)
+    Logger.getLogger("reconstruction.combination.apply").addHandler(handler)
+    logApply.setLevel(Level.ALL)
+    Logger.getLogger("reconstruction.combination.structures").addHandler(handler)
+    logStructures.setLevel(Level.ALL)
+    loggerCombinator.addHandler(handler)
+    loggerCombinator.setLevel(Level.ALL)
+    logReconstructor.addHandler(handlerRec)
+    logReconstructor.setLevel(Level.ALL)
   
 }
