@@ -1,6 +1,12 @@
 *.class
 *.log
 
+# project specific ignores
+**/.cache
+**/.classpath
+**/.settings
+SAV_Project_Report/document.pdf
+
 # sbt specific
 dist/*
 target/

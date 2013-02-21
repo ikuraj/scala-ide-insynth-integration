@@ -1,0 +1,21 @@
+Scala distinguishes between the following things:
+
+    Functions/methods with no parameter lists ("by-name parameter" if a function)
+    Functions with one empty parameter list
+    Functions with one parameter of type Unit
+    
+    
+map(type, container) ...
+type is equal to container.tpe???
+
+leafContext and leafDeclaration
+look from context; directly take declaration
+
+--------------------------------
+da, radi se unifikacija
+
+scala> def a1(a: Char, b:Char)(c:Char, d:Char):Unit = {}
+a1: (a: Char, b: Char)(c: Char, d: Char)Unit
+
+scala> def a2 = a1('a',_:Char)(_:Char,_:Char)
+a2: (Char, Char, Char) => Unit
