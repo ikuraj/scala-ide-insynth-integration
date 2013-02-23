@@ -26,7 +26,9 @@ object LogManager extends HasLogger {
 	eclipseLog.info("InSynth library logger configured to file path: " + inSynthLibraryLoggerFilePath);
 	
 	// create a file handler with appropriate path (no appending)
-	val inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, LogFileMaxSize, NumberOfLogFiles, true);
+	val inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, false)
+	// this causes issues on jenkins
+	//val inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, LogFileMaxSize, NumberOfLogFiles, true);
 
 	inSynthHandler.setLevel(Level.INFO);
 	// set simple text formatter
