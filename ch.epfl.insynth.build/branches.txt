@@ -6,5 +6,6 @@ uiTest - a branch containing working UI tests (stale)
 updatedExtractor - working on optimizing (and refactoring extractor)
 leon - working on with leon examples (not merged, no need to merge)
 issue10 - exercising tracked issue #10 (not merged, no need to merge)
+changesForEcosystem - recent changes needed for integration into the ecosystem (ongoing!)
 
 **note git 1.7.9 supports branch descriptions so this should be added accordingly
