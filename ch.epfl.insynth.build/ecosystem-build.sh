@@ -2,25 +2,24 @@
 
 # combinations of flavors to build
 ECLIPSE_FLAVORS=( "indigo" )
-SCALA_IDE_FLAVORS=( "dev-scala-ide-indigo-scala-2.9" )
-SCALA_FLAVORS=( "2.9.x" )
+SCALA_IDE_FLAVORS=( "scala-ide-indigo-scala-2.9" "scala-ide-indigo-scala-2.10" )
+SCALA_FLAVORS=( "2.9.x" "2.10.x" )
 
 # root dir (containing this script)
-ROOT_DIR=$(dirname $0)
-cd ${ROOT_DIR}
+#ROOT_DIR=$(dirname $0)
 ROOT_DIR=${PWD}
-#TARGET_DIR=/localhome/kuraj/temp/insynth-maven-build
-TARGET_DIR=/localhome/kuraj/Dropbox/Public/insynth
+TARGET_DIR=/localhome/kuraj/temp/insynth-maven-build
 
 for eclipse_flavor in "${ECLIPSE_FLAVORS[@]}"
 do
-for scala_ide_flavor in "${SCALA_IDE_FLAVORS[@]}"
-do
-for scala_flavor in "${SCALA_FLAVORS[@]}"
+for array_index in `seq 0 1`
 do
 
+scala_ide_flavor=${SCALA_IDE_FLAVORS[$array_index]}
+scala_flavor=${SCALA_FLAVORS[$array_index]}
+
 COMB="${eclipse_flavor}_${scala_ide_flavor}_${scala_flavor}"
-echo "Bulding InSynth for flavors ${eclipse_flavor} + ${scala_ide_flavor} + ${scala_flavor} into ${TARGET_DIR}/${COMB}"
+echo "Building InSynth for flavors ${eclipse_flavor} + ${scala_ide_flavor} + Scala ${scala_flavor} into ${TARGET_DIR}/${COMB}"
 
 mvn -Pset-versions -P$eclipse_flavor -P$scala_ide_flavor -P$scala_flavor -Dtycho.style=maven --non-recursive exec:java
 
@@ -31,7 +30,6 @@ mkdir -p ${TARGET_DIR}
 
 cp -r ${ROOT_DIR}/ch.epfl.insynth.update-site/target/site/ ${TARGET_DIR}/$COMB
 
-done
 done
 done
 
