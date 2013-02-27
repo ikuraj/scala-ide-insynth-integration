@@ -10,6 +10,8 @@ SCALA_FLAVORS=( "2.9.x" "2.10.x" )
 ROOT_DIR=${PWD}
 TARGET_DIR=/localhome/kuraj/temp/insynth-maven-build
 
+mkdir -p ${TARGET_DIR}
+
 for eclipse_flavor in "${ECLIPSE_FLAVORS[@]}"
 do
 for array_index in `seq 0 1`
@@ -26,9 +28,13 @@ mvn -Pset-versions -P$eclipse_flavor -P$scala_ide_flavor -P$scala_flavor -Dtycho
 mvn -Pset-versions -P$eclipse_flavor -P$scala_ide_flavor -P$scala_flavor clean package
 
 rm -rf ${TARGET_DIR}/$COMB
-mkdir -p ${TARGET_DIR}
 
 cp -r ${ROOT_DIR}/ch.epfl.insynth.update-site/target/site/ ${TARGET_DIR}/$COMB
+
+# if needed publishing to LARA update site
+echo "Copying files to insynth@laraserver.epfl.ch"
+ssh insynth@laraserver.epfl.ch "rm -rf ~/public_html/$COMB"
+scp -r ${TARGET_DIR}/$COMB insynth@laraserver.epfl.ch:~/public_html/
 
 done
 done
