@@ -1,9 +1,20 @@
 #!/bin/bash
 
+# url names for each flavor defined below
+URL_NAMES=(
+"indigo-2_9"
+"indigo-2_10"
+"juno-2_9"
+"juno-2_10"
+)
+
 # combinations of flavors to build
-ECLIPSE_FLAVORS=( "indigo" )
-SCALA_IDE_FLAVORS=( "scala-ide-indigo-scala-2.9" "scala-ide-indigo-scala-2.10" )
-SCALA_FLAVORS=( "2.9.x" "2.10.x" )
+FLAVORS=(
+"-Pindigo -Pscala-ide-indigo-scala-2.9 -P2.9.x"
+"-Pindigo -Pscala-ide-indigo-scala-2.10 -P2.10.x"
+"-Pjuno -Pscala-ide-juno-scala-2.9 -P2.9.x"
+"-Pjuno -Pscala-ide-juno-scala-2.10 -P2.10.x"
+)
 
 # root dir (containing this script)
 #ROOT_DIR=$(dirname $0)
@@ -12,31 +23,35 @@ TARGET_DIR=/localhome/kuraj/temp/insynth-maven-build
 
 mkdir -p ${TARGET_DIR}
 
-for eclipse_flavor in "${ECLIPSE_FLAVORS[@]}"
-do
-for array_index in `seq 0 1`
+for ((i=0; i < ${#FLAVORS[@]}; i++))
 do
 
-scala_ide_flavor=${SCALA_IDE_FLAVORS[$array_index]}
-scala_flavor=${SCALA_FLAVORS[$array_index]}
+FLAVOR=${FLAVORS[$i]}
 
-COMB="${eclipse_flavor}_${scala_ide_flavor}_${scala_flavor}"
-echo "Building InSynth for flavors ${eclipse_flavor} + ${scala_ide_flavor} + Scala ${scala_flavor} into ${TARGET_DIR}/${COMB}"
+COMB=${URL_NAMES[$i]}
+echo "Building InSynth with $FLAVOR into ${TARGET_DIR}/${COMB}"
 
-mvn -Pset-versions -P$eclipse_flavor -P$scala_ide_flavor -P$scala_flavor -Dtycho.style=maven --non-recursive exec:java
+mvn -Pset-versions $FLAVOR -Dtycho.style=maven --non-recursive exec:java
 
-mvn -Pset-versions -P$eclipse_flavor -P$scala_ide_flavor -P$scala_flavor clean package
+mvn -Pset-versions $FLAVOR clean package
+
+RETVAL=$?
+[ $RETVAL -ne 0 ] && echo "Maven build for $FLAVOR failed! Press enter to continue..." && read line
 
 rm -rf ${TARGET_DIR}/$COMB
 
 cp -r ${ROOT_DIR}/ch.epfl.insynth.update-site/target/site/ ${TARGET_DIR}/$COMB
 
 # if needed publishing to LARA update site
-echo "Copying files to insynth@laraserver.epfl.ch"
-ssh insynth@laraserver.epfl.ch "rm -rf ~/public_html/$COMB"
-scp -r ${TARGET_DIR}/$COMB insynth@laraserver.epfl.ch:~/public_html/
+if [ $# -lt 1 ];
+then
+	echo "Not copying files to insynth@laraserver.epfl.ch"
+else  
+	echo "Copying files to insynth@laraserver.epfl.ch"
+	ssh insynth@laraserver.epfl.ch "rm -rf ~/public_html/$COMB"
+	scp -r ${TARGET_DIR}/$COMB insynth@laraserver.epfl.ch:~/public_html/
+fi
 
-done
 done
 
 exit
