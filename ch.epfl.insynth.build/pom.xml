@@ -26,7 +26,7 @@
 
 		<!-- InSynth -->
 		<insynth.library.name>Specify a profile!</insynth.library.name>
-		<insynth.library.version>1.1.5</insynth.library.version>
+		<insynth.library.version>1.0.0</insynth.library.version>
 
 		<!-- dependencies repos -->
 		<eclipse.codename>Specify a profile!</eclipse.codename>
