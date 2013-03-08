@@ -8,7 +8,7 @@
 	</prerequisites>
 	<groupId>ch.epfl</groupId>
 	<artifactId>ch.epfl.insynth.build</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>Build project for the InSynth plugin</name>
 	<packaging>pom</packaging>
 
