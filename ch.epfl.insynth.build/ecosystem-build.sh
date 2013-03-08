@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # url names for each flavor defined below
 URL_NAMES=(
@@ -33,7 +33,7 @@ echo "Building InSynth with $FLAVOR into ${TARGET_DIR}/${COMB}"
 
 mvn -Pset-versions $FLAVOR -Dtycho.style=maven --non-recursive exec:java
 
-mvn -Pset-versions $FLAVOR clean package
+mvn -Pset-versions $FLAVOR -Dversion.tag=v clean package
 
 RETVAL=$?
 [ $RETVAL -ne 0 ] && echo "Maven build for $FLAVOR failed! Press enter to continue..." && read line

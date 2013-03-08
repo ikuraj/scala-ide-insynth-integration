@@ -4,7 +4,7 @@
   <parent>
     <groupId>ch.epfl</groupId>
     <artifactId>ch.epfl.insynth.build</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>ch.epfl.insynth.source.feature</artifactId>
   <packaging>eclipse-feature</packaging>
