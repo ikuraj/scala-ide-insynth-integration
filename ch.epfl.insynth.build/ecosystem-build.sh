@@ -2,18 +2,26 @@
 
 # url names for each flavor defined below
 URL_NAMES=(
-"indigo-2_9"
-"indigo-2_10"
-"juno-2_9"
-"juno-2_10"
+"dev-indigo-2_9"
+"dev-indigo-2_10"
+"dev-juno-2_9"
+"dev-juno-2_10"
+"stable-indigo-2_9"
+"stable-indigo-2_10"
+"stable-juno-2_9"
+"stable-juno-2_10"
 )
 
 # combinations of flavors to build
 FLAVORS=(
-"-Pindigo -Pscala-ide-indigo-scala-2.9 -P2.9.x"
-"-Pindigo -Pscala-ide-indigo-scala-2.10 -P2.10.x"
-"-Pjuno -Pscala-ide-juno-scala-2.9 -P2.9.x"
-"-Pjuno -Pscala-ide-juno-scala-2.10 -P2.10.x"
+"-Pindigo -Pdev-scala-ide-indigo-scala-2.9 -P2.9.x"
+"-Pindigo -Pdev-scala-ide-indigo-scala-2.10 -P2.10.x"
+"-Pjuno -Pdev-scala-ide-juno-scala-2.9 -P2.9.x"
+"-Pjuno -Pdev-scala-ide-juno-scala-2.10 -P2.10.x"
+"-Pindigo -Pstable-scala-ide-indigo-scala-2.9 -P2.9.x"
+"-Pindigo -Pstable-scala-ide-indigo-scala-2.10 -P2.10.x"
+"-Pjuno -Pstable-scala-ide-juno-scala-2.9 -P2.9.x"
+"-Pjuno -Pstable-scala-ide-juno-scala-2.10 -P2.10.x"
 )
 
 # root dir (containing this script)

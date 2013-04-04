@@ -161,28 +161,55 @@
 			</repositories>
 		</profile>
 
+		<!-- dev profiles - for Milestones and RCs -->
 		<profile>
-			<id>scala-ide-indigo-scala-2.9</id>
+			<id>dev-scala-ide-indigo-scala-2.9</id>
 			<properties>
 				<repo.scala-ide>${repo.scala-ide.root}/ecosystem/next/e37/scala29/dev/base/</repo.scala-ide>
 			</properties>
 		</profile>
 		<profile>
-			<id>scala-ide-indigo-scala-2.10</id>
+			<id>dev-scala-ide-indigo-scala-2.10</id>
 			<properties>
 				<repo.scala-ide>${repo.scala-ide.root}/ecosystem/next/e37/scala210/dev/base/</repo.scala-ide>
 			</properties>
 		</profile>
 		<profile>
-			<id>scala-ide-juno-scala-2.9</id>
+			<id>dev-scala-ide-juno-scala-2.9</id>
 			<properties>
 				<repo.scala-ide>${repo.scala-ide.root}/ecosystem/next/e38/scala29/dev/base/</repo.scala-ide>
 			</properties>
 		</profile>
 		<profile>
-			<id>scala-ide-juno-scala-2.10</id>
+			<id>dev-scala-ide-juno-scala-2.10</id>
 			<properties>
 				<repo.scala-ide>${repo.scala-ide.root}/ecosystem/next/e38/scala210/dev/base/</repo.scala-ide>
+			</properties>
+		</profile>
+		
+		<!-- stable profiles - for stable releases -->
+		<profile>
+			<id>stable-scala-ide-indigo-scala-2.9</id>
+			<properties>
+				<repo.scala-ide>${repo.scala-ide.root}/sdk/e37/scala29/stable/site/</repo.scala-ide>
+			</properties>
+		</profile>
+		<profile>
+			<id>stable-scala-ide-indigo-scala-2.10</id>
+			<properties>
+				<repo.scala-ide>${repo.scala-ide.root}/sdk/e37/scala210/stable/site/</repo.scala-ide>
+			</properties>
+		</profile>
+		<profile>
+			<id>stable-scala-ide-juno-scala-2.9</id>
+			<properties>
+				<repo.scala-ide>${repo.scala-ide.root}/sdk/e38/scala29/stable/site/</repo.scala-ide>
+			</properties>
+		</profile>
+		<profile>
+			<id>stable-scala-ide-juno-scala-2.10</id>
+			<properties>
+				<repo.scala-ide>${repo.scala-ide.root}/sdk/e38/scala210/stable/site/</repo.scala-ide>
 			</properties>
 		</profile>
 
