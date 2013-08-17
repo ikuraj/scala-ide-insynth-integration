@@ -11,15 +11,21 @@ This project contains plugins for building **InSynth** plugin in `Scala IDE`_.
 Building
 --------
 
-Maven is used to manage the build process.  The project can be built for Scala IDE 2.0.2 (stable) and master (nightly/2.1.0).
+The build is based on Maven and Tycho. There are several profiles to account for the different version of our dependencies:
 
-*To build for Scala IDE with Scala 2.9 (nightly/2.9), use
+* Scala IDE (milestone or nightly)
+* Scala (2.9 or 2.10)
+* Eclipse (indigo) 
 
-  $ mvn clean install -P scala-ide-master-scala-2.9
+You should check the existing profiles directly in the project's POM. But let's have an example of how you can compose the different profiles.
 
-*To build for Scala IDE with Scala 2.10 (nightly/2.1.0), use
+Say you want to build InSynth for the Scala IDE nightly bundled with Scala 2.9, for Eclipse indigo. Here is the Maven command you should enter:
 
-  $ mvn clean install -P scala-ide-master-scala-trunk
+  ```mvn -P 2.9.x -P nightly-scala-ide-scala-2.9 -P indigo clean install```
+
+What if instead you wanted to build InSynth against the latest available milestone, instead of against the nightly? That's easy as well:
+
+  ```mvn -P 2.9.x -P dev-scala-ide-indigo-scala-2.9 -P indigo clean install```
 
 InSynth user documentation
 ==========================

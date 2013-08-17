@@ -1,17 +1,16 @@
 package ch.epfl.insynth.reconstruction.combinator
 
+import scala.math.min
+
 import ch.epfl.insynth.{ env => InSynth }
 import ch.epfl.insynth.trees.{ Type, BottomType }
-import java.util.logging.Logger
 import ch.epfl.insynth.trees.FormatType
 import ch.epfl.insynth.reconstruction.intermediate.NullLeaf
 import ch.epfl.insynth.env.FormatNode
-import java.util.logging.Level
-import java.util.logging.ConsoleHandler
-import java.util.logging.FileHandler
-import java.util.logging.SimpleFormatter
 import ch.epfl.insynth.reconstruction.Config
 import ch.epfl.insynth.env.FormatNode
+
+import java.util.logging.{ Logger, Level, ConsoleHandler, FileHandler, SimpleFormatter }
 
 // TODO set required combinations in each Tree node after we hit the limit in the top
 // tree
@@ -117,7 +116,7 @@ extends Combinations
 	  Config.logStructures.info("Tree(" + this + ") received decl with weight " +
         decl.getMinComputedWeight + "and has minWeight " + minWeight)
     }
-    minWeight = Math.min(getTraversalWeight + decl.getMinComputedWeight, minWeight)
+    minWeight = min(getTraversalWeight + decl.getMinComputedWeight, minWeight)
     parent.childDone(this)
   }
   
