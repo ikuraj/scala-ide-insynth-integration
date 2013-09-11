@@ -15,35 +15,18 @@
     <dependency>
       <groupId>ch.epfl</groupId>
       <artifactId>ch.epfl.insynth.library</artifactId>
-      <version>1.0.0</version>
+      <version>${scala.version.short}_${insynth.library.version}</version>
+    </dependency>    
+    <dependency>
+      <groupId>com.typesafe</groupId>
+      <artifactId>scalalogging-log4j_${scala.version.short}</artifactId>
+      <version>1.0.1</version>
     </dependency>
   </dependencies>
 
   <build>
     <plugins> 
-			<!--<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>2.3.1</version>
-				<executions>
-					<execution>
-						<id>install-insynth-library</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<configuration>
-							<file>${basedir}/lib/ch.epfl.insynth.library.jar
-							</file>
-							<groupId>ch.epfl</groupId>
-							<artifactId>ch.epfl.insynth.library</artifactId>
-							<version>0.0.1-SNAPSHOT</version>
-							<packaging>jar</packaging>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin> -->
-      <plugin>
+	  <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.4</version>
@@ -55,6 +38,7 @@
               <goal>copy</goal>
             </goals>
             <configuration>
+              <stripVersion>true</stripVersion>
               <artifactItems>
                 <artifactItem>
                   <groupId>ch.epfl</groupId>

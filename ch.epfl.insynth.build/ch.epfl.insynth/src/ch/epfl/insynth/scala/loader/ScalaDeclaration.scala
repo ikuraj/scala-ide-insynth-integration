@@ -6,9 +6,8 @@ import insynth.load.Declaration
 import ch.epfl.insynth.scala
 import ch.epfl.insynth.scala._
 
-case class ScalaDeclaration(val fullName: String, val inSynthType: Type, val scalaType: ScalaType,
-  private var weight: Weight = new Weight(1.0f))
-	extends Declaration(inSynthType, weight.getValue.toFloat) {
+case class ScalaDeclaration(val fullName: String, override val inSynthType: Type, val scalaType: ScalaType,
+  var weight: Weight = new Weight(1.0f)) extends Declaration(inSynthType) {
   assert(fullName != null && inSynthType != null)
   
   private var method = false
@@ -57,11 +56,13 @@ case class ScalaDeclaration(val fullName: String, val inSynthType: Type, val sca
   def getObjectName = this.objectName  
   def setObjectName(objectName:String) {this.objectName = objectName}
         
-  def getWeight = weight.getValue
+  override def getWeight = weight.getValue
   
   def setWeight(weight:Weight){this.weight = weight}
   
-  def getType = inSynthType
+  override def getType = inSynthType
+
+  override def getDomainType = DomainTypeTransformer(scalaType) 
 
   override def getSimpleName = if (simpleName != null) simpleName 
                       else {
@@ -83,6 +84,7 @@ case class ScalaDeclaration(val fullName: String, val inSynthType: Type, val sca
               case scala.Const(name) => name
               case scala.Instance(name, params) => name
               case scala.Function(params, returnType) => "scala.Function"+params.length
+              case _ => throw new UnsupportedOperationException
             }
         }
         list.mkString(" ",",","")
@@ -122,7 +124,7 @@ case class ScalaDeclaration(val fullName: String, val inSynthType: Type, val sca
   def isApply = this.apply
   def setIsApply(apply:Boolean){this.apply = apply}
   
-  def isQuery = this.query
+  override def isQuery = this.query
   def setIsQuery(query:Boolean){this.query = query}
 
   def isLocal = this.local

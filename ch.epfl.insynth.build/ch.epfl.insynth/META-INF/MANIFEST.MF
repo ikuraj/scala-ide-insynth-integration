@@ -19,8 +19,11 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- target/lib/ch.epfl.insynth.library-1.0.0.jar
-Export-Package: ch.epfl.insynth.reconstruction;uses:="scala.collection.immutable,ch.epfl.insynth.env",
+ target/lib/ch.epfl.insynth.library.jar
+Export-Package: ch.epfl.insynth,
+ ch.epfl.insynth.core,
+ ch.epfl.insynth.core.completion,
+ ch.epfl.insynth.reconstruction,
  ch.epfl.insynth.reconstruction.codegen,
- ch.epfl.insynth.reconstruction.combinator,
- ch.epfl.insynth.reconstruction.intermediate
+ ch.epfl.insynth.scala,
+ ch.epfl.insynth.scala.loader

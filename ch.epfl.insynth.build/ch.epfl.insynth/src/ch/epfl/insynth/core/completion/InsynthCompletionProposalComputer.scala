@@ -1,35 +1,27 @@
-package ch.epfl.insynth.core.completion
+package ch.epfl.insynth.core
+package completion
+
+import java.io._
 
 import scala.collection.JavaConverters._
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer
-import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext
+
+import org.eclipse.jdt.ui.text.java._
 import org.eclipse.core.runtime.IProgressMonitor
-import org.eclipse.jface.text.contentassist.ICompletionProposal
-import org.eclipse.jface.text.contentassist.IContextInformation
-import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext
+import org.eclipse.jface.text.contentassist.{ ICompletionProposal, IContextInformation }
+
 import scala.tools.eclipse.javaelements.ScalaCompilationUnit
-import org.eclipse.jface.text.contentassist.CompletionProposal
-import java.io.FileWriter
-import java.io.BufferedWriter
 import scala.tools.nsc.interactive.Global
-import scala.tools.nsc.util.SourceFile
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import scala.tools.nsc.util.Position
-import java.io.OutputStreamWriter
-import ch.epfl.insynth.InSynth
-import ch.epfl.insynth.util.TreePrinter
-import ch.epfl.insynth.env.InitialEnvironmentBuilder
-import ch.epfl.insynth.env.Declaration
-import ch.epfl.insynth.reconstruction.Output
-import ch.epfl.insynth.reconstruction.Reconstructor
-import ch.epfl.insynth.core.Activator
 import scala.tools.eclipse.logging.HasLogger
-import ch.epfl.insynth.reconstruction.Output
+
+import insynth.engine.InitialEnvironmentBuilder
+import insynth.load.Declaration
+
 import ch.epfl.insynth.Config
 import ch.epfl.insynth.core.preferences.InSynthConstants
-import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator, ClassicStyleCodeGenerator, ApplyTransfromer }
-import ch.epfl.insynth.reconstruction.codegen.SimpleApplicationNamesTransfromer
+import ch.epfl.insynth.InSynth
+import ch.epfl.insynth.reconstruction._
+import ch.epfl.insynth.reconstruction.Output
+import ch.epfl.insynth.reconstruction.codegen._
 
 /* 
 TODO:
@@ -54,12 +46,14 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
         Config.inSynthLogger.info("InSynth working on source file: " + sourceFile.path)
         logger.info("InSynth working on source file: " + sourceFile.path)
 
+        val codegen = getSourceCodeGenerator
+
         if (compiler != InSynthWrapper.compiler) {
           InSynthWrapper.compiler = compiler
-          InSynthWrapper.insynth = new InSynth(compiler)
+          InSynthWrapper.insynth = new InSynth(compiler, codegen)
         } else {
           if (InSynthWrapper.insynth == null) {
-            InSynthWrapper.insynth = new InSynth(compiler)
+            InSynthWrapper.insynth = new InSynth(compiler, codegen)
           }
         }
 
@@ -78,26 +72,13 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
         predefBuildLoader = new PredefBuilderLoader()
         
         try {
-          InSynthWrapper.builder.synchronized {
-            val solution = InSynthWrapper.insynth.getSnippets(sourceFile.position(position), InSynthWrapper.builder)
-
-            if (solution != null) {
-            	logger.info("InSynth solution found, proceeding with reconstructor.")
-            	
-            	// get appropriate source code generator
-            	val codeGenerator = getSourceCodeGenerator
-            	            	
-              Some(
-                Reconstructor(solution.getNodes.head, codeGenerator).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
-        			)
-            }
-            else {
-            	logger.warn("InSynth solution not found")
-              None
-            }
+          InSynthWrapper.builder.synchronized {                       	
+            InSynthWrapper.insynth
+            	.getSnippets(sourceFile.position(position), InSynthWrapper.builder) map
+            	{ _.sortWith((x, y) => x.getWieght< y.getWieght) } // + "   w = "+x.getWieght.getValue)
           }
         } catch {
-          case ex =>
+          case ex: Throwable  =>
             logger.error("InSynth synthesis failed.", ex)
             None
         } finally {          

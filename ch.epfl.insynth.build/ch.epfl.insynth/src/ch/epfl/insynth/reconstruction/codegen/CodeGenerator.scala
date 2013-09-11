@@ -1,35 +1,38 @@
 package ch.epfl.insynth.reconstruction.codegen
 
-import ch.epfl.insynth.reconstruction.intermediate._
-import ch.epfl.insynth.trees
-import ch.epfl.scala.{ trees => Scala }
-import ch.epfl.insynth.print._
-import ch.epfl.insynth.reconstruction.combinator.{ NormalDeclaration, AbsDeclaration }
+import insynth.reconstruction.stream.Node
+import ch.epfl.insynth.scala
 
-import scala.text.Document
-import scala.text.Document.empty
+import insynth.util.format._
+
+import _root_.scala.text.Document
+import _root_.scala.text.Document.empty
 
 /**
  * class that converts an intermediate tree into a list of output elements (elements
  * capable of Scala code generation)
  * should be extended to provide syntax-style variants
  */
-abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
+abstract class CodeGenerator extends (Node => CodeGenOutput) {
+  import ScalaExtractors._
+
   // import methods for easier document manipulation
   import FormatHelpers._
   import Document._
   // convenience ?: operator
   import Bool._
 
+  implicit def documentToCodeGenOutput = CodeGenOutput(_: Document)
+
   /**
    * takes the tree and calls the recursive function and maps documents to Output elements
    * @param tree root of intermediate (sub)tree to transform
    * @return list of output (code snippet) elements
    */
-  def apply(tree:Node) = {
+  def apply(tree: Node) = {
     tree match {
-      case Application(Scala.Function(_, _ /* BottomType */), queryDec :: List(set)) =>
-      	transform(set.toList, TransformContext.Expr) map { CodeGenOutput(_:Document) }
+      case Application(scala.Function(_, _ /* BottomType */), queryDec :: List(list)) =>
+      	transform(list, TransformContext.Expr)
       case _ => throw new RuntimeException
     }    
   }
@@ -49,55 +52,36 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
    * @return list of documents containing all combinations of available expression for
    * the given (sub)tree
    */
-  def transform(tree: Node, ctx: TransformContext = Expr): List[Document]
+  def transform(tree: Node, ctx: TransformContext = Expr): Document
   
   /**
    * transform a scala type into an appropriate document
    * @param scalaType scala type to transform
    * @return an appropriate document
    */
-  protected def transform(scalaType: Scala.ScalaType): Document =
+  protected def transform(scalaType: scala.ScalaType): Document =
     scalaType match {
-	  case Scala.Function(params, returnType) =>
-	    paren(seqToDoc(params, ",", { param:Scala.ScalaType => transform(param) } )) :/:
+	  case scala.Function(params, returnType) =>
+	    paren(seqToDoc(params, ",", { param:scala.ScalaType => transform(param) } )) :/:
 	    "=>" :/: transform(returnType)	    		
-	  case Scala.Const(name) => name	    		
-	  case Scala.Instance(name, list) =>
-	    name :: sqBrackets( seqToDoc(list, ",", transform(_:Scala.ScalaType) ) )
+	  case scala.Const(name) => name	    		
+	  case scala.Instance(name, list) =>
+	    name :: sqBrackets( seqToDoc(list, ",", transform(_:scala.ScalaType) ) )
 	  case _ => throw new RuntimeException
   	}
   
   /**
-   * helper method which transforms each element of the given list
-   * @param nodeList parameter list to transform
-   * @return a list of documents, concatenation of lists of transformed documents
-   * for each element of the parameter list 
-   */
-  protected def transform(nodeList: List[Node], ctx: TransformContext): List[Document] = {
-    (List[Document]() /: nodeList) {
-      (list, node) => {
-        list ++ transform(node, ctx)
-      }
-    }
-  }
-  
-  /**
-   * generates all documents which represent all combinations of parameters according
-   * to the given parameter list
+   * generates parameter list according
    * @param params parameter list for transform
    * @return list of documents with all parameter combinations
    */
-  protected def getParamsCombinations(params: List[Set[Node]], ctx: TransformContext = Par):List[Document] = {
-    def getParamsCombinationsRec(listOfPicked: List[Document], params: List[Set[Node]]):List[Document] = {
+  protected def getParamsCombinations(params: List[Node], ctx: TransformContext = Par): Document = {
+    def getParamsCombinationsRec(listOfPicked: List[Document], params: List[Node]): Document = {
       params match {
         case List() =>
-          List(foldDoc(listOfPicked.tail, ", "))
-        case set :: list =>
-          (List[Document]() /: transform(set.toList, ctx)) {
-            (listSoFar, el) => {
-              listSoFar ++ getParamsCombinationsRec(listOfPicked :+ el, list)
-            }
-          }
+          foldDoc(listOfPicked.tail, ", ")
+        case el :: list =>
+          getParamsCombinationsRec(listOfPicked :+ transform(el, ctx), list)          
       }
     }
     
@@ -111,14 +95,15 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
    * @param paramsInfo parameter list information
    * @return list of documents with all parameter combinations
    */
-  protected def getParamsCombinations(params: List[Set[Node]], paramsInfo: List[List[Scala.ScalaType]], parenthesesRequired: Boolean):List[Document] = {
+  protected def getParamsCombinations(params: List[Node], paramsInfo: List[List[scala.ScalaType]], parenthesesRequired: Boolean): Document = {
     
+    assert(params.size == paramsInfo.flatten.size)
     // convenient solution for currying
     val backToBackParentheses: Document = ")("
     
     def getParamsCombinationsRec(
-        params: List[Set[Node]],
-        paramsInfo: List[List[Scala.ScalaType]]):List[Document] = 
+        params: List[Node],
+        paramsInfo: List[List[scala.ScalaType]]): Document = 
     {
       paramsInfo match {
         case List(lastList) =>
@@ -127,17 +112,12 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
           // return the list of transformed last parentheses parameters
           getParamsCombinations(params)
         case currentList :: restOfTheList => {
-          val currentListDocuments = getParamsCombinations(params take currentList.size)
-          // go through all recursively got documents
-          (List[Document]() /: getParamsCombinationsRec((params drop currentList.size), restOfTheList)) {
-            (list, currentDocument) =>
-              // add the combination with current parentheses documents
-              list ++ currentListDocuments map {
-                (_:Document) :: backToBackParentheses :: currentDocument
-              }
-          }
+          val currentListDocument = getParamsCombinations(params take currentList.size)
+          
+          currentListDocument :: backToBackParentheses ::
+          	getParamsCombinationsRec((params drop currentList.size), restOfTheList)          
         }
-        case Nil => List(empty)
+        case Nil => empty
       }
     }
     
@@ -155,14 +135,16 @@ abstract class CodeGenerator extends (Node => List[CodeGenOutput]) {
   // declare an implicit helper
   // ?:: concatenates the documents only if first one is not `empty` otherwise result is `empty`
   sealed case class DocumentHelper(innerDoc: Document) {
+    import _root_.scala.text._
+
     def ?::(argDoc: Document) = addOrEmpty(argDoc, innerDoc)
     def ?::(argDoc: String) = addOrEmpty(argDoc, innerDoc)
     def :/?:(argDoc: Document): Document = innerDoc match {
-      case scala.text.DocNil => argDoc
+      case DocNil => argDoc
       case _ => argDoc :/: innerDoc
     }
     def :?/:(argDoc: Document): Document = argDoc match {
-      case scala.text.DocNil => innerDoc
+      case DocNil => innerDoc
       case _ => argDoc :/: innerDoc
     }
   }	

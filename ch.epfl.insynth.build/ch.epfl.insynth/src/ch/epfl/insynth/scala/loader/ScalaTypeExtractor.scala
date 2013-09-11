@@ -47,7 +47,7 @@ object ScalaTypeExtractor {
     try{
       Some(traverse(tpe))
     } catch {
-      case ex =>
+      case ex: Throwable =>
         fine("exception " + ex)
         fine(ex.getStackTrace.mkString("\n"))
         None

@@ -1,10 +1,10 @@
 package ch.epfl.insynth.reconstruction.codegen
 
-import ch.epfl.insynth.reconstruction.intermediate._
-import ch.epfl.insynth.trees
-import ch.epfl.scala.{ trees => Scala }
-import ch.epfl.insynth.print._
-import ch.epfl.insynth.reconstruction.combinator.{ NormalDeclaration, AbsDeclaration }
+import insynth.reconstruction.stream._
+import ch.epfl.insynth.scala.loader.{ ScalaDeclaration => Declaration }
+import ch.epfl.insynth.{ scala => Scala }		
+
+import insynth.util.format._
 
 import scala.text.Document
 import scala.text.Document.empty
@@ -33,7 +33,7 @@ class CleanCodeGenerator extends CodeGenerator {
    * @return list of documents containing all combinations of available expression for
    * the given (sub)tree
    */
-  override def transform(tree: Node, ctx: TransformContext = Expr): List[Document] = {
+  override def transform(tree: Node, ctx: TransformContext = Expr): Document = {
     
     // a local variable to set if parentheses are needed
     var parenthesesRequired = true
@@ -65,15 +65,12 @@ class CleanCodeGenerator extends CodeGenerator {
       // variable (declared previously as arguments)
       // NOTE case when it is an argument (type is not needed)
       //case Variable(tpe, name) if ctx==Arg => List ( group(name :: ": " :: transform(tpe) ) )
-      case Variable(tpe, name) => List(name)
+      case Variable(tpe, name) => name
       // identifier from the scope
       case Identifier(tpe, dec) =>
-        List(dec.getSimpleName)
+        dec.getSimpleName
       // apply parameters in the tail of params according to the head of params 
       case Application(tpe, params) => {
-        // so far as we constructed, there should be only one application definition term
-        // (which tells us, whether it is a function a method...)
-        assert(params.head.size == 1)
 
         // import ternary operator
         import Bool._
@@ -83,58 +80,49 @@ class CleanCodeGenerator extends CodeGenerator {
           // set the recursive transformation context
           val recCtx = if (params.tail.size == 1) SinglePar else Par
           // go through all possible transformations of functions
-          (List[Document]() /: transform(params.head.head, App)) {
-            (list, appIdentifier) =>
-              // get every possible parameter combination
-              (list /: getParamsCombinations(params.tail, recCtx)) {
-                (list2, paramsDoc) =>
-                  list2 :+
-                    group(doParenApp(appIdentifier, paramsDoc))
-              }
-          }
+          val appIdentifier = transform(params.head, App)
+          val paramsDoc = getParamsCombinations(params.tail, recCtx)
+          
+        	group(doParenApp(appIdentifier, paramsDoc))          
         }
 
         // match the application definition term
-        params.head.head match {
-          case Identifier(_, NormalDeclaration(decl)) => {
+        params.head match {
+          case Identifier(_, decl: Declaration) if !decl.isAbstract => {
             // transform the application identifier in an application context
-            val appIdentifier = transform(params.head.head, App).head
+            val appIdentifier = transform(params.head, App)
 
             /* check what the declaration says about the application */
 
             // if inheritance function, just recursively transform
             if (decl.isInheritanceFun) {
               assert(params.size == 2)
-              return transform(params(1).toList, ctx)
+              return transform(params(1), ctx)
             }
 
             // if literal just return simple name
             if (decl.isLiteral) {
               assert(params.size == 1)
-              return List(decl.getSimpleName)
+              return decl.getSimpleName
             }
 
             // constructor call
             // NOTE cannot be curried?
             if (decl.isConstructor) {
-              assert(params(1).size == 1)
-              assert(params(1).head == NullLeaf)
+              assert(params(1) == NullLeaf)
               // set if we need parentheses
               parenthesesRequired =
                 // if there are any parameters or ctx is as receiver (App)
                 params.drop(2).size > 0 || ctx == App
               // go through all combinations of parameters documents
-              return (List[Document]() /: getParamsCombinations(params.drop(2))) {
-                (list, paramsDoc) =>
-                  list :+
-                    group("new" :/: doParenApp(appIdentifier, paramsDoc))
-              }
+                val paramsDoc = getParamsCombinations(params.drop(2))
+                
+                group("new" :/: doParenApp(appIdentifier, paramsDoc))              
             }
             
             // method is on some object
             if (decl.belongsToObject) {
-              assert(params(1).size == 1)
-              assert(params(1).head == NullLeaf)
+              assert(params(1) == NullLeaf)
               
               // get info about parameters
               val paramsInfo = decl.scalaType match {
@@ -153,13 +141,11 @@ class CleanCodeGenerator extends CodeGenerator {
 	              }
               
               // go through all combinations of parameters documents
-              return (List[Document]() /: getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)) {
-                (list, paramsDoc) =>
-                  list :+
-                    // TODO when to generate dot and when not??
-                    //group(decl.getObjectName :: "." :: doParen(appIdentifier, paramsDoc))
-                    group(doParenRecApp(decl.getObjectName, appIdentifier, paramsDoc))
-              }
+              val paramsDoc = getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)
+              
+              // TODO when to generate dot and when not??
+              //group(decl.getObjectName :: "." :: doParen(appIdentifier, paramsDoc))
+              group(doParenRecApp(decl.getObjectName, appIdentifier, paramsDoc))              
             }
 
             // TODO refactor - similar to the method construction 
@@ -167,28 +153,19 @@ class CleanCodeGenerator extends CodeGenerator {
               assert(params.size == 2)
               // if the field needs this keyword
               val needsThis = decl.hasThis
-              (List[Document]() /: params(1)) {
-                (listDocsReceivers, receiver) =>
-                  {
-                    // get documents for the receiver objects (or empty if none is needed)
-                    val documentsForThis = {
-                      if (!needsThis)
-                        receiver match {
-                          case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
-                            List(empty)
-                          case _ => transform(receiver, App)
-                        }
-                      else transform(receiver, App)
-                    }
-                    // go through all the receiver objects and add to the list
-                    (listDocsReceivers /: documentsForThis) {
-                      (listDocsTransformedReceiver, receiverDoc) =>
-                        {
-                          listDocsTransformedReceiver :+ group(receiverDoc :?/: appIdentifier)
-                        }
-                    }
+              val receiver = params(1)
+                
+              // get documents for the receiver objects (or empty if none is needed)
+              val documentsForThis = {
+                if (!needsThis)
+                  receiver match {
+                    case Identifier(_, receiverDecl: Declaration) if receiverDecl.isThis => empty
+                    case _ => transform(receiver, App)
                   }
+                else transform(receiver, App)
               }
+              
+              group(documentsForThis :?/: appIdentifier)              
             } 
             
             else if (!decl.isMethod) {
@@ -216,72 +193,57 @@ class CleanCodeGenerator extends CodeGenerator {
               
               // if the method needs this keyword
               val needsThis = decl.hasThis
-              
-              (List[Document]() /: params(1)) {
-                (listDocsReceivers, receiver) =>
-                  {
-                    // get documents for the receiver objects (or empty if none is needed)
-                    val documentsForThis = {
-                      if (!needsThis)
-                        receiver match {
-                          case Identifier(_, NormalDeclaration(receiverDecl)) if receiverDecl.isThis =>
-                            parenthesesRequired = params.drop(2).size >= 1
-                            List(empty)
-                          case _ => transform(receiver, App) // map { (_:Document) :: "." }			            
-                        }
-                      else transform(receiver, App) // map { (_:Document) :: "." }
-                    }
+              val receiver = params(1)
                     
-                    // go through all the receiver objects and add to the list
-                    (listDocsReceivers /: documentsForThis) {
-                      (listDocsTransformedReceiver, receiverDoc) =>
-                        {
-                          // go through all combinations of parameters documents
-                          (listDocsTransformedReceiver /: getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)) {
-                            // and add them to the list
-                            (listDocsTransformedParameters, paramsDoc) =>
-                              listDocsTransformedParameters :+
-                                group(doParenRecApp(receiverDoc, appIdentifier, paramsDoc))
-                          }
-                        }
-                    }
+              // get documents for the receiver objects (or empty if none is needed)
+              val documentsForThis = {
+                if (!needsThis)
+                  receiver match {
+                    case Identifier(_, receiverDecl: Declaration) if receiverDecl.isThis =>
+                      parenthesesRequired = params.drop(2).size >= 1
+                      empty
+                    case _ => transform(receiver, App) // map { (_:Document) :: "." }			            
                   }
+                else transform(receiver, App) // map { (_:Document) :: "." }
               }
+              
+              // go through all the receiver objects and add to the list              
+              // go through all combinations of parameters documents
+              val paramsDoc = getParamsCombinations(params.drop(2), paramsInfo, parenthesesRequired)
+                // and add them to the list
+              group(doParenRecApp(documentsForThis, appIdentifier, paramsDoc))              
             }
           }
+
           // function that is created as an argument or anything else
-          case Identifier(_, _: AbsDeclaration) | _: Variable | _ =>
+          case Identifier(_, d: Declaration) if d.isAbstract =>
+          	firstTermFunctionTransform
+          case _: Variable | _ =>
             firstTermFunctionTransform
         }
       }
       // abstraction first creates all of its arguments
-      case Abstraction(tpe, vars, subtrees) =>
+      case Abstraction(tpe, vars, subtree) =>
         assert(vars.size > 0)
         // check if we need parentheses for variables
         parenthesesRequired = vars.size > 1
         // for all bodies of this abstraction
-        val abstractionResults = (List[Document]() /: subtrees) {
-          (listOfAbstractions, body) =>
-            {
-              listOfAbstractions ++
-                // for all transformations of bodies
-                (List[Document]() /: transform(body, Expr)) {
-                  (listOfBodies, transformedBody) =>
-                    listOfBodies :+ (
-                      // transform argument variables
-                      doParen(seqToDoc(vars, ", ", { v: Variable => transform(v, Arg).head }))
-                      :/: "=>" :/:
-                      // transform the body
-                      transformedBody)
-                }
-            }
-        }
+        // for all transformations of bodies
+        val transformedBody = transform(subtree, Expr)
+
+        val abstractionResult =
+	        // transform argument variables
+	        doParen(seqToDoc(vars, ", ", { v: Variable => transform(v, Arg) })) :/:
+	        "=>" :/:
+	        // transform the body
+	        transformedBody
+        
         // return abstraction results
         // we need brackets only if this abstraction is parameter and it will not have parentheses
         if (ctx == SinglePar)
-          abstractionResults map { brackets(_: Document) }
+          brackets(abstractionResult)
         else
-          abstractionResults
+          abstractionResult
     }
   }
   

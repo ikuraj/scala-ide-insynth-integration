@@ -71,7 +71,7 @@ trait TDeclarationFactory extends TData with HasLogger {
             val inSynthType = TypeTransformer.transform(scalaType)
             Some(Declaration(name, inSynthType, scalaType))
           } catch {
-            case ex =>
+            case ex : Throwable =>
 				      fine("exception " + ex)
 				      fine(ex.getStackTrace.mkString("\n"))
               None
@@ -89,7 +89,7 @@ trait TDeclarationFactory extends TData with HasLogger {
             val inSynthType = TypeTransformer.transform(scalaType)
             Some(Declaration(name, inSynthType, scalaType))
           } catch {
-            case ex =>
+            case ex: Throwable  =>
 			        fine("exception " + ex)
 			        fine(ex.getStackTrace.mkString("\n"))
 			        None
@@ -113,7 +113,7 @@ trait TDeclarationFactory extends TData with HasLogger {
                 decl.setInheritanceFun(true)
                 Some(decl)
               } catch {
-                case ex => 
+                case ex: Throwable  => 
 					        fine("exception " + ex)
 					        fine(ex.getStackTrace.mkString("\n"))
 					        None
