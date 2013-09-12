@@ -20,7 +20,7 @@
     <dependency>
       <groupId>ch.epfl</groupId>
       <artifactId>ch.epfl.insynth.library</artifactId>
-      <version>1.0.0</version>
+      <version>${scala.version.short}_${insynth.library.version}</version>
     </dependency>
   </dependencies>
 
@@ -49,6 +49,7 @@
               <goal>copy</goal>
             </goals>
             <configuration>
+              <stripVersion>true</stripVersion>
               <artifactItems>
                 <artifactItem>
                   <groupId>ch.epfl</groupId>
@@ -64,4 +65,3 @@
   </build>
 
 </project>
-

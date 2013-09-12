@@ -6,10 +6,10 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: ch.epfl
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: .,
- target/lib/ch.epfl.insynth.library-1.0.0.jar
+ target/lib/ch.epfl.insynth.library.jar
 Require-Bundle: org.scala-ide.scala.library,
  org.eclipse.equinox.weaving.aspectj,
  org.junit4;bundle-version="4.8.1"
 Import-Package: org.aspectj.weaver.loadtime.definition,
  scala.tools.eclipse.testsetup
-Fragment-Host: ch.epfl.insynth;bundle-version="1.0.0"
+Fragment-Host: ch.epfl.insynth
