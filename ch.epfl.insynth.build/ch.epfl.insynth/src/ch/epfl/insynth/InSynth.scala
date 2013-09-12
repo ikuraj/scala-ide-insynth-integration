@@ -53,10 +53,9 @@ class InSynth(val compiler: Global, codeGenerator: CodeGenerator)
     if (solution != null) {
     	info("InSynth solution found, proceeding with reconstructor.")
     	
-//      Some(
-//        Reconstructor(solution.getNodes.head, codeGenerator).sortWith((x, y) => x.getWieght.getValue < y.getWieght.getValue) // + "   w = "+x.getWieght.getValue)
-//			)
-    	None
+      Some(
+        Reconstructor(solution.getNodes.head, codeGenerator).sortWith((x, y) => x.getWieght< y.getWieght) // + "   w = "+x.getWieght.getValue)
+			)
     }
     else {
     	warning("InSynth solution not found")

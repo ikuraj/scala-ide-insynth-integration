@@ -1,10 +1,10 @@
-package ch.epfl.insynth.test.reconstructor
+package ch.epfl.insynth.reconstruction
 
 import org.junit.Assert._
 import org.junit.Test
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
-import ch.epfl.insynth.reconstruction.Reconstructor
+
 import ch.epfl.insynth.reconstruction.codegen.CleanCodeGenerator
 
 class FeaturesTest {
@@ -27,7 +27,7 @@ class FeaturesTest {
             val matchExpected = expectedString
             output.getSnippet match {
               case `matchExpected` =>
-                assertEquals(expectedWeight, output.getWieght.getValue, 0d)
+                assertEquals(expectedWeight, output.getWieght, 0d)
                 true
               case _ => result
             }

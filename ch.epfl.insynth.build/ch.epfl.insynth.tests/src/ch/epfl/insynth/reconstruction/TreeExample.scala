@@ -1,8 +1,9 @@
-package ch.epfl.insynth.test.reconstructor
+package ch.epfl.insynth.reconstruction
 
-import ch.epfl.insynth.env._
-import ch.epfl.scala.trees._
-import ch.epfl.insynth.trees.{ Const=>InSynthConst, Type=>InSynthType, _ }
+import ch.epfl.insynth.scala._
+import ch.epfl.insynth.scala.loader.{ ScalaDeclaration => Declaration }
+import insynth.structures.{ Const=>InSynthConst, SuccinctType=>InSynthType, Function=>SuccFunction, _ }
+
 import scala.collection.mutable.{ Map => MutableMap }
 import scala.collection.mutable.{ Set => MutableSet }
 
@@ -24,7 +25,7 @@ object TreeExample {
 	private implicit def parameterToList(t: List[ScalaType]): List[List[ScalaType]] = List(t)
 	private implicit def declarationToList(t: Declaration): List[Declaration] = List(t)
 	
-	import ch.epfl.insynth.trees.TypeTransformer.transform
+	import TypeTransformer.transform
 	
 	private implicit def scalaTypeToInSynthType(t: ScalaType): InSynthType = transform(t)
 	

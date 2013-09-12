@@ -1,24 +1,20 @@
-package ch.epfl.insynth.test.reconstructor
+package ch.epfl.insynth.reconstruction
 
+import java.util.regex.Pattern
 import java.{ util => ju, lang => jl }
-import ch.epfl.insynth.reconstruction.intermediate.IntermediateTransformer
-import ch.epfl.insynth.reconstruction.codegen.CodeGenerator
-import ch.epfl.insynth.reconstruction.combinator.Combinator
-import ch.epfl.insynth.env.SimpleNode
-import ch.epfl.insynth.reconstruction.Reconstructor
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameters
-import org.junit.Test
-import org.junit.BeforeClass
-import org.junit.Assert._
+
+import insynth.structures._
+
+import ch.epfl.insynth.reconstruction.codegen._
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.core.completion.InnerFinder
-import ch.epfl.insynth.reconstruction.codegen.CleanCodeGenerator
-import ch.epfl.insynth.reconstruction.Output
-import ch.epfl.insynth.reconstruction.codegen.ClassicStyleCodeGenerator
-import java.util.regex.Pattern
+
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import org.junit.runners.Parameterized.Parameters
+import org.junit._
+import org.junit.Assert._
 
 @RunWith(value = classOf[Parameterized])
 class ReconstructorTest(givenTree: SimpleNode, expectedListAll: List[(Object, Object)]) {
