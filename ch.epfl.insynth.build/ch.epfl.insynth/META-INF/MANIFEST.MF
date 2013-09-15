@@ -19,10 +19,14 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- target/lib/ch.epfl.insynth.library.jar
+ target/lib/ch.epfl.insynth.library.jar,
+ target/lib/log4j-api.jar,
+ target/lib/log4j-core.jar,
+ target/lib/scalalogging-log4j_2.10.jar
 Export-Package: ch.epfl.insynth,
  ch.epfl.insynth.core,
  ch.epfl.insynth.core.completion,
+ ch.epfl.insynth.core.preferences,
  ch.epfl.insynth.reconstruction,
  ch.epfl.insynth.reconstruction.codegen,
  ch.epfl.insynth.scala,

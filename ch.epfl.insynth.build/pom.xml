@@ -43,6 +43,8 @@
 		<tycho.version>0.16.0</tycho.version>
 		<scala.plugin.version>3.0.2</scala.plugin.version>
 		<junit.version>4.10</junit.version>
+	    <log4j.version>2.0-beta3</log4j.version>
+	    <scalalogging-log4j.version>1.0.1</scalalogging-log4j.version>
 
 		<!-- tycho test related -->
 		<tycho.test.OSspecific />
@@ -260,8 +262,18 @@
 		    <dependency>
 		      <groupId>com.typesafe</groupId>
 		      <artifactId>scalalogging-log4j</artifactId>
-		      <version>1.0.1</version>
+		      <version>${scalalogging-log4j.version}</version>
 		    </dependency>
+		   	<dependency>
+			  <groupId>org.apache.logging.log4j</groupId>
+			  <artifactId>log4j-api</artifactId>
+			  <version>${log4j.version}</version>
+			</dependency>
+		   	<dependency>
+			  <groupId>org.apache.logging.log4j</groupId>
+			  <artifactId>log4j-core</artifactId>
+			  <version>${log4j.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

@@ -3,6 +3,7 @@
 	<name>ch.epfl.insynth.tests</name>
 	<comment></comment>
 	<projects>
+		<project>ch.epfl.insynth</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

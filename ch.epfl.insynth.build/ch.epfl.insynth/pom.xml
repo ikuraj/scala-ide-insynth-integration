@@ -22,6 +22,36 @@
       <artifactId>scalalogging-log4j_${scala.version.short}</artifactId>
       <version>1.0.1</version>
     </dependency>
+    <dependency>
+      <!-- log4j without its dependencies -->
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+	  <version>${log4j.version}</version>
+<!--       <scope>compile</scope> -->
+<!--       <exclusions> -->
+<!--         <exclusion> -->
+<!--           <groupId>javax.mail</groupId> -->
+<!--           <artifactId>mail</artifactId> -->
+<!--         </exclusion> -->
+<!--         <exclusion> -->
+<!--           <groupId>javax.jms</groupId> -->
+<!--           <artifactId>jms</artifactId> -->
+<!--         </exclusion> -->
+<!--         <exclusion> -->
+<!--           <groupId>com.sun.jdmk</groupId> -->
+<!--           <artifactId>jmxtools</artifactId> -->
+<!--         </exclusion> -->
+<!--         <exclusion> -->
+<!--           <groupId>com.sun.jmx</groupId> -->
+<!--           <artifactId>jmxri</artifactId> -->
+<!--         </exclusion> -->
+<!--       </exclusions> -->
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+	  <version>${log4j.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -43,6 +73,21 @@
                 <artifactItem>
                   <groupId>ch.epfl</groupId>
                   <artifactId>ch.epfl.insynth.library</artifactId>
+                  <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+			      <groupId>com.typesafe</groupId>
+			      <artifactId>scalalogging-log4j_${scala.version.short}</artifactId>
+                  <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-core</artifactId>
+                  <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.logging.log4j</groupId>
+                  <artifactId>log4j-api</artifactId>
                   <outputDirectory>${project.build.directory}/lib</outputDirectory>
                 </artifactItem>
               </artifactItems>

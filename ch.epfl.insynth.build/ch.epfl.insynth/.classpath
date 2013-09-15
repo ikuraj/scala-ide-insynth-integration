@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="target/lib/scalalogging-log4j_2.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/lib/log4j-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/lib/log4j-core.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/lib/ch.epfl.insynth.library.jar"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_COMPILER_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
