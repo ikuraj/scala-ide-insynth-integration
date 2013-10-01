@@ -27,7 +27,6 @@ import ch.epfl.insynth.core.completion.InsynthCompletionProposalComputer
 import ch.epfl.insynth.core.completion.InnerFinder
 import ch.epfl.insynth.core.Activator
 import ch.epfl.insynth.core.preferences.InSynthConstants
-import ch.epfl.insynth.Config
 
 object IssuesTests extends TestProjectSetup("issues", bundleName = "ch.epfl.insynth.tests") {
   

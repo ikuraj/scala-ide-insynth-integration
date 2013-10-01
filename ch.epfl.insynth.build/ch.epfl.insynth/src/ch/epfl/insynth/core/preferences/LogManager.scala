@@ -2,14 +2,13 @@ package ch.epfl.insynth.core.preferences
 
 // InSynth
 import ch.epfl.insynth.core.Activator
-import ch.epfl.insynth.Config
+
 // java logging
-import java.util.logging.Handler
-import java.util.logging.FileHandler
-import java.util.logging.Level
-import java.util.logging.SimpleFormatter
+import java.util.logging._
+
 // eclipse
 import org.eclipse.jface.util.PropertyChangeEvent
+
 // Scala IDE
 import scala.tools.eclipse.logging.HasLogger
 import scala.tools.eclipse.util.SWTUtils
@@ -73,13 +72,13 @@ object LogManager extends HasLogger {
   def setLogging(enable: Boolean) = 
 		if (enable) {
       // set logger handler
-    	Config.setLoggerHandler(inSynthHandler);
+//    	Config.setLoggerHandler(inSynthHandler);
 			// log to Scala IDE log
 			eclipseLog.info("InSynth library logger enabled.");
     }
     else {
       // remove logger handler
-    	Config.removeLoggerHandler(inSynthHandler);
+//    	Config.removeLoggerHandler(inSynthHandler);
     	// log to Scala IDE log
 			eclipseLog.info("InSynth library logger disabled.");
     }

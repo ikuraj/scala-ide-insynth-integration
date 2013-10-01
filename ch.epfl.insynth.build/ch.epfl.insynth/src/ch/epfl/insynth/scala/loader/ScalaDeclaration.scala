@@ -1,4 +1,5 @@
-package ch.epfl.insynth.scala.loader
+package ch.epfl.insynth.scala
+package loader
 
 import insynth.structures.{ SuccinctType => Type, _ }
 import insynth.load.Declaration
@@ -45,10 +46,11 @@ case class ScalaDeclaration(val fullName: String, override val inSynthType: Type
     case _ => TSet.empty
   }
   
-  def this(fullName:String, inSynthType:Type) = this(fullName, inSynthType, null)
+  def this(fullName:String, scalaType: ScalaType) = this(fullName,
+    TypeTransformer.transform(scalaType), scalaType)
   
-  def this(inSynthType:Type) = {
-    this("#abs#", inSynthType)
+  def this(scalaType: ScalaType) = {
+    this("#abs#", scalaType)
     this._abstract = true
   }
 

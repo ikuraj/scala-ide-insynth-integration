@@ -9,6 +9,8 @@ import insynth.util.logging._
 
 object DomainTypeTransformer extends (ScalaType => Type) with HasLogger {
 
+  println("My class is" + super.getMyClass)
+
   implicit def toSuccinctType(st: ScalaType) = TypeTransformer.transform(st)
 
   def apply(scalaType: ScalaType): Type = scalaType match {
@@ -26,7 +28,7 @@ object DomainTypeTransformer extends (ScalaType => Type) with HasLogger {
     case _: Variable =>
       throw new UnsupportedOperationException("matching variables not implemented")
     case t =>
-      fine("Case: "+t.getClass.getName+" should be covered in 'DomainTypeTransformer.transform()'.")
+      warning("Case: "+t.getClass.getName+" should be covered in 'DomainTypeTransformer.transform()'.")
       throw new Exception("Case: "+t.getClass.getName+" should be covered in 'DomainTypeTransformer.transform()'.")
   }
 

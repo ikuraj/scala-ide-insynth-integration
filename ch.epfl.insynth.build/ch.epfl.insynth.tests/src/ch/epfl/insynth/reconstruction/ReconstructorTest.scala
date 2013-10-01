@@ -158,12 +158,12 @@ object ReconstructorTest {
 	    // parameter[4]
       // NOTE only one solution is expected (recursion in proof tree is terminated right away)
       // f(intVal) returned rather than intVal ??
-      Array(buildTreeCycles, List[(Object, Object)](
-        //"intVal"
-        //,
-        "f(intVal)"
-      ))
-      ,
+//      Array(buildTreeCycles, List[(Object, Object)](
+//        //"intVal"
+//        //,
+//        "f(intVal)"
+//      ))
+//      ,
 	    // parameter[5]
       Array(buildTreeOverlapParameterTypeWithReturnType, List[(Object, Object)](
         ! "\\((\\S+), (\\S+)\\) => A\\.m1\\(\\)\\(\\1, \\2\\)",
@@ -234,6 +234,8 @@ object ReconstructorTest {
     )
 	  
 	  trees
+//	  (List(trees(7)))
+//	  (trees.take(7))
 	}
 
 }

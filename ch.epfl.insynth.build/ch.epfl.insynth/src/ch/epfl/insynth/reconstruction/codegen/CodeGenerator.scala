@@ -33,7 +33,7 @@ abstract class CodeGenerator extends (Node => CodeGenOutput) {
     tree match {
       case Application(scala.Function(_, _ /* BottomType */), queryDec :: List(list)) =>
       	transform(list, TransformContext.Expr)
-      case _ => throw new RuntimeException
+      case _ => throw new RuntimeException("Innappropriate root node: " + tree)
     }    
   }
   

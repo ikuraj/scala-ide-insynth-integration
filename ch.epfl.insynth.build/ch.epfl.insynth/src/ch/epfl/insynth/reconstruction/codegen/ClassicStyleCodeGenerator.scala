@@ -47,10 +47,6 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
         dec.getSimpleName
       // apply parameters in the tail of params according to the head of params 
       case Application(tpe, params) => {
-        // so far as we constructed, there should be only one application definition term
-        // (which tells us, whether it is a function, a method...)
-        assert(params.head == 1)
-                
         // import ternary operator
         import Bool._
 
@@ -88,12 +84,12 @@ class ClassicStyleCodeGenerator extends CodeGenerator {
           // constructor call
           // NOTE cannot be curried?
           if (decl.isConstructor) {
-            assert(params(1) == NullLeaf)
+            //assert(params(1) == NullLeaf)
 
             // go through all combinations of parameters documents
-            val paramsDoc = getParamsCombinations(params.drop(2))
+            val paramsDoc = getParamsCombinations(params.drop(1))
             
-            group("new" :/: doParenApp(appIdentifier, paramsDoc))       
+        		return group("new" :/: doParenApp(appIdentifier, paramsDoc))       
           }
 
           // method is on some object

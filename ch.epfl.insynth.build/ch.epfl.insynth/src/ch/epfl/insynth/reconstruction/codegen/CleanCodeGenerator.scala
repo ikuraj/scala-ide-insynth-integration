@@ -71,7 +71,6 @@ class CleanCodeGenerator extends CodeGenerator {
         dec.getSimpleName
       // apply parameters in the tail of params according to the head of params 
       case Application(tpe, params) => {
-
         // import ternary operator
         import Bool._
 
@@ -109,15 +108,15 @@ class CleanCodeGenerator extends CodeGenerator {
             // constructor call
             // NOTE cannot be curried?
             if (decl.isConstructor) {
-              assert(params(1) == NullLeaf)
+//              assert(params(1) == NullLeaf)
               // set if we need parentheses
               parenthesesRequired =
                 // if there are any parameters or ctx is as receiver (App)
-                params.drop(2).size > 0 || ctx == App
+                params.drop(1).size > 0 || ctx == App
               // go through all combinations of parameters documents
-                val paramsDoc = getParamsCombinations(params.drop(2))
-                
-                group("new" :/: doParenApp(appIdentifier, paramsDoc))              
+              val paramsDoc = getParamsCombinations(params.drop(1))
+              
+          		return group("new" :/: doParenApp(appIdentifier, paramsDoc))              
             }
             
             // method is on some object
@@ -145,7 +144,7 @@ class CleanCodeGenerator extends CodeGenerator {
               
               // TODO when to generate dot and when not??
               //group(decl.getObjectName :: "." :: doParen(appIdentifier, paramsDoc))
-              group(doParenRecApp(decl.getObjectName, appIdentifier, paramsDoc))              
+          		return group(doParenRecApp(decl.getObjectName, appIdentifier, paramsDoc))              
             }
 
             // TODO refactor - similar to the method construction 

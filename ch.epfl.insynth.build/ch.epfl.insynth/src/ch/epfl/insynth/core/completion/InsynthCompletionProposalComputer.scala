@@ -11,12 +11,11 @@ import org.eclipse.jface.text.contentassist.{ ICompletionProposal, IContextInfor
 
 import scala.tools.eclipse.javaelements.ScalaCompilationUnit
 import scala.tools.nsc.interactive.Global
-import scala.tools.eclipse.logging.HasLogger
 
 import insynth.engine.InitialEnvironmentBuilder
 import insynth.load.Declaration
+import insynth.util.logging.HasLogger
 
-import ch.epfl.insynth.Config
 import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.InSynth
 import ch.epfl.insynth.reconstruction._
@@ -43,8 +42,7 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
     scu.withSourceFile {
       (sourceFile, compiler) =>
         
-        Config.inSynthLogger.info("InSynth working on source file: " + sourceFile.path)
-        logger.info("InSynth working on source file: " + sourceFile.path)
+        info("InSynth working on source file: " + sourceFile.path)
 
         val codegen = getSourceCodeGenerator
 
@@ -79,7 +77,7 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
           }
         } catch {
           case ex: Throwable  =>
-            logger.error("InSynth synthesis failed.", ex)
+            error("InSynth synthesis failed." + ex)
             None
         } finally {          
         	predefBuildLoader.start()
@@ -175,11 +173,11 @@ class InsynthCompletionProposalComputer extends IJavaCompletionProposalComputer 
 
 object InSynthWrapper {
   
-  var insynth:InSynth = null;
-  var compiler:Global = null;
+  var insynth:InSynth = null
+  var compiler:Global = null
   
-  var builder:InitialEnvironmentBuilder = null;
-  var predefDecls:List[Declaration] = null;
+  var builder:InitialEnvironmentBuilder = null
+  var predefDecls:List[Declaration] = Nil
   
   final val loadPredefs = true
   

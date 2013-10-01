@@ -4,6 +4,8 @@ import _root_.scala.tools.nsc.interactive.Global
 import _root_.scala.reflect.internal.util.SourceFile
 
 import ch.epfl.insynth.scala._
+import ch.epfl.insynth.core._
+import ch.epfl.insynth.core.preferences._
 import ch.epfl.insynth.scala.loader.{ ScalaDeclaration => Declaration, _ }
 import ch.epfl.insynth.reconstruction.codegen.CodeGenerator
 import ch.epfl.insynth.reconstruction._
@@ -35,9 +37,13 @@ class InSynth(val compiler: Global, codeGenerator: CodeGenerator)
     fine("builder.getAllDeclarations.size: " + builder.getAllDeclarations.size)   
     finer("Declarations: \n" + builder.getAllDeclarations.sortWith( (d1, d2) => d1.getSimpleName.compareTo(d2.getSimpleName) < 0 ).map( decl => decl + 
       "[" + decl.getDomainType + " : " + decl.inSynthType + " : " + decl.getWeight + "]" ).mkString("\n"))
-    
+          
+		// get maximum duration of the combination step
+		val maximumTime = Activator.getDefault.getPreferenceStore.getInt(
+	    InSynthConstants.MaximumTimePropertyString)
+
     val queryBuilder = new QueryBuilder(desiredType)
-    val engine = new Engine(builder, queryBuilder.getQuery, new WeightScheduler(), TimeOut(Config.getTimeOutSlot))
+    val engine = new Engine(builder, queryBuilder.getQuery, new WeightScheduler(), TimeOut(maximumTime))
     
     val time = System.currentTimeMillis
       
@@ -45,7 +51,7 @@ class InSynth(val compiler: Global, codeGenerator: CodeGenerator)
 
     if (solution != null) {
       info("Solution found in " + (System.currentTimeMillis - time) + " ms.")
-      info("Solution found: " + TreePrinter(solution, Config.proofTreeLevelToLog))
+      info("Solution found: " + TreePrinter(solution, proofTreeLevelToLog))
       //TreePrinter.printAnswerAsXML(Config.proofTreeOutput, solution, Config.proofTreeLevelToLog)
     } else 
       info("No solution found in " + (System.currentTimeMillis - time) + " ms")
@@ -70,4 +76,6 @@ class InSynth(val compiler: Global, codeGenerator: CodeGenerator)
     val typed = response.get
     typed.fold(identity, throw _)
   }  
+
+  val proofTreeLevelToLog = 6
 }
