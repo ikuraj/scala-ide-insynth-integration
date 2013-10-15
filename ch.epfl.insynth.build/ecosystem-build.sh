@@ -5,6 +5,20 @@ then
   set -x
 fi
 
+if ( ! getopts "urls" opt); then
+  echo "Usage: `basename $0` options: websites(-s "url [...]") publish(-p)";
+  exit $E_OPTERROR;
+fi
+
+while getopts ":s:p" opt; do
+  case "$opt" in
+    s) SITES=$OPTARG ;;
+    p) PUBLISH=true ;;
+  esac
+done
+
+echo sites is $SITES
+
 # takes has parameters eclipse update site URLs, like:
 # http://download.scala-ide.org/sdk/e37/scala29/stable/site/
 # http://download.scala-ide.org/sdk/next/e38/scala210/dev/site/
@@ -44,7 +58,7 @@ git merge --ff-only origin/master
 COMBINED_SITE_DIR=${TARGET_DIR}/site
 mkdir -p ${COMBINED_SITE_DIR}
 
-for ECOSYSTEM_SITE in "$@"
+for ECOSYSTEM_SITE in $SITES
 do
 
   cd ${ROOT_DIR}
@@ -87,7 +101,17 @@ do
 
   cd "${MERGE_TOOL_DIR}"
   mvn "-Drepo.source=file://${ROOT_DIR}/ch.epfl.insynth.update-site/target/site" "-Drepo.dest=${COMBINED_SITE_DIR}" package
-
+  
 done
+
+# if needed publishing to LARA update site
+if [ ! $PUBLISH ];
+then
+  echo "Not copying files to insynth@laraserver.epfl.ch"
+else  
+  echo "Copying files to insynth@laraserver.epfl.ch"
+  ssh insynth@laraserver.epfl.ch "rm -rf ~/public_html/combined"
+  scp -r ${COMBINED_SITE_DIR} insynth@laraserver.epfl.ch:~/public_html/combined
+fi
 
 echo "All done"
