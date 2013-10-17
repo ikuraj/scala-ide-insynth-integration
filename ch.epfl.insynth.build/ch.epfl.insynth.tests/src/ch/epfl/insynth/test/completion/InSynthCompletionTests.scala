@@ -48,6 +48,7 @@ class InSynthCompletionTests {
     checkCompletionsDual("examplepkg1/Example1.scala")(exampleCompletions)
   }
   
+	@Ignore
   @Test
   def testExample2() {
     val oraclePos14 = ( List("new A() a", "new A() m b"), List("new A().a", "new A().m(b)") )
@@ -57,6 +58,7 @@ class InSynthCompletionTests {
     checkCompletionsDual("examplepkg2/Example2.scala")(exampleCompletions)
   }
   
+	@Ignore
   @Test
   def testExample3() {
     val oraclePos12regex = ( List("new A\\(\\) m1 (\\S+) => new A\\(\\) m2 \\1",

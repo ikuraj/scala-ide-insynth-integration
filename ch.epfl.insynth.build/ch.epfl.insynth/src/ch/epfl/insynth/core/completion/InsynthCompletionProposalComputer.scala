@@ -43,7 +43,6 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
       (sourceFile, compiler) =>
         
         info("InSynth working on source file: " + sourceFile.path)
-
         val codegen = getSourceCodeGenerator
 
         if (compiler != InSynthWrapper.compiler) {
@@ -177,7 +176,7 @@ object InSynthWrapper {
   var compiler:Global = null
   
   var builder:InitialEnvironmentBuilder = null
-  var predefDecls:List[Declaration] = Nil
+  var predefDecls:List[Declaration] = null
   
   final val loadPredefs = true
   

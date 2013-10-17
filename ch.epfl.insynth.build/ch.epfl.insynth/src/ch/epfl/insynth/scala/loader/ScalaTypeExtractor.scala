@@ -124,9 +124,9 @@ object ScalaTypeExtractor {
 	      allTypes += sym
 	      
 	      ScalaConst(SugarFree(sym.fullName))
-	    } else throw new Exception("<<Parametrized types not supported: "+ ask ( () => tpe.getClass.getName) +">>")
+	    } else throw new Exception("<<Parametrized types not supported: "+ tpe +">>")
 	    
-	  case _ => throw new Exception("<<Not supported: "+ ask ( () => tpe.getClass.getName) +">>") 
+	  case _ => throw new Exception("<<Not supported: "+ tpe +">>") 
     }
   }  
 }
