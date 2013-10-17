@@ -30,6 +30,11 @@
 		<!-- InSynth -->
 		<insynth.library.name>Specify a profile - insynth.library.name!</insynth.library.name>
 		<insynth.library.version>1.3</insynth.library.version>
+		
+		<!-- fixed versions -->
+		<junit.version>4.10</junit.version>
+	    <log4j.version>2.0-beta3</log4j.version>
+	    <scalalogging-log4j.version>1.0.1</scalalogging-log4j.version>
 	</properties>
 
 	<profiles>
@@ -44,7 +49,7 @@
 		<profile>
 			<id>scala-2.10.x</id>
 			<properties>
-				<insynth.library.name>ch.epfl.insynth.library-2.10.jar</insynth.library.name>
+				<insynth.library.name>ch.epfl.insynth.library_2.10-1.3.jar</insynth.library.name>
 			</properties>
 		</profile>
 
