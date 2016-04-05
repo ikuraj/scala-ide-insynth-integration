@@ -5,7 +5,10 @@ import ch.epfl.insynth.reconstruction.combinator.FormatPrNode
 import ch.epfl.insynth.env.SimpleNode
 import ch.epfl.insynth.env.FormatNode
 
-object CombinatorTest {
+import org.junit.Assert._
+import org.junit.Test
+
+class CombinatorTest {
   
   val numberOfCombinations = 15
   val maximumTime = 500
@@ -28,12 +31,17 @@ object CombinatorTest {
       parametrizedCombine(tree) 
           cycleTreeCombine
   }
+
+  @Test
+  def test1() {
+    main(Array.empty)    
+  }
   
   def parametrizedCombine(sn: SimpleNode) = {
     println("original tree")
     FormatNode(sn).println
     println("combined tree")
-    //FormatPrNode(Combinator(sn, numberOfCombinations, maximumTime)).println
+    FormatPrNode(Combinator(sn, numberOfCombinations, maximumTime).get).println
   } 
   
   // XXX cannot still be instantiated according to the proof representation!

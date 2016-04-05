@@ -3,9 +3,7 @@ package ch.epfl.insynth.test
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
 
-import ch.epfl.insynth.test.reconstructor.ReconstructorTest
-import ch.epfl.insynth.test.reconstructor.FeaturesTest
-import ch.epfl.insynth.test.reconstructor.CodeGenerationTests
+import ch.epfl.insynth.test.reconstructor._
 
 @RunWith(classOf[Suite])
 @Suite.SuiteClasses(
