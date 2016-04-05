@@ -10,7 +10,8 @@ import ch.epfl.insynth.reconstruction._
   Array(
     classOf[ReconstructorTest],
     classOf[FeaturesTest],
-    classOf[CodeGenerationTests]
+    classOf[CodeGenerationTests],
+    classOf[CombinatorTest]
   )
 )
 class CodeGenerationTestSuite 
