@@ -12,7 +12,8 @@ import ch.epfl.insynth.test.reconstructor.CodeGenerationTests
   Array(
     classOf[ReconstructorTest],
     classOf[FeaturesTest],
-    classOf[CodeGenerationTests]
+    classOf[CodeGenerationTests],
+    classOf[CombinatorTest]
   )
 )
 class CodeGenerationTestSuite 
