@@ -33,6 +33,7 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <configuration>
           <showEclipseLog>true</showEclipseLog>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <reportsDirectory>reports</reportsDirectory>
           <testSuite>${project.artifactId}</testSuite>
           <testClass>${testClassArg}</testClass>
