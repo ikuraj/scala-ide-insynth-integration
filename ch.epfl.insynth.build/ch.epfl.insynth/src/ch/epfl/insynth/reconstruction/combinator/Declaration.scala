@@ -22,7 +22,7 @@ abstract class Declaration(inSynthType: Type) {
     println("Declaration equals ")
     println(that)
     println(this)
-    return true
+    false
   }
 }
 
@@ -35,7 +35,7 @@ case class AbsDeclaration(inSynthType: Type) extends Declaration(inSynthType) {
     println("Declaration equals ")
     println(that)
     println(this)
-    return true
+    false
   }
 }
 
@@ -49,6 +49,6 @@ extends Declaration(declaration.getType)
     println("Declaration equals ")
     println(that)
     println(this)
-    return true
+    false
   }
 }
