@@ -51,6 +51,23 @@ class CombinatorTest {
 
   @Test
   def test1() {
+    val simpleTree = TreeExample.buildSimpleTree
+    val combinedSimpleTree = parametrizedCombine(simpleTree)
+    
+    val combinedSimpleTreeTest = TestTrees.buildCombinedSimpleTree
+    FormatNode(combinedSimpleTreeTest).println;
+
+    println("Decals:")
+    println(combinedSimpleTreeTest.getDecls)
+    println("Params:")
+    println(combinedSimpleTreeTest.getParams)
+    println("=====Current ^ ===== Solution V =====")
+    FormatPrNode(combinedSimpleTree).println
+    println("Decals:")
+    println(combinedSimpleTree.getDecls)
+    println("Params:")
+    println(combinedSimpleTree.getParams)
+    println(TestTrees.buildCombinedSimpleTree.equals(combinedSimpleTree));
     main(Array.empty)
   }
 
