@@ -32,44 +32,88 @@ class CombinatorTest {
 
   }
 
-  @Test
+  @Test 
   def testEquals() {
-    assert(false)
-    assertTrue(false)
     // tree1 = tree2 != tree3
     val tree1 = TreeExample.buildSimpleTree
     val tree2 = TreeExample.buildSimpleTree
     val tree3 = TreeExample.buildComplexTree
-    assertTrue(tree1.equals(tree3))
-
-    assertTrue(equals(tree1, tree1))
-    assertTrue(equals(tree1, tree2))
-    assertTrue(equals(tree3, tree3))
-    assertFalse(equals(tree1, tree3))
-    assertFalse(equals(tree3, tree2))
-  }
-
-  @Test
-  def test1() {
-    val simpleTree = TreeExample.buildSimpleTree
-    val combinedSimpleTree = parametrizedCombine(simpleTree)
     
-    val combinedSimpleTreeTest = TestTrees.buildCombinedSimpleTree
-    FormatNode(combinedSimpleTreeTest).println;
-
-    println("Decals:")
-    println(combinedSimpleTreeTest.getDecls)
-    println("Params:")
-    println(combinedSimpleTreeTest.getParams)
-    println("=====Current ^ ===== Solution V =====")
-    FormatPrNode(combinedSimpleTree).println
-    println("Decals:")
-    println(combinedSimpleTree.getDecls)
-    println("Params:")
-    println(combinedSimpleTree.getParams)
-    println(TestTrees.buildCombinedSimpleTree.equals(combinedSimpleTree));
-    main(Array.empty)
+    assertTrue(equals(tree1, tree1))
+    assertTrue(equals(tree2,tree2))
+    assertTrue(equals(tree3, tree3))
+    
+	assertTrue(equals(tree1, tree2))
+	assertTrue(equals(tree2, tree1))
+	
+	assertFalse(equals(tree1, tree3))
+	assertFalse(equals(tree3, tree2))
   }
+  
+//Determine if two SimpleNodes are equal 
+  def equals(s1: SimpleNode, s2: SimpleNode): Boolean = {
+    println("===Equals?===")
+    println(s1)
+    println(s2)
+    
+    val s1Decls = s1.getDecls
+    val s2Decls = s2.getDecls
+    //TODO: Compare Decls
+    if (s1Decls.size != s2Decls.size) return false
+    println(s1Decls)
+    println(s2Decls)
+    var dEqual = false
+    for (d1 <- s1Decls){ 
+        dEqual = false
+    	for (d2 <- s2Decls) { 
+    	  println("Anbout to call equals")
+    	  if (d2==d1) dEqual = true
+//    	  if (d2.equals(d1)) dEqual = true
+    	}
+        if (!dEqual) return false  
+    }
+    
+    val s1Params = s1.getParams
+    val s2Params = s2.getParams
+    
+    //Check that params are the same 
+    //Check that set of keys are equal
+    if (s1Params.keys == s2Params.keys) {     	
+    	//Compare children equality
+    	for ((k,v1) <- s1Params) { 
+    	  val v2 = s2Params(k)
+    	  val s1Nodes = v1.getNodes
+    	  val s2Nodes = v2.getNodes    	  
+    	  for ((n1,n2) <- (s1Nodes zip s2Nodes)){ 
+    		 if (!equals(n1,n2)) return false  
+    	  }
+    	}
+    	return true
+    }
+    false
+  }
+
+//  @Test
+//  def test1() {
+//    val simpleTree = TreeExample.buildSimpleTree
+//    val combinedSimpleTree = parametrizedCombine(simpleTree)
+//    
+//    val combinedSimpleTreeTest = TestTrees.buildCombinedSimpleTree
+//    FormatNode(combinedSimpleTreeTest).println;
+//
+//    println("Decals:")
+//    println(combinedSimpleTreeTest.getDecls)
+//    println("Params:")
+//    println(combinedSimpleTreeTest.getParams)
+//    println("=====Current ^ ===== Solution V =====")
+//    FormatPrNode(combinedSimpleTree).println
+//    println("Decals:")
+//    println(combinedSimpleTree.getDecls)
+//    println("Params:")
+//    println(combinedSimpleTree.getParams)
+//    println(TestTrees.buildCombinedSimpleTree.equals(combinedSimpleTree));
+//    main(Array.empty)
+//  }
 
   def parametrizedCombine(sn: SimpleNode) = {
     println("Parametrized COmbine");
