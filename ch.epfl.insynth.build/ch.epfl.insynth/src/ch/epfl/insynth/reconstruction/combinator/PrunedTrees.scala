@@ -26,6 +26,7 @@ case class SimpleNode(decls: List[Declaration], tpe: Type, params: Map[Type, Con
 
   //Determine if two SimpleNodes are equal 
   override def equals(that: Any): Boolean = {
+    println("Checking Node Equality");
     that match {
       case SimpleNode(tDecls, tTpe, tParams) =>
         if (tDecls.size == decls.size) {
@@ -43,10 +44,12 @@ case class SimpleNode(decls: List[Declaration], tpe: Type, params: Map[Type, Con
           val s1Params = params
           val s2Params = tParams
       
-          return false
+//          return false
       
           //Check that params are the same 
           //Check that set of keys are equal
+          
+          println("Decals are equal Checking Params now"); 
           if (s1Params.keys == s2Params.keys) {
             //Compare children equality
             for ((k, v1) <- s1Params) {
