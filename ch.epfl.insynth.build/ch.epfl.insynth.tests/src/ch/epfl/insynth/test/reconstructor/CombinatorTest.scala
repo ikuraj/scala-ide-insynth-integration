@@ -2,12 +2,11 @@ package ch.epfl.insynth.test.reconstructor
 
 import ch.epfl.insynth.reconstruction.combinator.Combinator
 
-
 import ch.epfl.insynth.reconstruction.combinator.FormatPrNode
-import ch.epfl.insynth.env.SimpleNode
-import ch.epfl.insynth.env.FormatNode
+import ch.epfl.insynth.env
 
-import ch.epfl.insynth.reconstruction.combinator.{Node => EnvSimpleNode}
+import ch.epfl.insynth.reconstruction.combinator._
+import ch.epfl.insynth.reconstruction.combinator.Combinator._
 //import env.{SimpleNode => EnvSimpleNode}
 
 import org.junit.Assert._
@@ -37,89 +36,80 @@ class CombinatorTest {
 
   }
 
-  @Test 
+  @Test
   def testEquals() {
     // tree1 = tree2 != tree3
     val tree1 = parametrizedCombine(TreeExample.buildSimpleTree)
     val tree2 = parametrizedCombine(TreeExample.buildSimpleTree)
     val tree3 = parametrizedCombine(TreeExample.buildComplexTree)
-    
+
     assertTrue(equals(tree1, tree1))
-    assertTrue(equals(tree2,tree2))
+    assertTrue(equals(tree2, tree2))
     assertTrue(equals(tree3, tree3))
-    
-	assertTrue(equals(tree1, tree2))
-	assertTrue(equals(tree2, tree1))
-	
-	assertFalse(equals(tree1, tree3))
-	assertFalse(equals(tree3, tree2))
+
+    assertTrue(equals(tree1, tree2))
+    assertTrue(equals(tree2, tree1))
+
+    assertFalse(equals(tree1, tree3))
+    assertFalse(equals(tree3, tree2))
+  }
+
+  //Determine if two SimpleNodes are equal
+  def equals(s1: Node, s2: Node): Boolean = {
+    (s1, s2) match {
+      case (SimpleNode(decls1, tp1, params1), SimpleNode(decls2, tp2, params2)) =>
+        
+        if (tp1 != tp2) return false
+
+        // Compare Decls
+        val declsSame = 
+          (decls1 zip decls2).foldLeft(true) {
+            case (res, (d1, d2)) =>
+              res && d1 == d2
+          }
+        if (!declsSame) return false
+        
+        for ((key, n1) <- params1) {
+          // note that map might not contain key
+          if (!params2.contains(key)) return false
+          equalsForContainerNodes(n1, params2(key))
+        }
+        
+        return true
+        
+      case (_, _) =>
+        ???
+    }
+
   }
   
-//Determine if two SimpleNodes are equal
- def simpleEquals(s1: SimpleNode, s2: SimpleNode): Boolean = { 
-    val s1Decls = s1.getDecls
-    val s2Decls = s2.getDecls
-    //TODO: Compare Decls
-    if (s1Decls.size != s2Decls.size) return false
-    println(s1Decls)
-    println(s2Decls)
-    var dEqual = false
-    for (d1 <- s1Decls){ 
-        dEqual = false
-    	for (d2 <- s2Decls) { 
-    	  println("Anbout to call equals")
-    	  if (d2==d1) dEqual = true
-//    	  if (d2.equals(d1)) dEqual = true
-    	}
-        if (!dEqual) return false  
-    }
-    
-    val s1Params = s1.getParams
-    val s2Params = s2.getParams
-    
-    //Check that params are the same 
-    //Check that set of keys are equal
-    if (s1Params.keys == s2Params.keys) {     	
-    	//Compare children equality
-    	for ((k,v1) <- s1Params) { 
-    	  val v2 = s2Params(k)
-    	  val s1Nodes = v1.getNodes
-    	  val s2Nodes = v2.getNodes    	  
-    	  for ((n1,n2) <- (s1Nodes zip s2Nodes)){ 
-    		 if (!equals(n1,n2)) return false  
-    	  }
-    	}
-    	return true
-    }
-    false
- } 
+  def equalsForContainerNodes(cn1: ContainerNode, cn2: ContainerNode): Boolean = ???
+  
   //Determine if two Nodes are equal
-  def equals(s1: EnvSimpleNode, s2: EnvSimpleNode): Boolean = {
+  def equalsNotSure(s1: EnvSimpleNode, s2: EnvSimpleNode): Boolean = {
     println("===Equals?===")
     println(s1)
     println(s2)
-    
-    s1 match { 
+
+    s1 match {
       case _: EnvSimpleNode => // s1 is just Node
-        s2 match { 
+        s2 match {
           case _: EnvSimpleNode => //s2 also just Node, compare types
             //TODO
             return true
           case _: SimpleNode => //Comparing Node to SimpleNode -> false
             return false
         }
-        
-       
-      case s1: SimpleNode =>// s1 is SimpleNode
-        s2 match { 
+
+      case s1: SimpleNode => // s1 is SimpleNode
+        s2 match {
           case _: EnvSimpleNode => //Comparing Node to SimpleNode -> false
             return false
-          case s2: SimpleNode => 
+          case s2: SimpleNode =>
             return simpleEquals(s1, s2)
         }
-        
+
     }
-    
 
   }
 
@@ -127,9 +117,9 @@ class CombinatorTest {
   def test1() {
     val simpleTree = TreeExample.buildSimpleTree
     val combinedSimpleTree = parametrizedCombine(simpleTree)
-    
+
     val combinedSimpleTreeTest = TestTrees.buildCombinedSimpleTree
-    println("========================"); 
+    println("========================");
     FormatNode(combinedSimpleTreeTest).println;
 
     println("Decals:")
@@ -144,7 +134,7 @@ class CombinatorTest {
     println(combinedSimpleTree.getParams)
     println(TestTrees.buildCombinedSimpleTree.equals(combinedSimpleTree));
     println(equals(combinedSimpleTree, combinedSimpleTreeTest));
-    println("========================"); 
+    println("========================");
 
     main(Array.empty)
   }
