@@ -7,7 +7,7 @@ import ch.epfl.insynth.env
 
 import ch.epfl.insynth.reconstruction.combinator._
 import ch.epfl.insynth.reconstruction.combinator.Combinator._
-//import env.{SimpleNode => EnvSimpleNode}
+import env.{SimpleNode => EnvSimpleNode}
 
 import org.junit.Assert._
 import org.junit.Test
@@ -17,7 +17,7 @@ class CombinatorTest {
   val numberOfCombinations = 15
   val maximumTime = 500
 
-  implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
+//  implicit def toFormatNode(sn: SimpleNode) = FormatNode(sn)
   implicit def toPrFormatNode(sn: ch.epfl.insynth.reconstruction.combinator.Node) = FormatPrNode(sn)
 
   def main(args: Array[String]): Unit = {
@@ -39,27 +39,37 @@ class CombinatorTest {
   @Test
   def testEquals() {
     // tree1 = tree2 != tree3
-    val tree1 = parametrizedCombine(TreeExample.buildSimpleTree)
-    val tree2 = parametrizedCombine(TreeExample.buildSimpleTree)
-    val tree3 = parametrizedCombine(TreeExample.buildComplexTree)
+    val tree1 = TestTrees.buildCombinedSimpleTree
+    val tree2 = TestTrees.buildCombinedSimpleTree
+//    val tree3 = parametrizedCombine(TreeExample.buildComplexTree)
+    
 
     assertTrue(equals(tree1, tree1))
     assertTrue(equals(tree2, tree2))
-    assertTrue(equals(tree3, tree3))
-
+//    assertTrue(equals(tree3, tree3))
+//
     assertTrue(equals(tree1, tree2))
     assertTrue(equals(tree2, tree1))
-
-    assertFalse(equals(tree1, tree3))
-    assertFalse(equals(tree3, tree2))
+    
+    println(tree1.getType); 
+//
+//    assertFalse(equals(tree1, tree3))
+//    assertFalse(equals(tree3, tree2))
   }
 
   //Determine if two SimpleNodes are equal
   def equals(s1: Node, s2: Node): Boolean = {
+    println("Checking if two nodes are equal"); 
     (s1, s2) match {
       case (SimpleNode(decls1, tp1, params1), SimpleNode(decls2, tp2, params2)) =>
-        
-        if (tp1 != tp2) return false
+        println("Comparing two simple nodes."); 
+
+        if (tp1 != tp2) { 
+          println("Types did not match"); 
+          println(tp1); 
+          println(tp2); 
+          return false
+        }
 
         // Compare Decls
         val declsSame = 
@@ -69,6 +79,7 @@ class CombinatorTest {
           }
         if (!declsSame) return false
         
+        println("Params are equal, checking other stuff"); 
         for ((key, n1) <- params1) {
           // note that map might not contain key
           if (!params2.contains(key)) return false
@@ -78,49 +89,63 @@ class CombinatorTest {
         return true
         
       case (_, _) =>
-        ???
+        println("Unimplemented equals case"); 
+//       TODO
+        return false
     }
 
   }
   
-  def equalsForContainerNodes(cn1: ContainerNode, cn2: ContainerNode): Boolean = ???
+  def equalsForContainerNodes(cn1: ContainerNode, cn2: ContainerNode): Boolean = { 
+    
+    println(cn1)
+    println(cn2)
+    return false
+    
+  }
   
   //Determine if two Nodes are equal
-  def equalsNotSure(s1: EnvSimpleNode, s2: EnvSimpleNode): Boolean = {
-    println("===Equals?===")
-    println(s1)
-    println(s2)
-
-    s1 match {
-      case _: EnvSimpleNode => // s1 is just Node
-        s2 match {
-          case _: EnvSimpleNode => //s2 also just Node, compare types
-            //TODO
-            return true
-          case _: SimpleNode => //Comparing Node to SimpleNode -> false
-            return false
-        }
-
-      case s1: SimpleNode => // s1 is SimpleNode
-        s2 match {
-          case _: EnvSimpleNode => //Comparing Node to SimpleNode -> false
-            return false
-          case s2: SimpleNode =>
-            return simpleEquals(s1, s2)
-        }
-
-    }
-
-  }
+//  def equalsNotSure(s1: EnvSimpleNode, s2: EnvSimpleNode): Boolean = {
+//    println("===Equals?===")
+//    println(s1)
+//    println(s2)
+//
+//    s1 match {
+//      case _: EnvSimpleNode => // s1 is just Node
+//        s2 match {
+//          case _: EnvSimpleNode => //s2 also just Node, compare types
+//            //TODO
+//            return true
+//          case _: SimpleNode => //Comparing Node to SimpleNode -> false
+//            return false
+//        }
+//
+//      case s1: SimpleNode => // s1 is SimpleNode
+//        s2 match {
+//          case _: EnvSimpleNode => //Comparing Node to SimpleNode -> false
+//            return false
+//          case s2: SimpleNode =>
+//            return simpleEquals(s1, s2)
+//        }
+//
+//    }
+//
+//  }
 
   @Test
   def test1() {
+    
     val simpleTree = TreeExample.buildSimpleTree
+    val combinedSimpleTreeTest = TestTrees.buildCombinedSimpleTree
+
+    println(simpleTree)
+    println("=====")
+    println(combinedSimpleTreeTest)
     val combinedSimpleTree = parametrizedCombine(simpleTree)
 
-    val combinedSimpleTreeTest = TestTrees.buildCombinedSimpleTree
+
     println("========================");
-    FormatNode(combinedSimpleTreeTest).println;
+//    FormatNode(combinedSimpleTreeTest).println;
 
     println("Decals:")
     println(combinedSimpleTreeTest.getDecls)
@@ -132,21 +157,20 @@ class CombinatorTest {
     println(combinedSimpleTree.getDecls)
     println("Params:")
     println(combinedSimpleTree.getParams)
-    println(TestTrees.buildCombinedSimpleTree.equals(combinedSimpleTree));
     println(equals(combinedSimpleTree, combinedSimpleTreeTest));
     println("========================");
 
     main(Array.empty)
   }
 
-  def parametrizedCombine(sn: SimpleNode) = {
+  def parametrizedCombine(sn: EnvSimpleNode) = {
     println("Parametrized COmbine");
     println("=====original tree=====")
-    FormatNode(sn).println
+//    FormatNode(sn).println
     println("=====combined tree=====")
-    FormatPrNode(Combinator(sn, numberOfCombinations, maximumTime).get).println
-    assertTrue(true)
-    println("END")
+    println(Combinator(sn, numberOfCombinations, maximumTime)) 
+    assertTrue(true);
+    println("END"); 
     Combinator(sn, numberOfCombinations, maximumTime).get;
   }
 
@@ -159,35 +183,35 @@ class CombinatorTest {
 
   def simpleTreeCombine() = {
     println("simple tree")
-    TreeExample.buildSimpleTree.println
+//    TreeExample.buildSimpleTree.println
     println("combined simple tree")
     //Combinator(TreeExample.buildSimpleTree, 2, maximumTime).println
   }
 
   def complexTreeCombine() = {
     println("complex tree")
-    TreeExample.buildComplexTree.println
+//    TreeExample.buildComplexTree.println
     println("combined complex tree")
     //Combinator(TreeExample.buildComplexTree, 2, maximumTime).println
   }
 
   def arrowTreeCombine() = {
     println("arrow tree")
-    TreeExample.buildTreeArrowType.println
+//    TreeExample.buildTreeArrowType.println
     println("combined arrow tree")
     //Combinator(TreeExample.buildTreeArrowType, 6, maximumTime).println
   }
 
   def overlapTreeCombine() = {
     println("overlap tree")
-    TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
+//    TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
     println("combined overlap tree")
     //Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, 6, maximumTime).println
   }
 
   def sKombinatorTreeReconstruct() = {
     println("s combinator tree")
-    TreeExample.buildTreeSKombinator.println
+//    TreeExample.buildTreeSKombinator.println
     println("combined tree")
     //Combinator(TreeExample.buildTreeSKombinator, 6, maximumTime).println
   }

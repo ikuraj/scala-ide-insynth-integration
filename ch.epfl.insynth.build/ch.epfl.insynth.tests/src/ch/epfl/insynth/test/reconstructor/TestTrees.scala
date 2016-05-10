@@ -1,10 +1,29 @@
 package ch.epfl.insynth.test.reconstructor
 
-import ch.epfl.insynth.env._
+//import ch.epfl.insynth.env._
+import ch.epfl.insynth.env.Node
+import ch.epfl.insynth.env.Declaration
+
 import ch.epfl.scala.trees._
 import ch.epfl.insynth.trees.{ Const=>InSynthConst, Type=>InSynthType, _ }
 import scala.collection.mutable.{ Map => MutableMap }
 import scala.collection.mutable.{ Set => MutableSet }
+import scala.collection.immutable.{ Map => ImmutableMap}
+import scala.collection.immutable.{ Set => ImmutableSet}
+
+
+import ch.epfl.insynth.reconstruction.combinator.SimpleNode
+import ch.epfl.insynth.reconstruction.combinator.ContainerNode
+import ch.epfl.insynth.reconstruction.combinator.AbsDeclaration
+import ch.epfl.insynth.reconstruction.combinator.NormalDeclaration
+import ch.epfl.insynth.reconstruction.combinator.{Declaration => cDeclaration}
+
+import ch.epfl.insynth.trees.BottomType
+
+
+//import ch.epfl.insynth.reconstruction.combinator.{Declaration => cDeclaration}
+
+
 
 object TestTrees {
 	val fullNameClassA = "some.package.A"
@@ -66,15 +85,17 @@ object TestTrees {
 	  //************************************
 	  // Declarations
 	  //************************************
-	  val objectADeclaration = new Declaration(
+	  
+	  val objectADeclaration =  Declaration(
 	      "some.package.A", // full name
 	      transform(objectA), // inSynth type
 	      objectA // scala type
 	    )
+	    
 	  // needs a constructor
-	  objectADeclaration.setIsApply(true)
+//	  objectADeclaration.setIsApply(true)
 	  
-	  val m4Declaration = new Declaration(
+	  val m4Declaration =  Declaration(
 	      "some.package.A.m4", // full name
 	      transform(m4), // inSynth type
 	      m4 // scala type
@@ -83,7 +104,7 @@ object TestTrees {
 	  m4Declaration.setHasParentheses(true)
 	  
 	  // special query declaration
-	  val queryDeclaration = new Declaration(
+	  val queryDeclaration = Declaration(
 	      "special.name.for.query",
 	      transform(queryType),
 	      queryType
@@ -96,16 +117,22 @@ object TestTrees {
 	  // XXX Unit→String is not the same as ()→String
 	  // goal:String, type:A→String
 	  // expression: m4(this):String
+
+	  //decls: List[Declaration], tpe: Type, params: Map[Type, ContainerNode]
+	  
+	      
 	  val getStringNode = new SimpleNode(
-	    m4Declaration,
-	    MutableMap(
+	    List[cDeclaration](NormalDeclaration(m4Declaration)),
+	    InSynthConst("String"), 
+	    ImmutableMap(
           // I will get object of class A from
           transform(objectA) ->
 	  	  new ContainerNode(
-	  		  MutableSet(
+	  		  ImmutableSet(
 	  		      new SimpleNode(
-  		    		  objectADeclaration,
-  		    		  MutableMap() // this is the end, no further nodes
+  		    		  List[cDeclaration](NormalDeclaration(objectADeclaration)), 
+  		    		  transform(objectA),
+  		    		  ImmutableMap() // this is the end, no further nodes
   		          )
   		      )
 	        )
@@ -116,11 +143,12 @@ object TestTrees {
       // expression: query(m4(this, Unit)):⊥
 	  val query = 
 	    new SimpleNode(
-	  	  queryDeclaration,
-	  	  MutableMap( // for each parameter type - how can we resolve it
+	  	  List[cDeclaration](NormalDeclaration(queryDeclaration)),
+	  	  BottomType, 
+	  	  ImmutableMap( // for each parameter type - how can we resolve it
 	  	      InSynthConst("String") ->
 	  	      new ContainerNode(
-	  	          MutableSet(getStringNode)
+	  	          ImmutableSet(getStringNode)
 	            )
 	        ) 
 	    )
