@@ -41,20 +41,20 @@ class CombinatorTest {
     // tree1 = tree2 != tree3
     val tree1 = TestTrees.buildCombinedSimpleTree
     val tree2 = TestTrees.buildCombinedSimpleTree
-//    val tree3 = parametrizedCombine(TreeExample.buildComplexTree)
+    val tree3 = TestTrees.buildCombinedComplexTree
     
 
     assertTrue(equals(tree1, tree1))
     assertTrue(equals(tree2, tree2))
-//    assertTrue(equals(tree3, tree3))
-//
+    assertTrue(equals(tree3, tree3))
+
     assertTrue(equals(tree1, tree2))
     assertTrue(equals(tree2, tree1))
     
     println(tree1.getType); 
-//
-//    assertFalse(equals(tree1, tree3))
-//    assertFalse(equals(tree3, tree2))
+
+    assertFalse(equals(tree1, tree3))
+    assertFalse(equals(tree3, tree2))
   }
 
   //Determine if two SimpleNodes are equal
@@ -97,7 +97,6 @@ class CombinatorTest {
   }
   
   def equalsForContainerNodes(cn1: ContainerNode, cn2: ContainerNode): Boolean = { 
-    
     println(cn1)
     println(cn2)
     return false
@@ -133,32 +132,26 @@ class CombinatorTest {
 //  }
 
   @Test
-  def test1() {
+  def testSimpleTree() {
     
     val simpleTree = TreeExample.buildSimpleTree
     val combinedSimpleTreeTest = TestTrees.buildCombinedSimpleTree
-
-    println(simpleTree)
-    println("=====")
-    println(combinedSimpleTreeTest)
     val combinedSimpleTree = parametrizedCombine(simpleTree)
+    
+    assertTrue(equals(combinedSimpleTree, combinedSimpleTreeTest))
 
+    main(Array.empty)
+  }
+  
+   @Test
+  def testComplexTree() {
+    
+    val complexTree = TreeExample.buildComplexTree
+    val combinedComplexTreeTest = TestTrees.buildCombinedComplexTree
 
-    println("========================");
-//    FormatNode(combinedSimpleTreeTest).println;
+    val combinedComplexTree = parametrizedCombine(complexTree)
 
-    println("Decals:")
-    println(combinedSimpleTreeTest.getDecls)
-    println("Params:")
-    println(combinedSimpleTreeTest.getParams)
-    println("=====Current ^ ===== Solution V =====")
-    FormatPrNode(combinedSimpleTree).println
-    println("Decals:")
-    println(combinedSimpleTree.getDecls)
-    println("Params:")
-    println(combinedSimpleTree.getParams)
-    println(equals(combinedSimpleTree, combinedSimpleTreeTest));
-    println("========================");
+    assertTrue(equals(combinedComplexTree, combinedComplexTreeTest));
 
     main(Array.empty)
   }

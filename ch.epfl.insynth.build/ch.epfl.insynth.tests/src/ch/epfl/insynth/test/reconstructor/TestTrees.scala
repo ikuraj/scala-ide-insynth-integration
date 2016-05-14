@@ -156,7 +156,231 @@ object TestTrees {
 	  query
 	}
 
-
+    
+	
+	def buildCombinedComplexTree = {
+	//***************************************************
+	// Goals
+	//	find expression of type: Boolean
+	//	expression: query(m1(this, m2(this), m4(this)))
+	//	code:
+	// 	class A {
+	//  	def m1(f: Int=>String, c:Char): Boolean
+	//  	def m2(a: Int): String
+	//  	def m3(a: Long): String
+	//  	def m4(): Char
+	//  	def m5(a: Int): Long
+	//  	def m6(): String
+	//  	def test() {
+	//    		val b:Bool = ?synthesize?
+	//  	}
+	//	}
+	//***************************************************
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // class A { ... }
+	  val objectA = Const("A")	
+	  // def m1(f: Int=>String, c:Char): Boolean
+	  val m1 = Method(
+	      objectA, // receiver
+	      List( List ( Function(typeInt, typeString), typeChar ) ), // parameters
+	      typeBoolean // return type
+		)	
+	  // def m2(a: Int): String 
+	  val m2 = Method(objectA, List(typeInt), typeString)
+	  // def m3(a:Long): String
+	  val m3 = Method(objectA, List(typeLong), typeString)
+	  // def m4(): Char
+	  val m4 = Method(objectA, List(), typeChar)
+	  // def m5(a: Int): Long
+	  val m5 = Method(objectA, List(typeInt), typeLong)
+	  // def m6(): String
+	  val m6 = Method(objectA, List(), typeString)
+	  // query: typeBoolean → ⊥
+	  val queryType = Function(typeBoolean, typeBottom)
+	  
+	  // NOTE InSynth query type: Arrow(TSet(List(Const(String))),Const($Bottom_Type_Just_For_Resolution$))
+	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	  val objectADeclaration = new Declaration(
+	      fullNameClassA, // full name
+	      transform(objectA), // inSynth type
+	      objectA // scala type
+	  )
+	  // needs a constructor
+	  objectADeclaration.setIsApply(true)	  
+	  
+	  val m1Declaration	= new Declaration(
+	      fullNameClassA + ".m1",
+	      transform(m1),
+	      m1
+	  )
+	  val m2Declaration = new Declaration(
+	      fullNameClassA + ".m2", // full name
+	      m2, // inSynth type (implicit conversion)
+	      m2 // scala type
+	  )
+	  val m3Declaration = new Declaration(
+	      fullNameClassA + ".m3", // full name
+	      m3, m3
+      )
+	  val m4Declaration = new Declaration(
+	      fullNameClassA + ".m4", // full name
+	      m4, m4
+      )
+	  val m5Declaration = new Declaration(
+	      fullNameClassA + ".m5", // full name
+	      m5, m5
+      )
+	  val m6Declaration = new Declaration(
+	      fullNameClassA + ".m6", // full name
+	      m6, m6
+      )		
+	  m1Declaration.setIsMethod(true)
+	  m2Declaration.setIsMethod(true)
+	  m3Declaration.setIsMethod(true)
+	  m4Declaration.setIsMethod(true)
+	  m5Declaration.setIsMethod(true)
+	  m6Declaration.setIsMethod(true)
+	  	  
+	  m1Declaration.setHasParentheses(true)
+	  m2Declaration.setHasParentheses(true)
+	  m3Declaration.setHasParentheses(true)
+	  m4Declaration.setHasParentheses(true)
+	  m5Declaration.setHasParentheses(true)
+	  m6Declaration.setHasParentheses(true)
+	  
+	  m1Declaration.setHasThis(false)
+	  m2Declaration.setHasThis(false)
+	  m3Declaration.setHasThis(false)
+	  m4Declaration.setHasThis(false)
+	  m5Declaration.setHasThis(false)
+	  m6Declaration.setHasThis(false)
+	  objectADeclaration.setIsThis(true)
+	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      queryType, queryType
+	    )	  
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  
+	  // XXX found out that there is a non-needed redundancy, new ContainerNode type
+	  // is actually not needed?
+	  
+	  // goal:ClassA object, type:ClassA
+	  // expression: this	  
+	  val thisNode = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(objectADeclaration)), null, ImmutableMap()
+      )
+	    
+	  // goal:Char, type:Unit→Char
+	  // expression: m4(this)	  
+	  val m4Node = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(m4Declaration)),
+	      transform(objectA), 
+	      ImmutableMap(
+	          transform(objectA) -> new ContainerNode(ImmutableSet(thisNode))
+          )
+      )
+      
+      // goal:(Int→String), type:(Int→String)
+	  // expression: m2(this)
+	  val m2Node = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(m2Declaration)),
+	      transform(objectA), 
+	      ImmutableMap(
+	          transform(objectA) -> new ContainerNode(ImmutableSet(thisNode)),
+	          transform(typeInt) ->
+	          	new ContainerNode(ImmutableSet(new SimpleNode(
+	          	    { 
+	          	      val dec = new Declaration(typeInt); dec.setIsApply(true);	List[cDeclaration](NormalDeclaration(dec))	
+	          	    }, null, ImmutableMap.empty
+          	    )))
+          )
+      )      
+      
+      // goal:String, type:(A→String)
+	  // expression: m6(this)
+	  val m6Node = new SimpleNode(
+	     List[cDeclaration](NormalDeclaration(m6Declaration)),
+	     transform(objectA), 
+	      ImmutableMap(
+	          transform(objectA) -> new ContainerNode(ImmutableSet(thisNode))
+          )
+      )
+            
+      // goal: Long, type:(Int→Long)
+	  // expression: m5(this, _)
+	  val m5Node = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(m5Declaration)),
+	      transform(objectA), 
+	      ImmutableMap(
+	          transform(objectA) -> new ContainerNode(ImmutableSet(thisNode)),
+	          transform(typeInt) -> new ContainerNode( 
+	          	ImmutableSet( new SimpleNode(
+	          	    { 
+	          	      val dec = new Declaration(typeInt); dec.setIsApply(true);  List[cDeclaration](NormalDeclaration(dec))	          	    	
+	          	    }, null, ImmutableMap.empty
+          	    ) )
+	          )
+          )
+      )
+      
+      // goal:(Int→String), type:(Long→String)
+	  // expression: Int => m3(this, m5(this, _))
+	  val composeNode = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(m3Declaration)),
+	      transform(objectA),
+	      ImmutableMap(
+	          transform(objectA) -> new ContainerNode(ImmutableSet(thisNode)),
+	          transform(typeLong) -> new ContainerNode(ImmutableSet(m5Node))
+          )
+      )
+	    
+	  // goal:Boolean, type:List((Int→String),Char)→Boolean
+	  // expression: m1(this, 
+      //				m2(this) |  m3(this) ∘ m5(this) | Int→m6(this), 
+	  //				m4(this))	  
+	  val m1Node = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(m1Declaration)),
+	      transform(typeChar), 
+	      ImmutableMap(
+	          transform(typeChar) -> new ContainerNode(ImmutableSet(m4Node)),
+	          transform(Function(typeInt, typeString)) ->
+	          	new ContainerNode( 
+	          	    ImmutableSet(composeNode, m2Node, m6Node)
+          	    ),
+	          transform(objectA) -> new ContainerNode(ImmutableSet(thisNode))
+          )
+      )
+	  
+      // goal:⊥, type:Boolean→⊥	    
+      // expression: query(		m1(this,
+	  //			m2(this) |  m3(this) ∘ m5(this) | Int→m6(this), 
+	  //			m4(this)	)):⊥
+	  val queryNode = 
+	    new SimpleNode(
+	  	   List[cDeclaration](NormalDeclaration(queryDeclaration)),
+	  	   BottomType, 
+	  	   ImmutableMap( // for each parameter type - how can we resolve it
+	  	      transform(typeBoolean) ->
+	  	      new ContainerNode(
+	  	          ImmutableSet(m1Node)
+	            )
+	        ) 
+	    )
+	    
+	  queryNode
+	}
+	
 
 
 	
