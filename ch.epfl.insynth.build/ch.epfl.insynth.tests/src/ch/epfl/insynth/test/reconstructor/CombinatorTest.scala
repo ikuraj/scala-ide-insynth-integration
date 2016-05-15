@@ -168,6 +168,21 @@ class CombinatorTest {
     main(Array.empty)
   }
   
+  @Test
+  def testTreeOverlapParameterTypeWithReturnType() {
+    val tree =  TreeExample.buildTreeOverlapParameterTypeWithReturnType
+    val combinedTreeTest = TestTrees. buildCombinedTreeOverlapParameterTypeWithReturnType
+
+    val combinedTree = parametrizedCombine(tree)
+
+    assertTrue(equals(combinedTree, combinedTreeTest));
+
+    main(Array.empty)
+  }
+  
+  
+ 
+  
   
   def parametrizedCombine(sn: EnvSimpleNode) = {
     println("Parametrized COmbine");
@@ -185,34 +200,6 @@ class CombinatorTest {
     println("combined cycle tree")
     val cycleTree = TreeExample.buildTreeCycles
     //Combinator(cycleTree, numberOfCombinations, maximumTime).println
-  }
-
-  def simpleTreeCombine() = {
-    println("simple tree")
-//    TreeExample.buildSimpleTree.println
-    println("combined simple tree")
-    //Combinator(TreeExample.buildSimpleTree, 2, maximumTime).println
-  }
-
-  def complexTreeCombine() = {
-    println("complex tree")
-//    TreeExample.buildComplexTree.println
-    println("combined complex tree")
-    //Combinator(TreeExample.buildComplexTree, 2, maximumTime).println
-  }
-
-  def arrowTreeCombine() = {
-    println("arrow tree")
-//    TreeExample.buildTreeArrowType.println
-    println("combined arrow tree")
-    //Combinator(TreeExample.buildTreeArrowType, 6, maximumTime).println
-  }
-
-  def overlapTreeCombine() = {
-    println("overlap tree")
-//    TreeExample.buildTreeOverlapParameterTypeWithReturnType.println
-    println("combined overlap tree")
-    //Combinator(TreeExample.buildTreeOverlapParameterTypeWithReturnType, 6, maximumTime).println
   }
 
   def sKombinatorTreeReconstruct() = {

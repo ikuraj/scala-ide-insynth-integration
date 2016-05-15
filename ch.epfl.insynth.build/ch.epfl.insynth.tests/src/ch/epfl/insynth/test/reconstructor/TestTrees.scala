@@ -157,7 +157,6 @@ object TestTrees {
 	}
 
     
-	
 	def buildCombinedComplexTree = {
 	//***************************************************
 	// Goals
@@ -567,7 +566,193 @@ object TestTrees {
 	}
 	
 
-
+	/**
+	 * Constructs a tree in which expression can be synthesized as a return one
+	 * but also as a parameter to one of the methods
+	 */
+	def buildCombinedTreeOverlapParameterTypeWithReturnType = {
+	//***************************************************
+	// Goals
+	//	find expression of type: (Int, Int)→Char
+	//	expression:
+	//	code:
+	//  def outside(a: Int, b:Int): Char
+	// 	class A {
+	//		val intVal: Int  
+	//  	def m1(): ((Int, Int)=>Char)
+	//  	def m2(a: Int, b:Int): Char
+	//  	def m3(): Char
+	//  	def test() {
+	//    		val b:(Int, Int)=>Char = ?synthesize?
+	//  	}
+	//	}
+	//***************************************************
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // class A { ... }
+	  val objectA = Const("A")	
+	  // def m1(): ((Int, Int)=>Char)
+	  val m1 = Method(
+	      objectA, // receiver
+	      List(), // parameters
+	      Function(List(typeInt, typeInt), typeChar) // return type
+		)	
+	  // def m2(a: Int, b:Int): Char
+	  val m2 = Method(objectA, List(List(typeInt, typeInt)), typeChar)
+	  // def m3(): Char
+	  val m3 = Method(objectA, List(), typeChar)
+	  // query: String → ⊥
+	  val queryType = Function(
+	    Function(List(typeInt, typeInt), typeChar),
+	    typeBottom
+	  )
+	  // def outside(a: Int, b:Int): Char
+	  val outside = Function(List(typeInt, typeInt), typeChar)
+	  // val intVal: Int
+	  val intVal = typeInt
+	  	  	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	  val objectADeclaration = Declaration(
+	      fullNameClassA, // full name
+	      transform(objectA), // inSynth type
+	      objectA // scala type
+	    )
+	  // needs a constructor
+	  objectADeclaration.setIsApply(true)	  
+	  
+	  val m1Declaration	= Declaration(
+	      fullNameClassA + ".m1",
+	      // XXX
+	      m1,
+	      //Arrow(TSet(objectA), Function(List(typeInt, typeInt), typeChar)),
+	      m1
+	  )
+	  val m2Declaration = Declaration(
+	      fullNameClassA + ".m2", // full name
+	      m2, // inSynth type (implicit conversion)
+	      m2 // scala type
+	  )
+	  val m3Declaration = Declaration(
+	      fullNameClassA + ".m3", // full name
+	      m3, m3
+      )	  
+            
+	  m1Declaration.setIsMethod(true)
+	  m2Declaration.setIsMethod(true)
+	  m3Declaration.setIsMethod(true)
+	  	  
+	  m1Declaration.setHasParentheses(true)
+	  m2Declaration.setHasParentheses(true)
+	  m3Declaration.setHasParentheses(true)
+	  
+	  // special query declaration
+	  val queryDeclaration = Declaration(
+	      "special.name.for.query",
+	      queryType, queryType
+	    )	  	
+	  
+	  val outsideDeclaration = Declaration(
+	      "outside",
+	      outside, outside
+      )	 
+	  val intValDeclaration = Declaration(
+	      "A.intVal",
+	      intVal, intVal
+      )	 
+      
+	  val leafIntDeclaration = new Declaration(typeInt)
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************	  
+	  
+	  // goal:A, type: A
+	  // expression: d.fullname
+	  val thisNode = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(objectADeclaration)),
+	      transform(objectA), 
+	      ImmutableMap()
+      )
+      
+      // goal:Int, type:Int
+	  // expression: A.intVal	  
+	  val intValNode = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(intValDeclaration)),
+	      typeInt, 
+	      ImmutableMap()
+      )
+	  
+	  // goal:(Int→Char), type:A→Int→Char
+	  // expression: (Int,Int) → m1(this)(_, _)	  
+	  val m1Node = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(m1Declaration)),
+	      transform(objectA), //TODO
+	      ImmutableMap(
+	          transform(objectA) -> new ContainerNode(ImmutableSet(thisNode)),
+	          transform(typeInt) -> new ContainerNode(
+	              ImmutableSet(new SimpleNode(List[cDeclaration](NormalDeclaration(leafIntDeclaration)), transform(typeInt), ImmutableMap.empty), intValNode))
+          )
+      )
+	  
+      // goal:(Int→Char), type:((Int,A)→Char)
+	  // expression: (Int, Int) → m2(this, _, _)	  
+	  val m2Node = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(m2Declaration)),
+	      typeInt, 
+	      ImmutableMap(
+	        transform(typeInt) -> 
+        	  new ContainerNode(ImmutableSet(new SimpleNode(List[cDeclaration](NormalDeclaration(leafIntDeclaration)), transform(typeInt), ImmutableMap.empty), intValNode)),
+	        transform(objectA) ->
+        	  new ContainerNode(ImmutableSet(thisNode))
+          )
+      )     
+      
+      // goal:(Int→Char), type:(Int→Char)
+	  // expression: d.fullName ("outside")	  
+	  val outsideNode = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(outsideDeclaration)),
+	      typeInt, 
+	      ImmutableMap(
+	          transform(typeInt) -> new ContainerNode(
+	              ImmutableSet(new SimpleNode(List[cDeclaration](NormalDeclaration(leafIntDeclaration)), transform(typeInt), ImmutableMap.empty), intValNode))
+          )
+      )
+      
+      // goal:(Char), type:(A→Char)
+	  // expression: (Int,Int)→m3(A)	  
+	  val m3Node = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(m3Declaration)),
+	      transform(objectA), 
+	      ImmutableMap(
+	        transform(objectA) -> 
+	          new ContainerNode(ImmutableSet(thisNode))
+          )
+      )
+      	  
+      // goal:⊥, type:(Int→Char)→⊥	    
+      // expression: query	(		
+      //	(Int,Int) -> m1(this)(_,_) | (Int,Int) -> m1(this)(intVal, intVal)
+	  //	(Int,Int) -> m2(this,_,_) | m2(this, intVal, intVal)
+      //	(Int,Int) -> m3(this) | outside
+      //					):⊥
+	  val queryNode = 
+	    new SimpleNode(
+	  	  List[cDeclaration](NormalDeclaration(queryDeclaration)),
+	  	  BottomType,  
+	  	  ImmutableMap( // for each parameter type - how can we resolve it
+	  	      transform(Function(List(typeInt, typeInt), typeChar)) ->
+	  	      new ContainerNode(
+	  	          ImmutableSet(m1Node, outsideNode, m2Node, m3Node)
+    		  )
+	        ) 
+	    )
+      queryNode
+	}	
+	
 
 	
 }
