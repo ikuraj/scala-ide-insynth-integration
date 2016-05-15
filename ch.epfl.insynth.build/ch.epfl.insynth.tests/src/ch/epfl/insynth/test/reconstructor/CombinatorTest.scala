@@ -174,7 +174,16 @@ class CombinatorTest {
     val combinedTreeTest = TestTrees. buildCombinedTreeOverlapParameterTypeWithReturnType
 
     val combinedTree = parametrizedCombine(tree)
+    assertTrue(equals(combinedTree, combinedTreeTest));
 
+    main(Array.empty)
+  }
+  
+  @Test
+  def testTreesKombinator() {
+    val tree =  TreeExample.buildTreeSKombinator
+    val combinedTreeTest = TestTrees. buildCombinedTreeSKombinator
+    val combinedTree = parametrizedCombine(tree)
     assertTrue(equals(combinedTree, combinedTreeTest));
 
     main(Array.empty)

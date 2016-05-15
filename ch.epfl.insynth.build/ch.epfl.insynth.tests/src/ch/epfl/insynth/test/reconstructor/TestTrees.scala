@@ -752,6 +752,100 @@ object TestTrees {
 	    )
       queryNode
 	}	
+
+    /**
+	 * Small example that uses function parameter application
+	 */
+	def buildCombinedTreeSKombinator = {
+	//***************************************************
+	// Goals
+	//	find expression of type: (Int→(Char→String)) → (Int→Char) → Int→String
+	//	expression:
+	//	code:
+	//  	def test() {
+	//    		val b:(Int=>(Char=>String))=>(Int=>Char)=>Int=>String = ?synthesize?
+	//  	}
+	//***************************************************
+	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  
+	  val sKombType = 
+	    Function(
+          List(Function(typeInt, Function(typeChar, typeString))),
+          Function(
+            Function(typeInt, typeChar),
+            Function(typeInt, typeString)
+          )
+		)
+	  
+	  // query: (Int→(Char→String)) → (Int→Char) → Int→String → ⊥
+	  val queryType = Function(
+	    sKombType,
+	    typeBottom
+	  )
+	  	  	  
+	  //************************************
+	  // Declarations
+	  //************************************
+	 	  
+	  // special query declaration
+	  val queryDeclaration = Declaration(
+	      "special.name.for.query",
+	      queryType, queryType
+	    )	  
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************	
+      
+	  val intLeafNode = new SimpleNode(List[cDeclaration](NormalDeclaration(new Declaration(typeInt))), typeInt, ImmutableMap.empty)
+	  
+      // TODO
+      // goal:(Int→Char, Int)→Char, type:Char
+	  // expression: (Int, Int) → m2(this, _, _)	????  
+	  val absNode2 = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(new Declaration(Function(List(typeInt), typeChar)))),
+	      typeInt, 
+	      ImmutableMap(
+	        transform(typeInt) -> 
+        	  new ContainerNode(ImmutableSet(intLeafNode))     	  
+          )
+      )     
+	    
+      // TODO
+      // goal:(Int→Char, Int)→Char, type:Char
+	  // expression: (Int, Int) → m2(this, _, _)	????  
+	  val absNode1 = new SimpleNode(
+	      List[cDeclaration](NormalDeclaration(new Declaration(Function(typeInt, Function(typeChar, typeString))))),
+	      typeInt, 
+	      ImmutableMap(
+	        transform(typeInt) -> 
+        	  new ContainerNode(ImmutableSet(intLeafNode)),
+        	transform(typeChar) ->
+        	  new ContainerNode(ImmutableSet(absNode2))        	  
+          )
+      )     
+
+      // TODO      
+      // goal:⊥, type:(Int→Char, Int)→Char→⊥	    
+      // expression: query	(		
+      //	(Int→Char, Int) -> _(_)
+      //					):⊥????
+	  val queryNode = 
+	    new SimpleNode(
+	  	  List[cDeclaration](NormalDeclaration(queryDeclaration)),
+	  	  BottomType, 
+	  	  ImmutableMap( // for each parameter type - how can we resolve it
+	  	      transform(sKombType) ->
+	  	      new ContainerNode(
+	  	          ImmutableSet(absNode1)
+	            )
+	        ) 
+	    )
+      queryNode
+	}	
 	
 
 	
