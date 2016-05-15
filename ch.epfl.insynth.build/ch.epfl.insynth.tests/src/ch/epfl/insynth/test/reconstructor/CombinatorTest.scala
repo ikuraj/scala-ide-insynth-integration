@@ -143,7 +143,7 @@ class CombinatorTest {
     main(Array.empty)
   }
   
-   @Test
+  @Test
   def testComplexTree() {
     
     val complexTree = TreeExample.buildComplexTree
@@ -156,6 +156,19 @@ class CombinatorTest {
     main(Array.empty)
   }
 
+  @Test
+  def testTreeArrowType() {
+    val tree = TreeExample.buildTreeArrowType
+    val combinedTreeTest = TestTrees.buildCombinedTreeArrowType
+
+    val combinedTree = parametrizedCombine(tree)
+
+    assertTrue(equals(combinedTree, combinedTreeTest));
+
+    main(Array.empty)
+  }
+  
+  
   def parametrizedCombine(sn: EnvSimpleNode) = {
     println("Parametrized COmbine");
     println("=====original tree=====")
