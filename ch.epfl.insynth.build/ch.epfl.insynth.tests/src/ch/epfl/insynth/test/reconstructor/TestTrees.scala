@@ -2,6 +2,8 @@ package ch.epfl.insynth.test.reconstructor
 
 //import ch.epfl.insynth.env._
 import ch.epfl.insynth.env.Node
+
+
 import ch.epfl.insynth.env.Declaration
 
 import ch.epfl.scala.trees._
@@ -21,11 +23,11 @@ import ch.epfl.insynth.reconstruction.combinator.{Declaration => cDeclaration}
 import ch.epfl.insynth.trees.BottomType
 
 
+
 //import ch.epfl.insynth.reconstruction.combinator.{Declaration => cDeclaration}
 
-
-
 object TestTrees {
+  
 	val fullNameClassA = "some.package.A"
 
 	val typeInt = Const("Int")
@@ -846,6 +848,97 @@ object TestTrees {
 	    )
       queryNode
 	}	
+	
+	def buildCobminedTreeCycles = {
+	  //************************************
+	  // Goals
+	  //	find expression of type: Int
+	  //	expression: query(intVal | f(intVal) | f(f(intVal)) | ... )
+	  //************************************
+	  	  
+	  //************************************
+	  // Scala types
+	  //************************************
+	  // def f(): Int=>Int	  
+	  val f = Function(List(typeInt), typeInt)
+	  // query: Int → ⊥
+	  val queryType = Function(typeInt, typeBottom)
+	  
+	  // NOTE InSynth query type:
+	  // Arrow(TMutableSet(List(typeInt)),Const($Bottom_Type_Just_For_Resolution$))
+	  
+	  //************************************
+	  // Declarations
+	  //************************************	  
+	  val fDeclaration = new Declaration(
+	      "some.package.f", // full name
+	      transform(f), // inSynth type
+	      f // scala type
+	    )		
+	  fDeclaration.setIsMethod(false)
+	  fDeclaration.setIsLocal(true)
+	  	  	  
+	  val intValDeclaration = Declaration(
+	      "intVal",
+	      typeInt, typeInt
+      )	 
+      intValDeclaration.setIsLocal(true)
+	  
+	  // special query declaration
+	  val queryDeclaration = new Declaration(
+	      "special.name.for.query",
+	      transform(queryType),
+	      queryType
+	    )	  
+	  
+	  //************************************
+	  // InSynth proof trees
+	  //************************************
+	  	        
+      val intNode = new SimpleNode(
+          List[cDeclaration](NormalDeclaration(intValDeclaration)),
+          typeInt, 
+          ImmutableMap()
+      )
+	  
+	  val getIntNode:SimpleNode = new SimpleNode(
+	    List[cDeclaration](NormalDeclaration(fDeclaration)),
+	    typeInt, 
+	    ImmutableMap()
+	  )
+	  
+//	  getIntNode.getParams +=
+//	    (
+//          transform(typeInt) ->
+//	  	  new ContainerNode(
+//	  		  MutableSet(intNode, getIntNode)
+//	        )
+//	    )
+	  
+//	  lazy val getIntNodeRec = new SimpleNode(
+//	    fDeclaration,
+//	    MutableMap(
+//          transform(typeInt) ->
+//	  	  new ContainerNode(
+//	  		  MutableSet(getIntNode)
+//	        )
+//	    )
+//	  )
+	  	  
+	  val query = 
+	    new SimpleNode(
+	  	  List[cDeclaration](NormalDeclaration(queryDeclaration)),
+	  	  BottomType, 
+	  	  ImmutableMap( // for each parameter type - how can we resolve it
+	  	      transform(typeInt) ->
+	  	      new ContainerNode(
+	  	          ImmutableSet(getIntNode)
+	            )
+	        ) 
+	    )
+	    
+	  query
+	}
 	
 
 	

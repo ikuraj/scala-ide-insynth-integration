@@ -189,7 +189,17 @@ class CombinatorTest {
     main(Array.empty)
   }
   
-  
+  @Test
+  def testTreesCycle() { 
+	val tree =  TreeExample.buildTreeCycles
+    val combinedTreeTest = TestTrees.buildCobminedTreeCycles
+    val combinedTree = parametrizedCombine(tree)
+
+    assertTrue(equals(combinedTree, combinedTreeTest));
+
+    main(Array.empty)  
+    
+  }
  
   
   
@@ -204,18 +214,7 @@ class CombinatorTest {
     Combinator(sn, numberOfCombinations, maximumTime).get;
   }
 
-  // XXX cannot still be instantiated according to the proof representation!
-  def cycleTreeCombine = {
-    println("combined cycle tree")
-    val cycleTree = TreeExample.buildTreeCycles
-    //Combinator(cycleTree, numberOfCombinations, maximumTime).println
-  }
+  
 
-  def sKombinatorTreeReconstruct() = {
-    println("s combinator tree")
-//    TreeExample.buildTreeSKombinator.println
-    println("combined tree")
-    //Combinator(TreeExample.buildTreeSKombinator, 6, maximumTime).println
-  }
 
 }
