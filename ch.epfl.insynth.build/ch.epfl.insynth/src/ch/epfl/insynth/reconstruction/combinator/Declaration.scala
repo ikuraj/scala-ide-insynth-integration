@@ -19,15 +19,16 @@ abstract class Declaration(inSynthType: Type) {
   def getSimpleName: String  
   
   override def equals(other: Any): Boolean = { 
-//    println("Declaration equals ")
-    val that = other.asInstanceOf[Declaration]
-    if (this.getType != that.getType) return false
-    if (this.getWeight != that.getWeight) return false
-    if (this.getSimpleName != that.getSimpleName) return false
-    
-    true
-    
+    other match {
+      case that: Declaration =>
+        if (this.getType != that.getType) return false
+        if (this.getWeight != that.getWeight) return false
+        if (this.getSimpleName != that.getSimpleName) return false
+        false
+      case _ => false
+    }
   }
+
 }
 
 case class AbsDeclaration(inSynthType: Type) extends Declaration(inSynthType) {
@@ -36,6 +37,7 @@ case class AbsDeclaration(inSynthType: Type) extends Declaration(inSynthType) {
   def getWeight = abstractDeclarationWeight
   def getSimpleName = "#abs#"
   override def equals(other: Any): Boolean = { 
+    // ivan: don't forget to call super.equals as well
 //    println("AbsDeclaration equals ")
     val that = other.asInstanceOf[Declaration]
     if (this.getType != that.getType) return false
