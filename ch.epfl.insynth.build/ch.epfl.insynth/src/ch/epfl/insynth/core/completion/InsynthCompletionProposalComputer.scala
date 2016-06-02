@@ -19,7 +19,7 @@ import scala.tools.nsc.util.Position
 import java.io.OutputStreamWriter
 import ch.epfl.insynth.InSynth
 import ch.epfl.insynth.util.TreePrinter
-import ch.epfl.insynth.env.InitialEnvironmentBuilder
+import ch.epfl.insynth.env.builder.InitialEnvironmentBuilder
 import ch.epfl.insynth.env.Declaration
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.reconstruction.Reconstructor
@@ -31,6 +31,7 @@ import ch.epfl.insynth.core.preferences.InSynthConstants
 import ch.epfl.insynth.reconstruction.codegen.{ CleanCodeGenerator, ClassicStyleCodeGenerator, ApplyTransfromer }
 import ch.epfl.insynth.reconstruction.codegen.SimpleApplicationNamesTransfromer
 
+
 /* 
 TODO:
 4. predef.exit(1)
@@ -40,6 +41,9 @@ TODO:
 object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]]) with HasLogger {
     
   var predefBuildLoader: PredefBuilderLoader = new PredefBuilderLoader()
+
+  val mapFromFileToDeclarations =
+    scala.collection.mutable.Map[(String, Int), List[ch.epfl.insynth.env.Declaration]]()
   
   def apply(scu: ScalaCompilationUnit, position: Int): Option[List[Output]] = {
 
@@ -80,6 +84,8 @@ object InnerFinder extends ((ScalaCompilationUnit, Int) => Option[List[Output]])
         try {
           InSynthWrapper.builder.synchronized {
             val solution = InSynthWrapper.insynth.getSnippets(sourceFile.position(position), InSynthWrapper.builder)
+            
+            mapFromFileToDeclarations += ((sourceFile.path, position) -> InSynthWrapper.builder.getAllDeclarations)
 
             if (solution != null) {
             	logger.info("InSynth solution found, proceeding with reconstructor.")

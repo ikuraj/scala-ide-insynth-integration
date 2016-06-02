@@ -32,9 +32,9 @@ object TestSuite {
 		Activator.getDefault.getPreferenceStore.setValue(MaximumTimePropertyString, 500)      
 		Activator.getDefault.getPreferenceStore.setValue(DoSeparateLoggingPropertyString, true)
 		
-		val handler = new java.util.logging.FileHandler("tempOutFile.txt", false)
-		handler.setFormatter(new java.util.logging.SimpleFormatter)	
-		Config.inSynthLogger.setLevel(java.util.logging.Level.FINEST)
-		Config.inSynthLogger.addHandler(handler)
+//		val handler = new java.util.logging.FileHandler("tempOutFile.txt", false)
+//		handler.setFormatter(new java.util.logging.SimpleFormatter)	
+//		Config.inSynthLogger.setLevel(java.util.logging.Level.FINEST)
+//		Config.inSynthLogger.addHandler(handler)
   }
 }
