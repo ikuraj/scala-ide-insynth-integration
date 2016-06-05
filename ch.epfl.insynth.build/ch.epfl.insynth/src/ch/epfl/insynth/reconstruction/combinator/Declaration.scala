@@ -24,7 +24,7 @@ abstract class Declaration(inSynthType: Type) {
         if (this.getType != that.getType) return false
         if (this.getWeight != that.getWeight) return false
         if (this.getSimpleName != that.getSimpleName) return false
-        false
+        true
       case _ => false
     }
   }
@@ -37,14 +37,19 @@ case class AbsDeclaration(inSynthType: Type) extends Declaration(inSynthType) {
   def getWeight = abstractDeclarationWeight
   def getSimpleName = "#abs#"
   override def equals(other: Any): Boolean = { 
-    // ivan: don't forget to call super.equals as well
 //    println("AbsDeclaration equals ")
-    val that = other.asInstanceOf[Declaration]
-    if (this.getType != that.getType) return false
-    if (this.getWeight != that.getWeight) return false
-    if (this.getSimpleName != that.getSimpleName) return false
+    other match { 
+      case that: AbsDeclaration => 
+        val that = other.asInstanceOf[Declaration]
+        if (this.getType != that.getType) return false
+        if (this.getWeight != that.getWeight) return false
+        if (this.getSimpleName != that.getSimpleName) return false
     
-    true 
+        return super.equals(this)
+      case _ => false
+      
+    }
+
   }
 }
 
@@ -56,11 +61,18 @@ extends Declaration(declaration.getType)
   def getScalaType = declaration.scalaType
   override def equals(other: Any): Boolean = { 
 //    println("NormalDeclaration equals ")
-    val that = other.asInstanceOf[Declaration]
-    if (this.getType != that.getType) return false
-    if (this.getWeight != that.getWeight) return false
-    if (this.getSimpleName != that.getSimpleName) return false
+    other match{ 
+      case that: NormalDeclaration => 
+        val that = other.asInstanceOf[Declaration]
+        if (this.getType != that.getType) return false
+        if (this.getWeight != that.getWeight) return false
+        if (this.getSimpleName != that.getSimpleName) return false
     
-    true 
+        return super.equals(this)
+      case _ => false
+      
+    }
+
+
   }
 }
