@@ -19,7 +19,7 @@ import scala.tools.nsc.util.Position
 import java.io.OutputStreamWriter
 import ch.epfl.insynth.InSynth
 import ch.epfl.insynth.util.TreePrinter
-import ch.epfl.insynth.env.builder.InitialEnvironmentBuilder
+import ch.epfl.insynth.env.InitialEnvironmentBuilder
 import ch.epfl.insynth.env.Declaration
 import ch.epfl.insynth.reconstruction.Output
 import ch.epfl.insynth.reconstruction.Reconstructor
