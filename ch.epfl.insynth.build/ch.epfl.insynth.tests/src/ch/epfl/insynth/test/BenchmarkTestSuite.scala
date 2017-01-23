@@ -38,37 +38,53 @@ object BenchmarkTestSuite {
     val map = InnerFinder.mapFromFileToDeclarations
     
     // group by filename, not (filename and pos)
-    val groupedMap = map.groupBy(_._1._1)
+//    val groupedMap = map.groupBy(_._1._1)
     
-//    for (((fileName, pos), declList) <- map.take(1)) {
-    for ((fileName, groupedSegmentMap) <- groupedMap) {
+    for (((fileName, pos), declList) <- map) {
       val path = java.nio.file.Paths.get(fileName)
 //      val ext = org.apache.commons.io.FilenameUtils.getExtension(fileName)
 //      val split = path.getFileName.toString.split("\\.")
 //      println(split.head + pos + "." + split(1))
       val relativePath = java.nio.file.Paths.get("./target/work/data/").toUri().relativize(path.toAbsolutePath().toUri())
-//      println("************ NEW PATH: " + path)
-//      println("************ RELATIVE PATH: " + relativePath)
-//      println("************ decls size: " + bla.values.flatten.size)
-//      val oos = new PrintWriter(new FileOutputStream("decls/" + split.head + pos + "." + split(1)))
-      val split = relativePath.toString.split("\\.")
-      val file = new File("decls/" + relativePath)
+      val split = relativePath.toString.split("/")
+      assert(split.size >= 2)
+      val file = new File("decls/" + split.init.mkString("/") + "/" + "pos-" + pos + "-" + split.last)
       file.getParentFile.mkdirs()
       val oos = new PrintWriter(new FileOutputStream(file))
-      oos.println(groupedSegmentMap.values.flatten.size)
-      oos.println(groupedSegmentMap.values.flatten.mkString("\n"))
-//      for (dec <- declList) {
-//        oos.println(declList.size)
-//        oos.println(dec.toString)
-//      }
-//      oos.writeInt(map.size)
-//      oos.writeUTF(fileName)
-//      oos.writeInt(pos)
-//      oos.writeInt(declList.size)
-//      for (dec <- declList)
-//        oos.writeObject(dec)
+      oos.println(declList.size)
+      oos.println(declList.mkString("\n"))
       oos.close
     }
+    
+////    for (((fileName, pos), declList) <- map.take(1)) {
+//    for ((fileName, groupedSegmentMap) <- groupedMap) {
+//      val path = java.nio.file.Paths.get(fileName)
+////      val ext = org.apache.commons.io.FilenameUtils.getExtension(fileName)
+////      val split = path.getFileName.toString.split("\\.")
+////      println(split.head + pos + "." + split(1))
+//      val relativePath = java.nio.file.Paths.get("./target/work/data/").toUri().relativize(path.toAbsolutePath().toUri())
+////      println("************ NEW PATH: " + path)
+////      println("************ RELATIVE PATH: " + relativePath)
+////      println("************ decls size: " + bla.values.flatten.size)
+////      val oos = new PrintWriter(new FileOutputStream("decls/" + split.head + pos + "." + split(1)))
+//      val split = relativePath.toString.split("\\.")
+//      val file = new File("decls/" + relativePath)
+//      file.getParentFile.mkdirs()
+//      val oos = new PrintWriter(new FileOutputStream(file))
+//      oos.println(groupedSegmentMap.values.flatten.size)
+//      oos.println(groupedSegmentMap.values.flatten.mkString("\n"))
+////      for (dec <- declList) {
+////        oos.println(declList.size)
+////        oos.println(dec.toString)
+////      }
+////      oos.writeInt(map.size)
+////      oos.writeUTF(fileName)
+////      oos.writeInt(pos)
+////      oos.writeInt(declList.size)
+////      for (dec <- declList)
+////        oos.writeObject(dec)
+//      oos.close
+//    }
   }
   
 }
