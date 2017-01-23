@@ -159,6 +159,13 @@
 					</snapshots>
 				</repository>
 			</repositories>
+			<dependencies>
+				<dependency>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-reflect</artifactId>
+					<version>${scala.version}</version>
+				</dependency>
+			</dependencies>
 		</profile>
 
 		<!-- dev profiles - for Milestones and RCs -->
@@ -186,7 +193,7 @@
 				<repo.scala-ide>${repo.scala-ide.root}/ecosystem/next/e38/scala210/dev/base/</repo.scala-ide>
 			</properties>
 		</profile>
-		
+
 		<!-- stable profiles - for stable releases -->
 		<profile>
 			<id>stable-scala-ide-indigo-scala-2.9</id>
@@ -258,9 +265,9 @@
 				<version>${junit.version}</version>
 			</dependency>
 			<dependency>
-			  <groupId>commons-io</groupId>
-			  <artifactId>commons-io</artifactId>
-			  <version>2.5</version>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.5</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

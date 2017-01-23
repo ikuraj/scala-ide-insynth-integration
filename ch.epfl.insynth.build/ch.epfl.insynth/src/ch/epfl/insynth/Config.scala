@@ -12,6 +12,12 @@ object Config {
   inSynthLogger.setUseParentHandlers(false)
   inSynthLogger.setLevel(Level.ALL)
   
+  // temporary hakc
+  val handler = new java.util.logging.ConsoleHandler
+  handler.setFormatter(new java.util.logging.SimpleFormatter)
+  handler.setLevel(java.util.logging.Level.ALL)
+  inSynthLogger.addHandler(handler)
+  
   def setLoggerHandler(handler: Handler) {
     inSynthLogger.addHandler(handler)
   }

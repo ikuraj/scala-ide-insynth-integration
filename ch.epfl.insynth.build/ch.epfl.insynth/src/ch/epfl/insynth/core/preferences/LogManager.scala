@@ -30,7 +30,7 @@ object LogManager extends HasLogger {
 	// this causes issues on jenkins
 	//val inSynthHandler = new FileHandler(inSynthLibraryLoggerFilePath, LogFileMaxSize, NumberOfLogFiles, true);
 
-	inSynthHandler.setLevel(Level.INFO);
+//	inSynthHandler.setLevel(Level.INFO);
 	// set simple text formatter
 	inSynthHandler.setFormatter(new SimpleFormatter);
 	

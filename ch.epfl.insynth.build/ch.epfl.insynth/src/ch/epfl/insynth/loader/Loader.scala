@@ -95,7 +95,7 @@ trait TLoader extends TCollector with TExtractor with TDeclarationFactory {
             desiredType
           case None => throw new Exception("Desired Type not found in: "+this.getClass.getName)
         }
-      } else throw new Exception("Desired Type not found in: "+this.getClass.getName)
+      } else throw new Exception("Desired Type not found (data.hasDesiredType): "+this.getClass.getName)
       
     }
     

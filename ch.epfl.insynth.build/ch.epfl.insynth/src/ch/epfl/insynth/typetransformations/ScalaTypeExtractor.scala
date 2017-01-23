@@ -39,13 +39,15 @@ object ScalaTypeExtractor {
     
     
   def getLocalType(tpe:Type):Option[ScalaType] = {
-    assert(tpe != null)
+    assert(tpe != null, "tpe is null!")
     try{
       Some(traverse(tpe))
     } catch {
       case ex =>
         inSynthLogger.fine("exception " + ex)
+        println("exception " + ex)
         inSynthLogger.fine(ex.getStackTrace.mkString("\n"))
+        println(ex.getStackTrace.mkString("\n"))
         None
     }
   }
