@@ -296,12 +296,16 @@ trait TCollector extends TData {
           case "scala.this{type}.Predef.exit{()Nothing}(){Nothing}" => true
           // added for Scala 2.10 compatibility
           case "scala.this{scala.type}.Predef.exit{()Nothing}(){Nothing}" => true
+          case "scala.this.Predef.exit()" => true
           case _ => false
         }
       }
+//      case t: ValDef if t.toString.contains("= null") =>
+//        true
       case t => {
-        println("t is not Apply")
+        println("t is not Apply, it is: " + t.getClass)
         println("t is" + t)
+        println("***")
         false
       }
     }
