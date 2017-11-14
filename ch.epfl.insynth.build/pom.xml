@@ -46,7 +46,7 @@
 
 		<!-- tycho test related -->
 		<tycho.test.OSspecific />
-		<!-- Partial workaround against JDT Weaving deadlocks. See #1000317 and 
+		<!-- Partial workaround against JDT Weaving deadlocks. See #1000317 and
 			the original ticket on https://issuetracker.springsource.com/browse/STS-1445 -->
 		<tycho.test.weaving>-XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass -Dosgi.classloader.lock=classname</tycho.test.weaving>
 		<tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m -Dsdtcore.headless ${tycho.test.weaving} ${tycho.test.OSspecific}</tycho.test.jvmArgs>
@@ -257,20 +257,18 @@
 		<url>https://github.com/kaptoxic/scala-ide-insynth-integration/tree/master/ch.epfl.insynth.build</url>
 	</scm>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${junit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>2.5</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+	</dependencies>
 
 	<repositories>
 		<repository>
@@ -319,41 +317,39 @@
 	</repositories>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>tycho-surefire-plugin</artifactId>
-					<version>${tycho.version}</version>
-					<configuration>
-						<useUIHarness>false</useUIHarness>
-						<useUIThread>false</useUIThread>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<useUIHarness>false</useUIHarness>
+					<useUIThread>false</useUIThread>
 
-						<!-- Enable JDT weaving -->
-						<systemProperties combine.children="append">
-							<aj.weaving.verbose>true</aj.weaving.verbose>
-							<org.aspectj.weaver.showWeaveInfo>true</org.aspectj.weaver.showWeaveInfo>
-							<org.aspectj.osgi.verbose>true</org.aspectj.osgi.verbose>
-						</systemProperties>
-						<frameworkExtensions>
-							<frameworkExtension>
-								<groupId>p2.osgi.bundle</groupId>
-								<artifactId>org.eclipse.equinox.weaving.hook</artifactId>
-								<version>${weaving.hook.plugin.version}</version>
-							</frameworkExtension>
-						</frameworkExtensions>
-						<bundleStartLevel>
-							<bundle>
-								<id>org.eclipse.equinox.weaving.aspectj</id>
-								<level>2</level>
-								<autoStart>true</autoStart>
-							</bundle>
-						</bundleStartLevel>
-						<argLine>${tycho.test.jvmArgs}</argLine>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+					<!-- Enable JDT weaving -->
+					<systemProperties combine.children="append">
+						<aj.weaving.verbose>true</aj.weaving.verbose>
+						<org.aspectj.weaver.showWeaveInfo>true</org.aspectj.weaver.showWeaveInfo>
+						<org.aspectj.osgi.verbose>true</org.aspectj.osgi.verbose>
+					</systemProperties>
+					<frameworkExtensions>
+						<frameworkExtension>
+							<groupId>p2.osgi.bundle</groupId>
+							<artifactId>org.eclipse.equinox.weaving.hook</artifactId>
+							<version>${weaving.hook.plugin.version}</version>
+						</frameworkExtension>
+					</frameworkExtensions>
+					<bundleStartLevel>
+						<bundle>
+							<id>org.eclipse.equinox.weaving.aspectj</id>
+							<level>2</level>
+							<autoStart>true</autoStart>
+						</bundle>
+					</bundleStartLevel>
+					<argLine>${tycho.test.jvmArgs}</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
